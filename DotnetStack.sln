@@ -9,6 +9,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GC.Authentication.UI", "GC.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GC.Utils.UI", "GC.Utils.UI\GC.Utils.UI.csproj", "{AA9B15B9-43C2-4650-A471-146918597390}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.Repo", "Test.Repo\Test.Repo.csproj", "{A0A45545-CBA1-40C0-957A-31FC057B8C4E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.Repo.UI", "Test.Repo.UI\Test.Repo.UI.csproj", "{9795501B-DC76-4D8E-8372-9D8E371D8C39}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +34,13 @@ Global
 		{AA9B15B9-43C2-4650-A471-146918597390}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AA9B15B9-43C2-4650-A471-146918597390}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AA9B15B9-43C2-4650-A471-146918597390}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A0A45545-CBA1-40C0-957A-31FC057B8C4E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A0A45545-CBA1-40C0-957A-31FC057B8C4E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A0A45545-CBA1-40C0-957A-31FC057B8C4E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A0A45545-CBA1-40C0-957A-31FC057B8C4E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9795501B-DC76-4D8E-8372-9D8E371D8C39}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9795501B-DC76-4D8E-8372-9D8E371D8C39}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9795501B-DC76-4D8E-8372-9D8E371D8C39}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9795501B-DC76-4D8E-8372-9D8E371D8C39}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
