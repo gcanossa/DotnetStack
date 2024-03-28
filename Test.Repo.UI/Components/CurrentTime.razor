@@ -1,0 +1,11 @@
+<strong>@((DateTime.Now - Now).ToString(@"hh\:mm\:ss"))</strong>
+
+@code {
+  [Parameter]
+  public DateTime Now { get; set; }
+
+  protected override void OnAfterRender(bool firstRender)
+  {
+    Console.WriteLine("render");
+  }
+}

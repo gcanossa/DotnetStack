@@ -5,3 +5,41 @@
 <h1>Hello, world!</h1>
 
 Welcome to your new app.
+
+<TimerProvider Period="1000">
+  <CurrentTime Now="_now" />
+</TimerProvider>
+<TimerProvider Period="1000" EventOnly>
+  <CurrentTime Now="_now" />
+</TimerProvider>
+@* <FullscreenProvider @ref="fullscreenProvider">
+<button @onclick="@AllFullscreen">all</button>
+<button @onclick="@DivFullscreen">Div</button>
+<div id="div">
+Hi I am DIV
+</div>
+</FullscreenProvider> *@
+<DocumentEventListenerProvider @ref="docProvider" />
+
+@code {
+  private DateTime _now = DateTime.Now;
+  private FullscreenProvider? fullscreenProvider;
+  private DocumentEventListenerProvider? docProvider;
+
+  protected override void OnAfterRender(bool firstRender)
+  {
+    docProvider!.Instance!.KeyPress += KeyPress!;
+  }
+  private async Task AllFullscreen()
+  {
+    await fullscreenProvider!.OpenFullscreen();
+  }
+  private async Task DivFullscreen()
+  {
+    await fullscreenProvider!.OpenFullscreen();
+  }
+  private void KeyPress(object sender, KeyboardEventArgs evt)
+  {
+    Console.WriteLine(evt.Key);
+  }
+}

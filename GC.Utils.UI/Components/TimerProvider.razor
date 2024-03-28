@@ -1,0 +1,70 @@
+@implements IDisposable
+
+<CascadingValue Value="this">
+  @ChildContent
+</CascadingValue>
+
+@code {
+  [Parameter]
+  public int? DueTime { get; set; }
+  [Parameter]
+  public int? Period { get; set; }
+
+  [Parameter]
+  public bool EventOnly { get; set; } = false;
+
+  [Parameter]
+  public EventCallback OnTick { get; set; }
+
+  [Parameter]
+  public RenderFragment? ChildContent { get; set; }
+
+  private Timer? _timer = null;
+  private int? _dueTime = null;
+  private int? _period = null;
+  protected override void OnParametersSet()
+  {
+    base.OnParametersSet();
+
+    if (Period is null && DueTime is not null)
+    {
+      Period = Timeout.Infinite;
+    }
+    else if (Period is not null && DueTime is null)
+    {
+      DueTime = 0;
+    }
+
+    if (_period != Period || _dueTime != DueTime)
+    {
+      _period = Period;
+      _dueTime = DueTime;
+      Start();
+    }
+  }
+
+  private void OnTickCallback(object? state)
+  {
+    InvokeAsync(async () =>
+    {
+      await OnTick.InvokeAsync();
+      if (EventOnly == false) StateHasChanged();
+    });
+  }
+
+  public void Start()
+  {
+    _timer?.Dispose();
+    _timer = new Timer(OnTickCallback, null, DueTime!.Value, Period!.Value);
+  }
+
+  public void Stop()
+  {
+    _timer?.Dispose();
+  }
+
+  public void Dispose()
+  {
+    _timer?.Dispose();
+  }
+}

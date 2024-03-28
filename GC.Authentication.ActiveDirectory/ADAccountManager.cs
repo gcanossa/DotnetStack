@@ -18,16 +18,16 @@ public class ADAccountManager(
   private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
   /// <summary>
-  /// Tries to binnd to an AD controller using a given username and password.
+  /// Tries to bind to an AD controller using a given username and password.
   /// </summary>
   /// <param name="username"></param>
   /// <param name="password"></param>
-  /// <returns>LdapConncetion on success. Throws an exception otherwise.</returns>
+  /// <returns>LdapConnection on success. Throws an exception otherwise.</returns>
   protected LdapConnection Connect(string username, string password)
   {
     try
     {
-      username = OperatingSystem.IsWindows() ? username : $"{_options.Value.Domain}\\{username}";
+      // username = OperatingSystem.IsWindows() ? username : @$"{_options.Value.Domain}\{username}";
       var authType = OperatingSystem.IsWindows() ? AuthType.Negotiate : AuthType.Basic;
 
       var connection = new LdapConnection(new(_options.Value.Host, _options.Value.Port), new(username, password), authType);
@@ -47,7 +47,7 @@ public class ADAccountManager(
       throw;
     }
   }
-  
+
   /// <summary>
   /// Extract an attribute fro an LDAP search result.
   /// </summary>
@@ -107,7 +107,7 @@ public class ADAccountManager(
 
       return true;
     }
-    catch(Exception e)
+    catch (Exception e)
     {
       _logger.LogWarning(e, "Unable to query the LDAP server");
       return false;

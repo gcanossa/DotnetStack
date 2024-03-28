@@ -1,0 +1,47 @@
+@using GC.Utils.UI.Services
+
+@implements IAsyncDisposable
+
+@inject DocumentEventListener Service;
+@inject IJSRuntime JS
+
+<CascadingValue Value="Service">
+  @ChildContent
+</CascadingValue>
+
+@code {
+  [CascadingParameter]
+  public DocumentEventListener? Instance { get; set; }
+
+  [Parameter]
+  public RenderFragment? ChildContent { get; set; }
+
+  private IJSObjectReference? _module;
+
+  private DotNetObjectReference<DocumentEventListener>? objRef;
+
+  protected override async Task OnInitializedAsync()
+  {
+    _module = await JS.InvokeAsync<IJSObjectReference>(
+    "import", "./_content/GC.Utils.UI/Components/DocumentEventListenerProvider.razor.js");
+  }
+
+  protected override async Task OnAfterRenderAsync(bool firstRender)
+  {
+    if (objRef is null && Instance is null)
+    {
+      objRef = DotNetObjectReference.Create(Service);
+      await _module!.InvokeVoidAsync("connect", objRef);
+
+      await base.OnAfterRenderAsync(firstRender);
+    }
+  }
+
+  public async ValueTask DisposeAsync()
+  {
+    if (objRef is not null)
+      await _module!.InvokeVoidAsync("disconnect", objRef);
+    objRef?.Dispose();
+    objRef = null;
+  }
+}
