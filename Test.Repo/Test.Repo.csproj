@@ -24,6 +24,7 @@
   <ItemGroup>
     <ProjectReference Include="..\GC.Authentication.ActiveDirectory\GC.Authentication.ActiveDirectory.csproj" />
     <ProjectReference Include="..\Test.Repo.UI\Test.Repo.UI.csproj" />
+    <ProjectReference Include="..\GC.Csv\GC.Csv.csproj" />
   </ItemGroup>
 
 </Project>

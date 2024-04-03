@@ -7,13 +7,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GC.Authentication.ActiveDir
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GC.Authentication.UI", "GC.Authentication.UI\GC.Authentication.UI.csproj", "{4D7E7AAF-83FD-4355-A89E-243C293499FA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GC.Utils.UI", "GC.Utils.UI\GC.Utils.UI.csproj", "{AA9B15B9-43C2-4650-A471-146918597390}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Repo", "Test.Repo\Test.Repo.csproj", "{A0A45545-CBA1-40C0-957A-31FC057B8C4E}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Repo.UI", "Test.Repo.UI\Test.Repo.UI.csproj", "{9795501B-DC76-4D8E-8372-9D8E371D8C39}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GC.Blazor", "GC.Blazor\GC.Blazor.csproj", "{930C0B84-5F22-4E23-AA6C-31B255F6A44C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GC.Csv", "GC.Csv\GC.Csv.csproj", "{AC62F0DE-C054-4743-8D14-519AE771E232}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +45,10 @@ Global
 		{930C0B84-5F22-4E23-AA6C-31B255F6A44C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{930C0B84-5F22-4E23-AA6C-31B255F6A44C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{930C0B84-5F22-4E23-AA6C-31B255F6A44C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AC62F0DE-C054-4743-8D14-519AE771E232}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC62F0DE-C054-4743-8D14-519AE771E232}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AC62F0DE-C054-4743-8D14-519AE771E232}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AC62F0DE-C054-4743-8D14-519AE771E232}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

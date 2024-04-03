@@ -8,45 +8,75 @@
   [Parameter]
   public RenderFragment? ChildContent { get; set; }
 
-  private readonly Stack<Func<ValueTask>> _stack = new();
+  private readonly Dictionary<object, Func<ValueTask>> _disposables = new();
 
   public void AddDisposable<T>(T obj) where T : IDisposable
   {
-    _stack.Push(() =>
+    if (!_disposables.ContainsKey(obj))
     {
-      obj.Dispose();
-      return ValueTask.CompletedTask;
-    });
+      _disposables.Add(obj, () =>
+      {
+        obj.Dispose();
+        return ValueTask.CompletedTask;
+      });
+    }
   }
   public void AddAsyncDisposable<T>(T obj) where T : IAsyncDisposable
   {
-    _stack.Push(obj.DisposeAsync);
+    if (!_disposables.ContainsKey(obj))
+    {
+      _disposables.Add(obj, obj.DisposeAsync);
+    }
   }
 
   public void AddDisposable<T>(Func<T> factory) where T : IDisposable
   {
     var obj = factory.Invoke();
 
-    _stack.Push(() =>
+    if (!_disposables.ContainsKey(obj))
     {
-      obj.Dispose();
-      return ValueTask.CompletedTask;
-    });
+      _disposables.Add(obj, () =>
+      {
+        obj.Dispose();
+        return ValueTask.CompletedTask;
+      });
+    }
   }
   public void AddAsyncDisposable<T>(Func<T> factory) where T : IAsyncDisposable
   {
-    _stack.Push(factory.Invoke().DisposeAsync);
+    var obj = factory.Invoke();
+
+    if (!_disposables.ContainsKey(obj))
+    {
+      _disposables.Add(obj, obj.DisposeAsync);
+    }
+  }
+
+  public void RemoveDisposable(IDisposable obj)
+  {
+    if (_disposables.ContainsKey(obj))
+    {
+      _disposables.Remove(obj);
+    }
+  }
+  public void RemoveDisposable(IAsyncDisposable obj)
+  {
+    if (_disposables.ContainsKey(obj))
+    {
+      _disposables.Remove(obj);
+    }
   }
 
   public async ValueTask DisposeAsync()
   {
-    while (_stack.TryPop(out var item))
+    foreach (var kv in _disposables)
     {
       try
       {
-        await item();
+        await kv.Value();
       }
-      catch{}
+      catch { }
     }
+    _disposables.Clear();
   }
 }

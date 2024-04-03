@@ -1,4 +1,4 @@
-<strong>@((DateTime.Now - Now).ToString(@"hh\:mm\:ss"))</strong>
+<strong>@(Now.ToString(@"hh\:mm\:ss"))</strong>
 
 @code {
   [Parameter]
@@ -6,6 +6,6 @@
 
   protected override void OnAfterRender(bool firstRender)
   {
-    Console.WriteLine("render");
+    @* Console.WriteLine("render"); *@
   }
 }

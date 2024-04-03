@@ -1,0 +1,47 @@
+@inherits DisposableScope
+
+@inject TimerService Service
+
+@ChildContent
+
+@code {
+  [Parameter]
+  public TimeSpan? Period { get; set; }
+  [Parameter]
+  public bool EventOnly { get; set; }
+  [Parameter]
+  public EventCallback OnTick { get; set; }
+
+  private IDisposable? _interval;
+  private TimeSpan? _period;
+  protected override void OnParametersSet()
+  {
+    base.OnParametersSet();
+
+    if (_period != Period)
+    {
+      _period = Period;
+
+      if (_interval is not null)
+      {
+        RemoveDisposable(_interval);
+        _interval?.Dispose();
+        _interval = null;
+      }
+
+      if (_period is not null)
+      {
+        _interval = Service.SetInterval(async () =>
+        {
+          await InvokeAsync(async () =>
+  {
+  await OnTick.InvokeAsync();
+  if (EventOnly == false) StateHasChanged();
+          });
+        }, _period!.Value);
+
+        AddDisposable(_interval);
+      }
+    }
+  }
+}

@@ -1,4 +1,4 @@
-using GC.Utils.UI.Services;
+using GC.Blazor;
 using Test.Repo.UI.Components;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,8 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddScoped<DocumentEventListener>();
-
+builder.Services.AddGCBlazorServices();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

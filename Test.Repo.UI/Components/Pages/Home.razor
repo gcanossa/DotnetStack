@@ -1,4 +1,9 @@
 ﻿@page "/"
+@using System.Reactive.Linq
+
+@inject FullscreenService fsService
+@inject DocumentEventService dsService
+
 
 <PageTitle>Home</PageTitle>
 
@@ -6,40 +11,54 @@
 
 Welcome to your new app.
 
-<TimerProvider Period="1000">
-  <CurrentTime Now="_now" />
-</TimerProvider>
-<TimerProvider Period="1000" EventOnly>
-  <CurrentTime Now="_now" />
-</TimerProvider>
-@* <FullscreenProvider @ref="fullscreenProvider">
+<TimedScope Period="@TimeSpan.FromSeconds(1)">
+  <CurrentTime Now="@DateTime.Now" />
+</TimedScope>
+<TimedScope Period="@TimeSpan.FromSeconds(1)" EventOnly>
+  <CurrentTime Now="@DateTime.Now" />
+</TimedScope>
+
 <button @onclick="@AllFullscreen">all</button>
 <button @onclick="@DivFullscreen">Div</button>
 <div id="div">
-Hi I am DIV
+  Hi I am DIV
 </div>
-</FullscreenProvider> *@
-<DocumentEventListenerProvider @ref="docProvider" />
 
 @code {
   private DateTime _now = DateTime.Now;
-  private FullscreenProvider? fullscreenProvider;
-  private DocumentEventListenerProvider? docProvider;
+  private DocumentEventSource? source;
 
-  protected override void OnAfterRender(bool firstRender)
+  private IObservable<string>? CardId;
+
+  protected override async Task OnAfterRenderAsync(bool firstRender)
   {
-    docProvider!.Instance!.KeyPress += KeyPress!;
+    if (source is null)
+    {
+      source = await dsService.Connect();
+      source.KeyPress += KeyPress!;
+
+      @* TODO: guarda per fc *@
+      CardId = Observable.FromEventPattern<KeyboardEventArgs>(source, nameof(source.KeyPress))
+      .Select(p => p.EventArgs.Key)
+      .Buffer(TimeSpan.FromMilliseconds(5000), 3 + 1)
+      .Where(p => p.LastOrDefault() == "Enter")
+      .Select(p => string.Join("", p.SkipLast(1)))
+      .Where(p => p.Length == 3);
+
+      CardId.Subscribe(p => Console.WriteLine(p));
+    }
   }
   private async Task AllFullscreen()
   {
-    await fullscreenProvider!.OpenFullscreen();
+    await fsService.OpenFullscreen();
   }
   private async Task DivFullscreen()
   {
-    await fullscreenProvider!.OpenFullscreen();
+    await fsService.OpenFullscreen("#div");
   }
   private void KeyPress(object sender, KeyboardEventArgs evt)
   {
     Console.WriteLine(evt.Key);
   }
-}
+} using System.Reactive.Linq;
+using System.Reactive.Linq;
