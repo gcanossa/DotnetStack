@@ -1,0 +1,52 @@
+﻿@implements IAsyncDisposable
+
+<CascadingValue Value="this">
+  @ChildContent
+</CascadingValue>
+
+@code {
+  [Parameter]
+  public RenderFragment? ChildContent { get; set; }
+
+  private readonly Stack<Func<ValueTask>> _stack = new();
+
+  public void AddDisposable<T>(T obj) where T : IDisposable
+  {
+    _stack.Push(() =>
+    {
+      obj.Dispose();
+      return ValueTask.CompletedTask;
+    });
+  }
+  public void AddAsyncDisposable<T>(T obj) where T : IAsyncDisposable
+  {
+    _stack.Push(obj.DisposeAsync);
+  }
+
+  public void AddDisposable<T>(Func<T> factory) where T : IDisposable
+  {
+    var obj = factory.Invoke();
+
+    _stack.Push(() =>
+    {
+      obj.Dispose();
+      return ValueTask.CompletedTask;
+    });
+  }
+  public void AddAsyncDisposable<T>(Func<T> factory) where T : IAsyncDisposable
+  {
+    _stack.Push(factory.Invoke().DisposeAsync);
+  }
+
+  public async ValueTask DisposeAsync()
+  {
+    while (_stack.TryPop(out var item))
+    {
+      try
+      {
+        await item();
+      }
+      catch{}
+    }
+  }
+}
