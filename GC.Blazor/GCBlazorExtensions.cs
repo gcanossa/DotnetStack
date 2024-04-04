@@ -10,6 +10,7 @@ public static class GCBlazorExtensions
     ext.AddScoped<DocumentEventService>();
     ext.AddScoped<TimerService>();
     ext.AddScoped<DownloadFileService>();
+    ext.AddScoped<ClipboardService>();
 
     return ext;
   }

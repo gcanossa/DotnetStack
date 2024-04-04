@@ -5,8 +5,6 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GC.Authentication.ActiveDirectory", "GC.Authentication.ActiveDirectory\GC.Authentication.ActiveDirectory.csproj", "{A3C908DA-092F-4BEF-9A97-933A96061E64}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GC.Authentication.UI", "GC.Authentication.UI\GC.Authentication.UI.csproj", "{4D7E7AAF-83FD-4355-A89E-243C293499FA}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Repo", "Test.Repo\Test.Repo.csproj", "{A0A45545-CBA1-40C0-957A-31FC057B8C4E}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Repo.UI", "Test.Repo.UI\Test.Repo.UI.csproj", "{9795501B-DC76-4D8E-8372-9D8E371D8C39}"
