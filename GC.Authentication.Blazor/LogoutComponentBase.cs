@@ -4,14 +4,11 @@ namespace GC.Authentication.Blazor;
 
 public abstract class LogoutComponentBase : ComponentBase
 {
-  protected readonly NavigationManager NavigationManager;
+  [Inject]
+  protected NavigationManager NavigationManager { get; set; }
 
   [SupplyParameterFromQuery]
   public string ReturnUrl { get; set; } = "/";
-  public LogoutComponentBase(NavigationManager navigationManager)
-  {
-    NavigationManager = navigationManager;
-  }
 
   protected override async Task OnInitializedAsync()
   {

@@ -4,7 +4,8 @@ namespace GC.Authentication.Blazor;
 
 public abstract class LoginComponentBase<T> : ComponentBase where T : new()
 {
-  protected readonly NavigationManager NavigationManager;
+  [Inject]
+  protected NavigationManager NavigationManager { get; set; }
 
   [SupplyParameterFromForm]
   public T Model { get; set; } = new();
@@ -13,11 +14,6 @@ public abstract class LoginComponentBase<T> : ComponentBase where T : new()
   public string ReturnUrl { get; set; } = "/";
 
   public bool FailedLoginAttempt { get; protected set; } = false;
-
-  public LoginComponentBase(NavigationManager navigationManager)
-  {
-    NavigationManager = navigationManager;
-  }
 
   private async Task LoginUser()
   {

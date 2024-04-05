@@ -1,0 +1,8 @@
+@inherits LoginComponentBase<Credentials>
+
+@code {
+  protected override Task<bool> SignInAsync(Credentials credentials)
+  {
+    return Task.FromResult(true);
+  }
+}

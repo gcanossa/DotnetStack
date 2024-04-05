@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\GC.Blazor\GC.Blazor.csproj" />
+    <ProjectReference Include="..\GC.Authentication.Blazor\GC.Authentication.Blazor.csproj" />
   </ItemGroup>
 
   <ItemGroup>
