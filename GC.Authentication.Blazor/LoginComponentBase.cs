@@ -15,7 +15,7 @@ public abstract class LoginComponentBase<T> : ComponentBase where T : new()
 
   public bool FailedLoginAttempt { get; protected set; } = false;
 
-  private async Task LoginUser()
+  protected async Task LoginUser()
   {
     var result = await SignInAsync(Model);
 
