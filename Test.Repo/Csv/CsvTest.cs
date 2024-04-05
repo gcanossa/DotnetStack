@@ -24,6 +24,6 @@ public class CsvTest
   {
     public int Num { get; set; }
     public DateTime DateNow { get; set; }
-    public string Title { get; set; }
+    public string Title { get; set; } = "";
   }
 }

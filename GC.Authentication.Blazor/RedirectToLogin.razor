@@ -1,0 +1,12 @@
+﻿@inject NavigationManager NavigationManager
+
+@code {
+  [CascadingParameter]
+  public AuthenticationOptions Options { get; set; } = new();
+
+  protected override void OnInitialized()
+  {
+    NavigationManager.NavigateTo($"{Options.LoginPath}?returnUrl={Uri.EscapeDataString(NavigationManager.Uri)}", forceLoad:
+    true);
+  }
+}
