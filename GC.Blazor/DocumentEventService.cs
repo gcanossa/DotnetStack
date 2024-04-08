@@ -45,10 +45,19 @@ public class DocumentEventSource : IAsyncDisposable
     return Task.CompletedTask;
   }
 
+  private bool _disposed = false;
   public async ValueTask DisposeAsync()
   {
-    await _module.InvokeVoidAsync("disconnect", this);
-    await _module.DisposeAsync();
+    if (!_disposed)
+    {
+      try
+      {
+        await _module.InvokeVoidAsync("disconnect", this);
+      }
+      catch { }
+      await _module.DisposeAsync();
+      _disposed = true;
+    }
   }
 }
 
@@ -74,12 +83,14 @@ public class DocumentEventService : IAsyncDisposable
     return source;
   }
 
+  private bool _disposed = false;
   public async ValueTask DisposeAsync()
   {
-    if (moduleTask.IsValueCreated)
+    if (!_disposed && moduleTask.IsValueCreated)
     {
       var module = await moduleTask.Value;
       await module.DisposeAsync();
+      _disposed = true;
     }
   }
 }
