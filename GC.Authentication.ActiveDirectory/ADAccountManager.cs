@@ -129,7 +129,7 @@ public class ADAccountManager(
     Claim[] claims = [
       new (ClaimTypes.NameIdentifier, user!.Id.ToString()),
       new (ClaimTypes.WindowsAccountName, user.AccountName),
-      new (ClaimTypes.Name, user.DisplayName),
+      new (ClaimTypes.Name, user.DisplayName ?? user.AccountName),
       new (ClaimTypes.Email, user.Mail ?? ""),
       ..user.GroupsNames.Select(p => new Claim(ClaimTypes.Role, p))];
 
