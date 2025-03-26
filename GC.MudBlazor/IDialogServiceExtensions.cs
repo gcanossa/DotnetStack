@@ -4,7 +4,7 @@ namespace GC.MudBlazor;
 
 public static class IDialogServiceExtensions
 {
-  public static async Task<DialogResult> Confirm(this IDialogService service, string title, string contentText, Color? color = null, string? okText = null, string? cancelText = null)
+  public static async Task<DialogResult?> Confirm(this IDialogService service, string title, string contentText, Color? color = null, string? okText = null, string? cancelText = null)
   {
     var parameters = new DialogParameters
     {
