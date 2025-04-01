@@ -18,7 +18,8 @@ public static class LocalizationExtensions
 {
   public static IMudBlazorLocalizationConfiguration AddMudBlazorLocalization(this IServiceCollection ext, CultureInfo defaultCulture)
   {
-    CultureInfo.CurrentCulture = defaultCulture;
+    CultureInfo.DefaultThreadCurrentCulture = defaultCulture;
+    CultureInfo.DefaultThreadCurrentUICulture = defaultCulture;
 
     ext.AddTransient<MudLocalizer, DictionaryMudLocalizer>();
 
