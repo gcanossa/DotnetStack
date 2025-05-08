@@ -24,4 +24,14 @@ public class RevisionInfo
       DocumentId = DocumentId
     };
   }
+
+  public static RevisionInfo First()
+  {
+    return new RevisionInfo
+    {
+      IsCurrent = true,
+      CreatedAt = DateTime.Now,
+      Revision = 0
+    };
+  }
 }

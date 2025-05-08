@@ -1,0 +1,13 @@
+@using Microsoft.EntityFrameworkCore
+
+<CascadingValue Value="this">
+  @ChildContent
+</CascadingValue>
+
+@code {
+  [Parameter]
+  public RenderFragment? ChildContent { get; set; }
+
+  [Parameter, EditorRequired]
+  public Func<CancellationToken, Task<DbContext>> ContextFactory { get; set; } = default!;
+}

@@ -20,14 +20,14 @@ public class XlsReporter<T>(string title, IEnumerable<ColumnDescriptor<T>> descr
     return value;
   }
 
-  public virtual ICellStyle GetHeaderStyle(IWorkbook workbook)
+  protected virtual ICellStyle GetHeaderStyle(IWorkbook workbook)
   {
     return MemoCellStyle(nameof(GetHeaderStyle), () => workbook.CreateCellStyle()
       .WithFont(workbook.CreateFont().FontStyle("Tahoma", 8).Bold())
       .VerticalAlign(VerticalAlignment.Center)
       .BorderStyle(BorderStyle.Thin));
   }
-  public virtual ICellStyle GetDataStyle(IWorkbook workbook)
+  protected virtual ICellStyle GetDataStyle(IWorkbook workbook)
   {
     return MemoCellStyle(nameof(GetDataStyle), () => workbook.CreateCellStyle()
       .WithFont(workbook.CreateFont().FontStyle("Tahoma", 8))

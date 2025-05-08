@@ -1,34 +1,31 @@
 ﻿@using FluentValidation
 @typeparam T where T : class
 @typeparam TForm where TForm : IComponent, IEditEntityForm<T>
-@typeparam TValidator where TValidator : AbstractValidatorBase<T>, new()
-
-@implements IEditEntityDialog<T>
 
 <MudDialog>
   <TitleContent>
     <MudText Typo="Typo.h6">@Title</MudText>
   </TitleContent>
   <DialogContent>
-    <MudForm @ref="form" Model="@Model" Validation="@(Validator.ValidateValue)" ValidationDelay="0"
+    <MudForm @ref="_form" Model="@Model" Validation="@(Validator.ValidateValue)" ValidationDelay="0"
       IsValidChanged="p => { }" IsTouchedChanged="p => { }">
-      <DynamicComponent Type="typeof(TForm)" Parameters="formParameters" />
+      <DynamicComponent Type="typeof(TForm)" Parameters="_formParameters" />
     </MudForm>
   </DialogContent>
   <DialogActions>
     <MudStack Row>
-      <MudButton Color="Color.Primary" OnClick="() => MudDialog.Close<T>(Model)"
-        Disabled="!(form?.IsTouched ?? false) || !(form?.IsValid ?? false)">Salva</MudButton>
-      <MudButton Color="Color.Error" OnClick="() => MudDialog.Cancel()">Annulla</MudButton>
+      <MudButton Color="Color.Primary" OnClick="() => _mudDialog.Close<T>(Model)"
+        Disabled="!(_form?.IsTouched ?? false) || !(_form?.IsValid ?? false)">Salva</MudButton>
+      <MudButton Color="Color.Error" OnClick="() => _mudDialog.Cancel()">Annulla</MudButton>
     </MudStack>
   </DialogActions>
 </MudDialog>
 
 @code {
-  private MudForm? form;
+  protected MudForm? _form;
 
   [CascadingParameter]
-  private IMudDialogInstance MudDialog { get; set; } = default!;
+  protected IMudDialogInstance _mudDialog { get; set; } = default!;
 
   [Parameter]
   public string Title { get; set; } = "Modifica Elemento";
@@ -36,20 +33,13 @@
   [Parameter]
   public T Model { get; set; } = default!;
 
-  public AbstractValidatorBase<T> Validator { get; private set; } = new TValidator();
-
-  public virtual T EmptyValueFactory()
-  {
-    return default!;
-  }
-
-  private Dictionary<string, object> formParameters = new Dictionary<string, object>();
+  protected Dictionary<string, object> _formParameters = new Dictionary<string, object>();
 
   protected override void OnParametersSet()
   {
     Model = Model ?? EmptyValueFactory();
 
-    formParameters = new Dictionary<string, object>() { { nameof(IEditEntityForm<T>.Model), Model }
+    _formParameters = new Dictionary<string, object>() { { nameof(IEditEntityForm<T>.Model), Model }
 };
   }
 }

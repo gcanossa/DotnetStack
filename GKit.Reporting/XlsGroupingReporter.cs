@@ -8,35 +8,35 @@ namespace GKit.Reporting;
 public abstract class XlsGroupingReporter<T>(string title, IEnumerable<ColumnDescriptor<T>> descriptors, IEnumerable<Func<IEnumerable<T>, object>> aggregations)
   : XlsReporter<T>(title, descriptors.AsEnumerable())
 {
-  public override ICellStyle GetHeaderStyle(IWorkbook workbook)
+  protected override ICellStyle GetHeaderStyle(IWorkbook workbook)
   {
     return MemoCellStyle(nameof(GetHeaderStyle), () => workbook.CreateCellStyle()
       .WithFont(workbook.CreateFont().FontStyle("Tahoma", 8).Bold())
       .VerticalAlign(VerticalAlignment.Center)
       .BorderStyle(BorderStyle.Thin));
   }
-  public virtual ICellStyle GetDataStyle(IWorkbook workbook, T item, int index, ColumnDescriptor<T> column)
+  protected virtual ICellStyle GetDataStyle(IWorkbook workbook, T item, int index, ColumnDescriptor<T> column)
   {
     return MemoCellStyle(nameof(GetDataStyle), () => workbook.CreateCellStyle()
       .WithFont(workbook.CreateFont().FontStyle("Tahoma", 8))
       .VerticalAlign(VerticalAlignment.Center)
       .BorderStyle(BorderStyle.Thin));
   }
-  public virtual ICellStyle GetAggregationStyle(IWorkbook workbook)
+  protected virtual ICellStyle GetAggregationStyle(IWorkbook workbook)
   {
     return MemoCellStyle(nameof(GetAggregationStyle), () => workbook.CreateCellStyle()
       .WithFont(workbook.CreateFont().FontStyle("Tahoma", 8))
       .VerticalAlign(VerticalAlignment.Center)
       .BorderStyle(BorderStyle.Thin));
   }
-  public virtual ICellStyle GetRegionStyle(IWorkbook workbook)
+  protected virtual ICellStyle GetRegionStyle(IWorkbook workbook)
   {
     return MemoCellStyle(nameof(GetRegionStyle), () => workbook.CreateCellStyle()
       .WithFont(workbook.CreateFont().FontStyle("Tahoma", 8))
       .VerticalAlign(VerticalAlignment.Center)
       .BorderStyle(BorderStyle.Thin));
   }
-  public virtual void ApplyRegionStyle(ISheet sheet, CellRangeAddress range)
+  protected virtual void ApplyRegionStyle(ISheet sheet, CellRangeAddress range)
   {
     sheet.RegionWithBorderStyle(range, BorderStyle.Thin);
   }
