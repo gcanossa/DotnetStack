@@ -1,9 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <ItemGroup>
-    <ProjectReference Include="..\GC.Blazor\GC.Blazor.csproj" />
-    <ProjectReference Include="..\GC.Authentication.Blazor\GC.Authentication.Blazor.csproj" />
-    <ProjectReference Include="..\GC.MudBlazor\GC.MudBlazor.csproj" />
+    <ProjectReference Include="..\GKit.BlazorExt\GKit.BlazorExt.csproj" />
+    <ProjectReference Include="..\GKit.Authentication.Blazor\GKit.Authentication.Blazor.csproj" />
+    <ProjectReference Include="..\GKit.MudBlazorExt\GKit.MudBlazorExt.csproj" />
   </ItemGroup>
 
   <ItemGroup>

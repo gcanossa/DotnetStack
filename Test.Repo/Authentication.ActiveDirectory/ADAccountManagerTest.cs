@@ -1,4 +1,4 @@
-using GC.Authentication.ActiveDirectory;
+using GKit.Authentication.ActiveDirectory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualBasic;
 

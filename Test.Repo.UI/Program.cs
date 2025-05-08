@@ -1,6 +1,5 @@
 using System.Globalization;
-using GC.Blazor;
-using GC.MudBlazor.Localization;
+using GKit.BlazorExt;
 using MudBlazor;
 using Test.Repo.UI.Components;
 
@@ -10,11 +9,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddGCBlazorServices();
+builder.Services.AddGKitBlazorServices();
 
-builder.Services.AddLocalization();
-builder.Services.AddMudBlazorLocalization(CultureInfo.GetCultureInfo("it-IT"))
-    .AddLanguage<IT_MudLanguage>();
+builder.Services.AddLocalization(); ;
 
 var app = builder.Build();
 

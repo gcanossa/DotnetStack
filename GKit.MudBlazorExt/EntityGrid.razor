@@ -1,0 +1,257 @@
+@using GKit.BlazorExt
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.Extensions.Logging
+
+@attribute [CascadingTypeParameter(nameof(T))]
+@typeparam T where T : class
+@typeparam TContext where TContext : DbContext
+@typeparam TDialog where TDialog : IEditEntityDialog<T>, IComponent
+
+@inject IDbContextFactory<TContext> ctxFactory
+@inject ISnackbar snackbar
+@inject IDialogService dialogService
+@inject ILogger<EntityGrid<T, TContext, TDialog>> logger
+@inject DownloadFileService downloadFileService
+
+<MudDataGrid @ref="dataGrid" T="T" VirtualizeServerData="LoadServerData" Height="75vh" ItemSize="43" FixedHeader
+  FixedFooter Filterable SortMode="SortMode.Multiple" Virtualize Dense Hover ShowColumnOptions
+  RowClassFunc="RowClassFunc" Loading="_loading">
+  <ToolBarContent>
+    <MudText Typo="Typo.h6">@Title</MudText>
+    <MudSpacer />
+    @if (HeaderControls != null)
+    {
+      @HeaderControls
+    }
+    @if (Exportable)
+    {
+      <MudFab StartIcon="@Icons.Material.Filled.Download" Size="Size.Small" Color="Color.Default"
+        OnClick="() => ExportXlsAsync()" Class="mx-2" />
+    }
+    <MudFab StartIcon="@Icons.Material.Filled.Add" Size="Size.Small" Color="Color.Primary" OnClick="() => NewAsync()"
+      Class="mx-2" />
+  </ToolBarContent>
+  <Columns>
+    <TemplateColumn CellClass="d-flex justify-end" HeaderStyle="width: 6rem;" StickyLeft="true">
+      <CellTemplate>
+        <MudStack Row>
+          <MudTooltip Text="Modifica">
+            <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" aria-label="edit"
+              OnClick="() => EditAsync(context.Item)" />
+          </MudTooltip>
+          <MudTooltip Text="Elimina">
+            <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" aria-label="delete"
+              Color="Color.Error" OnClick="() => DeleteAsync(context.Item)" />
+          </MudTooltip>
+          @if (Controls != null)
+          {
+            @Controls(context)
+          }
+        </MudStack>
+      </CellTemplate>
+    </TemplateColumn>
+    @Columns
+  </Columns>
+  <NoRecordsContent>
+    <MudStack>
+      <MudText Typo="Typo.body1">Nessun elemento presente</MudText>
+    </MudStack>
+  </NoRecordsContent>
+</MudDataGrid>
+
+@code {
+  [Parameter]
+  public string? Title { get; set; }
+
+  [Parameter]
+  public RenderFragment HeaderControls { get; set; } = default!;
+
+  [Parameter]
+  public RenderFragment<CellContext<T>> Controls { get; set; } = default!;
+
+  [Parameter, EditorRequired]
+  public RenderFragment Columns { get; set; } = default!;
+
+  [Parameter, EditorRequired]
+  public Func<DbContext, IQueryable<T>> QueryFactory { get; set; } = default!;
+
+  [Parameter, EditorRequired]
+  public Func<DbContext, T, T> AttachEntityFunc { get; set; } = (ctx, entity) => entity;
+
+  [Parameter]
+  public Func<T, string> ToStringFunc { get; set; } = default!;
+
+  [Parameter]
+  public bool Exportable { get; set; } = false;
+
+  [Parameter]
+  public Func<T, int, string> RowClassFunc { get; set; } = default!;
+
+  [Parameter]
+  public EventCallback<GridStateVirtualize<T>> OnLoadedServerData { get; set; } = default!;
+
+  private bool _loading = false;
+
+  MudDataGrid<T> dataGrid = default!;
+
+  public IEnumerable<IFilterDefinition<T>> FilterDefinitions => dataGrid.FilterDefinitions;
+
+  public async Task WithLoading(Func<Task> fn)
+  {
+    try
+    {
+      _loading = true;
+
+      await fn.Invoke();
+    }
+    finally
+    {
+      _loading = false;
+    }
+  }
+
+  private async Task ExportXlsAsync()
+  {
+    await WithLoading(async () =>
+    {
+
+      var title = Title ?? typeof(T).Name;
+      using var ctx = await ctxFactory.CreateDbContextAsync();
+
+      var query = QueryFactory?.Invoke(ctx) ?? throw new InvalidOperationException($"{nameof(QueryFactory)} is not set");
+
+      query = QueryFilterExtensions.Where(query, dataGrid.FilterDefinitions);
+      query = QuerySortExtensions.OrderBy(query, dataGrid.SortDefinitions.Values);
+
+      using var ms = new MemoryStream();
+      await query.ToXlsAsync(title, dataGrid, ms);
+      ms.Position = 0;
+      await downloadFileService.DownloadFileFromStream(ms, $"{title}.xls");
+    });
+  }
+
+  private async Task DeleteAsync(T entity)
+  {
+    using var ctx = await ctxFactory.CreateDbContextAsync();
+
+    var choice = await dialogService.ShowMessageBox(
+    "Conferma Operazione",
+    (MarkupString)(ToStringFunc != null ?
+    $"Confermi di voler eliminare <strong>{ToStringFunc(entity)}</strong>?" : "Confermi l'operazione?"),
+    yesText: "Ok", noText: "Annulla"
+    );
+
+    if (choice == true)
+    {
+      try
+      {
+        ctx.Remove(entity!);
+        await ctx.SaveChangesAsync();
+        snackbar.Add("Elemento eliminato con successo", Severity.Success);
+      }
+      catch (Exception e)
+      {
+        logger.LogError(e.Message);
+        snackbar.Add("Impossibile eliminare l'elemento", Severity.Error);
+      }
+
+      await dataGrid.ReloadServerData();
+    }
+
+    await InvokeAsync(StateHasChanged);
+  }
+
+  private async Task EditAsync(T entity)
+  {
+    using var ctx = await ctxFactory.CreateDbContextAsync();
+
+    ctx.Attach(entity);
+
+    var dialog = await dialogService.ShowAsync<TDialog>("Modifica Elemento", new DialogParameters<TDialog> { {
+p => p.Model, entity},
+{p => p.Title, (object)"Modifica Elemento"}
+});
+
+    var shouldSave = await dialog.Result;
+    if (shouldSave != null && !shouldSave.Canceled)
+    {
+      try
+      {
+        ctx.Attach(AttachEntityFunc(ctx, entity));
+
+        await ctx.SaveChangesAsync();
+        snackbar.Add("Elemento modificato con successo", Severity.Success);
+
+      }
+      catch (Exception e)
+      {
+        logger.LogError(e.Message);
+        snackbar.Add("Impossibile modificare l'elemento", Severity.Error);
+      }
+    }
+
+    await dataGrid.ReloadServerData();
+    await InvokeAsync(StateHasChanged);
+  }
+  private async Task NewAsync()
+  {
+    using var ctx = await ctxFactory.CreateDbContextAsync();
+
+    var dialog = await dialogService.ShowAsync<TDialog>("Crea Elemento", new DialogParameters<TDialog> {
+{p => p.Title, (object)"Crea Elemento"} });
+
+    var shouldSave = await dialog.Result;
+    if (shouldSave != null && !shouldSave.Canceled)
+    {
+      try
+      {
+        ctx.Attach(AttachEntityFunc(ctx, (T)shouldSave.Data!));
+
+        await ctx.SaveChangesAsync();
+        snackbar.Add("Elemento aggiunto con successo", Severity.Success);
+
+      }
+      catch (Exception e)
+      {
+        logger.LogError(e.Message);
+        snackbar.Add("Impossibile aggiungere l'elemento", Severity.Error);
+      }
+    }
+
+    await dataGrid.ReloadServerData();
+    await InvokeAsync(StateHasChanged);
+  }
+
+  private async Task<GridData<T>> LoadServerData(GridStateVirtualize<T> gridState, CancellationToken token)
+  {
+    try
+    {
+      using var ctx = await ctxFactory.CreateDbContextAsync();
+
+      GridData<T> result = new GridData<T>();
+
+      var query = QueryFactory?.Invoke(ctx) ?? throw new InvalidOperationException($"{nameof(QueryFactory)} is not set");
+
+      query = QueryFilterExtensions.Where(query, gridState.FilterDefinitions);
+      query = QuerySortExtensions.OrderBy(query, gridState.SortDefinitions);
+
+      result.TotalItems = await query.CountAsync(token);
+
+      result.Items = await query.Skip(gridState.StartIndex).Take(gridState.Count).ToListAsync(token);
+
+      return result;
+    }
+    catch (TaskCanceledException)
+    {
+      return new GridData<T>
+      {
+        Items = [],
+        TotalItems = 0
+      };
+    }
+    finally
+    {
+      await OnLoadedServerData.InvokeAsync(gridState);
+    }
+  }
+}
