@@ -1,4 +1,5 @@
 ﻿@using FluentValidation
+@using Microsoft.EntityFrameworkCore
 @typeparam T where T : class
 @typeparam TForm where TForm : IComponent, IEditEntityForm<T>
 
@@ -33,13 +34,18 @@
   [Parameter]
   public T Model { get; set; } = default!;
 
+  [Parameter]
+  public DbContext Context { get; set; } = default!;
+
   protected Dictionary<string, object> _formParameters = new Dictionary<string, object>();
 
   protected override void OnParametersSet()
   {
     Model = Model ?? EmptyValueFactory();
 
-    _formParameters = new Dictionary<string, object>() { { nameof(IEditEntityForm<T>.Model), Model }
+    _formParameters = new Dictionary<string, object>() {
+{ nameof(IEditEntityForm<T>.Model), Model },
+{ nameof(IEditEntityForm<T>.Context), Context }
 };
   }
 }

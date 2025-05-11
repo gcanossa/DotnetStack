@@ -73,9 +73,6 @@
   [Parameter, EditorRequired]
   public Func<DbContext, IQueryable<T>> QueryFactory { get; set; } = default!;
 
-  [Parameter, EditorRequired]
-  public Func<DbContext, T, T> AttachEntityFunc { get; set; } = (ctx, entity) => entity;
-
   [Parameter]
   public Func<T, string> ToStringFunc { get; set; } = default!;
 
@@ -88,14 +85,8 @@
   [Parameter]
   public EventCallback<GridStateVirtualize<T>> OnLoadedServerData { get; set; } = default!;
 
-  [CascadingParameter]
-  public DbContextFactoryScope? FactoryScope { get; set; }
-
-  [Parameter]
-  public Func<CancellationToken, Task<DbContext>>? ContextFactory { get; set; }
-
-  protected Func<CancellationToken, Task<DbContext>> ContextFactoryFunc =>
-  FactoryScope?.ContextFactory ?? ContextFactory ?? throw new ArgumentNullException(nameof(ContextFactoryFunc));
+  [Parameter, EditorRequired]
+  public Func<DbContext> ContextFactory { get; set; } = default!;
 
   private bool _loading = false;
 

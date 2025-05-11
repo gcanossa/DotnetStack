@@ -28,9 +28,8 @@ public partial class EntityGrid<T, TDialog>
   {
     await WithLoading(async () =>
     {
-
+      using var ctx = ContextFactory.Invoke();
       var title = Title ?? typeof(T).Name;
-      using var ctx = await ContextFactoryFunc.Invoke(default);
 
       var query = QueryFactory?.Invoke(ctx) ?? throw new InvalidOperationException($"{nameof(QueryFactory)} is not set");
 
@@ -46,8 +45,6 @@ public partial class EntityGrid<T, TDialog>
 
   protected async Task DeleteAsync(T entity)
   {
-    using var ctx = await ContextFactoryFunc.Invoke(default);
-
     var choice = await dialogService.ShowMessageBox(
     "Conferma Operazione",
     (MarkupString)(ToStringFunc != null ?
@@ -59,6 +56,7 @@ public partial class EntityGrid<T, TDialog>
     {
       try
       {
+        using var ctx = ContextFactory.Invoke();
         ctx.Remove(entity!);
         await ctx.SaveChangesAsync();
         snackbar.Add("Elemento eliminato con successo", Severity.Success);
@@ -77,22 +75,27 @@ public partial class EntityGrid<T, TDialog>
 
   protected async Task EditAsync(T entity)
   {
-    using var ctx = await ContextFactoryFunc.Invoke(default);
+    using var ctx = ContextFactory.Invoke();
+    try
+    {
+      ctx.Attach(entity);
+    }
+    catch (InvalidOperationException)
+    {
+      ctx.Attach(entity);
+    }
 
-    ctx.Attach(entity);
-
-    var dialog = await dialogService.ShowAsync<TDialog>("Modifica Elemento", new DialogParameters<TDialog> { {
-p => p.Model, entity},
-{p => p.Title, (object)"Modifica Elemento"}
-});
+    var dialog = await dialogService.ShowAsync<TDialog>("Modifica Elemento", new DialogParameters<TDialog> {
+      {p => p.Model, entity},
+      {p => p.Context, ctx},
+      {p => p.Title, (object)"Modifica Elemento"}
+    });
 
     var shouldSave = await dialog.Result;
     if (shouldSave != null && !shouldSave.Canceled)
     {
       try
       {
-        ctx.Attach(AttachEntityFunc(ctx, entity));
-
         await ctx.SaveChangesAsync();
         snackbar.Add("Elemento modificato con successo", Severity.Success);
 
@@ -110,17 +113,18 @@ p => p.Model, entity},
 
   protected async Task NewAsync()
   {
-    using var ctx = await ContextFactoryFunc.Invoke(default);
-
+    using var ctx = ContextFactory.Invoke();
     var dialog = await dialogService.ShowAsync<TDialog>("Crea Elemento", new DialogParameters<TDialog> {
-{p => p.Title, (object)"Crea Elemento"} });
+      {p => p.Context, ctx},
+      {p => p.Title, (object)"Crea Elemento"}
+    });
 
     var shouldSave = await dialog.Result;
     if (shouldSave != null && !shouldSave.Canceled)
     {
       try
       {
-        ctx.Attach(AttachEntityFunc(ctx, (T)shouldSave.Data!));
+        ctx.Attach((T)shouldSave.Data!);
 
         await ctx.SaveChangesAsync();
         snackbar.Add("Elemento aggiunto con successo", Severity.Success);
@@ -141,11 +145,10 @@ p => p.Model, entity},
   {
     try
     {
-      using var ctx = await ContextFactoryFunc.Invoke(token);
+      using var ctx = ContextFactory.Invoke();
+      var result = new GridData<T>();
 
-      GridData<T> result = new GridData<T>();
-
-      var query = QueryFactory?.Invoke(ctx) ?? throw new InvalidOperationException($"{nameof(QueryFactory)} is not set");
+      var query = QueryFactory?.Invoke(ctx)?.AsNoTracking()?.IgnoreQueryFilters() ?? throw new InvalidOperationException($"{nameof(QueryFactory)} is not set");
 
       query = QueryFilterExtensions.Where(query, gridState.FilterDefinitions);
       query = QuerySortExtensions.OrderBy(query, gridState.SortDefinitions);

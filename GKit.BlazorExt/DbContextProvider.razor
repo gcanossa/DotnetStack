@@ -1,0 +1,35 @@
+@using Microsoft.EntityFrameworkCore
+@inherits DbContextFactoryProvider<T>
+@implements IDisposable
+@implements IAsyncDisposable
+
+@typeparam T where T : DbContext
+
+@ChildContent
+
+@code {
+
+  public T Context { get; protected set; } = default!;
+
+  protected override async Task OnInitializedAsync()
+  {
+    Context = await CreateDbContextAsync();
+  }
+
+  public void Dispose()
+  {
+    Context?.Dispose();
+    Context = null!;
+    GC.SuppressFinalize(this);
+  }
+
+  public async ValueTask DisposeAsync()
+  {
+    if (Context != null)
+    {
+      await Context.DisposeAsync();
+      Context = null!;
+      GC.SuppressFinalize(this);
+    }
+  }
+}

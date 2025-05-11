@@ -41,14 +41,9 @@
 
 @code
 {
-  [CascadingParameter]
-  public DbContextFactoryScope? FactoryScope { get; set; }
 
-  [Parameter]
-  public Func<CancellationToken, Task<DbContext>>? ContextFactory { get; set; }
-
-  protected Func<CancellationToken, Task<DbContext>> ContextFactoryFunc =>
-  FactoryScope?.ContextFactory ?? ContextFactory ?? throw new ArgumentNullException(nameof(ContextFactoryFunc));
+  [Parameter, EditorRequired]
+  public DbContext Context { get; set; } = default!;
 
   [Parameter]
   public bool Disabled { get; set; } = false;
@@ -86,8 +81,7 @@
 
   public async Task<IEnumerable<T>> Search(string value, CancellationToken token)
   {
-    using var ctx = await ContextFactoryFunc.Invoke(token);
-    var query = QueryFactory(ctx);
+    var query = QueryFactory(Context);
     if (string.IsNullOrEmpty(value))
       return await query.ToListAsync(token);
 
@@ -98,20 +92,22 @@
   {
     await component.CloseMenuAsync();
 
-    using var ctx = await ContextFactoryFunc.Invoke(default);
-
     Type dialogType = (EditDialog.Body as NewExpression)!.Type;
 
-    var dialog = await dialogService.ShowAsync(dialogType, "Crea Elemento", new DialogParameters { });
+    var parameters = new DialogParameters<IEditEntityDialog<T>> {
+{ p => p.Context, Context }
+};
+
+    var dialog = await dialogService.ShowAsync(dialogType, "Crea Elemento", parameters);
 
     var shouldSave = await dialog.Result;
     if (shouldSave != null && !shouldSave.Canceled)
     {
       try
       {
-        var entry = ctx.Attach(shouldSave.Data!);
+        var entry = Context.Attach(shouldSave.Data!);
 
-        await ctx.SaveChangesAsync();
+        await Context.SaveChangesAsync();
         snackbar.Add("Elemento aggiunto con successo", Severity.Success);
 
         await component.SelectOptionAsync((T)(entry.Entity));

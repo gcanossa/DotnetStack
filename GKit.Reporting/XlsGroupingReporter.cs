@@ -5,9 +5,26 @@ using NPOI.XSSF.UserModel;
 
 namespace GKit.Reporting;
 
-public abstract class XlsGroupingReporter<T>(string title, IEnumerable<ColumnDescriptor<T>> descriptors, IEnumerable<Func<IEnumerable<T>, object>> aggregations)
-  : XlsReporter<T>(title, descriptors.AsEnumerable())
+public abstract class XlsGroupingReporter<T> : XlsReporter<T>
 {
+  protected IEnumerable<GroupingColumnDescriptor<T>> GroupDefs { get; init; }
+  protected IEnumerable<ColumnDescriptor<T>> PropDefs { get; init; }
+  protected IEnumerable<Func<IEnumerable<T>, object>> Aggregations { get; init; }
+
+  public XlsGroupingReporter(
+    string title,
+    IEnumerable<ColumnDescriptor<T>> descriptors,
+    IEnumerable<Func<IEnumerable<T>, object>> aggregations)
+    : base(title, descriptors.AsEnumerable())
+  {
+    GroupDefs = descriptors.Where(p => p is GroupingColumnDescriptor<T>)
+      .Cast<GroupingColumnDescriptor<T>>();
+
+    PropDefs = descriptors.Where(p => p is not GroupingColumnDescriptor<T>);
+
+    Aggregations = aggregations;
+  }
+
   protected override ICellStyle GetHeaderStyle(IWorkbook workbook)
   {
     return MemoCellStyle(nameof(GetHeaderStyle), () => workbook.CreateCellStyle()
@@ -45,11 +62,11 @@ public abstract class XlsGroupingReporter<T>(string title, IEnumerable<ColumnDes
   {
     var verticalRange = new CellRangeAddress(
         baseRowIndex,
-        baseRowIndex + node.Items.Count() + node.AllSubNodes.Count() * (aggregations.Any() ? 2 : 1) + (aggregations.Any() ? 1 : 0),
+        baseRowIndex + node.Items.Count() + node.AllSubNodes.Count() * (Aggregations.Any() ? 2 : 1) + (Aggregations.Any() ? 1 : 0),
         baseColIndex,
         baseColIndex);
 
-    var horizontalRange = new CellRangeAddress(baseRowIndex, baseRowIndex, baseColIndex + 1, baseColIndex + 1 + node.Depth - 1 + descriptors.Count() - 1);
+    var horizontalRange = new CellRangeAddress(baseRowIndex, baseRowIndex, baseColIndex + 1, baseColIndex + 1 + node.Depth - 1 + PropDefs.Count() - 1);
 
     sheet.GetRow(verticalRange.FirstRow).GetCell(verticalRange.FirstColumn).SetCellValue("-" ?? "").WithStyle(GetRegionStyle(workbook));
     sheet.GetRow(horizontalRange.FirstRow).GetCell(horizontalRange.FirstColumn).SetCellValue($"{node.Label}: {node.Value} (tot = {node.Items.Count()})");
@@ -71,7 +88,7 @@ public abstract class XlsGroupingReporter<T>(string title, IEnumerable<ColumnDes
       foreach (var item in node.Items)
       {
         col = 0;
-        foreach (var prop in descriptors)
+        foreach (var prop in PropDefs)
         {
           var cell = sheet.GetRow(baseRowIndex + 1 + row).GetCell(baseColIndex + 1 + col++).SetCellValue(prop.SelectValue(item)?.ToString() ?? "");
           cell.CellStyle = GetDataStyle(workbook, item, row, prop);
@@ -82,7 +99,7 @@ public abstract class XlsGroupingReporter<T>(string title, IEnumerable<ColumnDes
 
     var lastRow = node.Items.Count() + node.AllSubNodes.Count() * 2;
     var firstCol = node.Depth - 1;
-    foreach (var agg in aggregations)
+    foreach (var agg in Aggregations)
     {
       var cell = sheet.GetRow(baseRowIndex + 1 + lastRow).GetCell(baseColIndex + 1 + firstCol++).SetCellValue(agg.Invoke(node.Items)?.ToString() ?? "");
       cell.CellStyle = GetAggregationStyle(workbook);
@@ -101,8 +118,8 @@ public abstract class XlsGroupingReporter<T>(string title, IEnumerable<ColumnDes
         baseRowIndex + Enumerable.Range(0, i)
           .Select(j =>
             children[j].Items.Count() +
-            children[j].AllSubNodes.Count() * (aggregations.Any() ? 2 : 1) +
-            (aggregations.Any() ? 2 : 1)).Sum(),
+            children[j].AllSubNodes.Count() * (Aggregations.Any() ? 2 : 1) +
+            (Aggregations.Any() ? 2 : 1)).Sum(),
         baseColIndex);
     }
   }
@@ -117,18 +134,14 @@ public abstract class XlsGroupingReporter<T>(string title, IEnumerable<ColumnDes
     var headerRow = sheet.CreateRow(0);
     headerRow.HeightInPoints = 40;
 
-    var groupDefs = descriptors.Where(p => p is GroupingColumnDescriptor<T>)
-      .Cast<GroupingColumnDescriptor<T>>();
-    var propDefs = descriptors.Where(p => p is not GroupingColumnDescriptor<T>);
-
     var headerCell = 0;
-    foreach (var grp in groupDefs)
+    foreach (var grp in GroupDefs)
     {
       var cell = headerRow.CreateCell(headerCell++).SetCellValue(grp.Label);
       cell.CellStyle = GetHeaderStyle(workbook);
     }
 
-    foreach (var prop in propDefs)
+    foreach (var prop in PropDefs)
     {
       var cell = headerRow.CreateCell(headerCell++).SetCellValue(prop.Label);
       cell.CellStyle = GetHeaderStyle(workbook);
@@ -136,16 +149,16 @@ public abstract class XlsGroupingReporter<T>(string title, IEnumerable<ColumnDes
 
     int rowOffset = 1;
     int colOffset = 0;
-    int groupColumns = groupDefs.Count();
-    int propertiesColumns = propDefs.Count();
+    int groupColumns = GroupDefs.Count();
+    int propertiesColumns = PropDefs.Count();
     int totalColumns = groupColumns + propertiesColumns;
 
-    var groupings = groupDefs.ExecuteGrouping(data);
+    var groupings = GroupDefs.ExecuteGrouping(data);
 
     int totalRows = groupings.Select(p =>
       p.Items.Count() +
-      p.AllSubNodes.Count() * (aggregations.Any() ? 2 : 1) +
-      (aggregations.Any() ? 2 : 1)).Sum();
+      p.AllSubNodes.Count() * (Aggregations.Any() ? 2 : 1) +
+      (Aggregations.Any() ? 2 : 1)).Sum();
 
     for (int i = 0; i < totalRows; i++)
     {
