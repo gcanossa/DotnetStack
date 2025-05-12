@@ -138,13 +138,13 @@ public class FileSystemMigrationMappingsStore : IMigrationMappingsStore
     if (!Directory.Exists(MigrationLogsPath))
       Directory.CreateDirectory(MigrationLogsPath);
 
-    await File.WriteAllLinesAsync(Path.Combine(MigrationLogsPath, "index.txt"), keyMappingsChanges
+    await File.AppendAllLinesAsync(Path.Combine(MigrationLogsPath, "index.txt"), keyMappingsChanges
       .Where(kv => !keyMappings.ContainsKey(kv.Key))
       .Select(kv => $"{kv.Key}{KeySeparator}{kv.Value.First().Key.GetType().FullName}{KeySeparator}{kv.Value.First().Value.GetType().FullName}"));
 
     foreach (var kv in keyMappingsChanges)
     {
-      await File.WriteAllLinesAsync(Path.Combine(MigrationLogsPath, $"{kv.Key}.txt"), kv.Value
+      await File.AppendAllLinesAsync(Path.Combine(MigrationLogsPath, $"{kv.Key}.txt"), kv.Value
         .Select(map => $"{map.Key}{KeySeparator}{map.Value}"));
     }
 
