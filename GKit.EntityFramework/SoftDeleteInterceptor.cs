@@ -24,6 +24,9 @@ public class SoftDeleteInterceptor : SaveChangesInterceptor
       entry.State = EntityState.Modified;
       entity.DeletedAt = DateTime.Now;
     }
+
+    _hardDeleteRegistrations.Clear();
+
     return result;
   }
 
@@ -31,8 +34,6 @@ public class SoftDeleteInterceptor : SaveChangesInterceptor
     DbContextEventData eventData, InterceptionResult<int> result, CancellationToken cancellationToken = default)
   {
     var p = ValueTask.FromResult(SavingChanges(eventData, result));
-
-    _hardDeleteRegistrations.Clear();
 
     return p;
   }

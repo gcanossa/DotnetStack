@@ -30,14 +30,15 @@ public class RevisionInterceptor : SaveChangesInterceptor
       entry.Reload();
       entity.Revision.IsCurrent = false;
     }
+
+    _updateRegistrations.Clear();
+
     return result;
   }
 
   public override ValueTask<InterceptionResult<int>> SavingChangesAsync(DbContextEventData eventData, InterceptionResult<int> result, CancellationToken cancellationToken = default)
   {
     var data = ValueTask.FromResult(SavingChanges(eventData, result));
-
-    _updateRegistrations.Clear();
 
     return data;
   }
