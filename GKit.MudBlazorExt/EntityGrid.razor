@@ -26,6 +26,11 @@
       <MudFab StartIcon="@Icons.Material.Filled.Download" Size="Size.Small" Color="Color.Default"
         OnClick="() => ExportXlsAsync()" Class="mx-2" />
     }
+    @if (Refreshable)
+    {
+      <MudFab StartIcon="@Icons.Material.Filled.Refresh" Size="Size.Small" Color="Color.Default"
+        OnClick="() => RefreshDataAsync()" Class="mx-2" />
+    }
     <MudFab StartIcon="@Icons.Material.Filled.Add" Size="Size.Small" Color="Color.Primary" OnClick="() => NewAsync()"
       Class="mx-2" />
   </ToolBarContent>
@@ -78,6 +83,9 @@
 
   [Parameter]
   public bool Exportable { get; set; } = false;
+
+  [Parameter]
+  public bool Refreshable { get; set; } = false;
 
   [Parameter]
   public Func<T, int, string> RowClassFunc { get; set; } = default!;

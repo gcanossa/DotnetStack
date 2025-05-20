@@ -67,7 +67,7 @@ public partial class EntityGrid<T, TDialog>
         snackbar.Add("Impossibile eliminare l'elemento", Severity.Error);
       }
 
-      await _dataGrid.ReloadServerData();
+      await RefreshDataAsync();
     }
 
     await InvokeAsync(StateHasChanged);
@@ -107,6 +107,11 @@ public partial class EntityGrid<T, TDialog>
       }
     }
 
+    await RefreshDataAsync();
+  }
+
+  protected async Task RefreshDataAsync()
+  {
     await _dataGrid.ReloadServerData();
     await InvokeAsync(StateHasChanged);
   }
@@ -137,8 +142,7 @@ public partial class EntityGrid<T, TDialog>
       }
     }
 
-    await _dataGrid.ReloadServerData();
-    await InvokeAsync(StateHasChanged);
+    await RefreshDataAsync();
   }
 
   protected async Task<GridData<T>> LoadServerData(GridStateVirtualize<T> gridState, CancellationToken token)
