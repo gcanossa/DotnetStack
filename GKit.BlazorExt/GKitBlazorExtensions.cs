@@ -7,7 +7,8 @@ public static class GKitBlazorExtensions
   public static IServiceCollection AddGKitBlazorServices(this IServiceCollection ext)
   {
     ext.AddScoped<FullscreenService>();
-    ext.AddScoped<DocumentEventService>();
+    ext.AddScoped<DocumentKeyboardEventService>();
+    ext.AddScoped<DocumentPasteEventService>();
     ext.AddScoped<TimerService>();
     ext.AddScoped<DownloadFileService>();
     ext.AddScoped<ClipboardService>();

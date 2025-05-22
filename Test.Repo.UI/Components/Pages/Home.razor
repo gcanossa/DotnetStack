@@ -2,7 +2,8 @@
 @using System.Reactive.Linq
 
 @inject FullscreenService fsService
-@inject DocumentEventService dsService
+@inject DocumentKeyboardEventService dkbsService
+@inject DocumentPasteEventService dpsService
 
 
 <PageTitle>Home</PageTitle>
@@ -26,7 +27,8 @@ Welcome to your new app.
 
 @code {
   private DateTime _now = DateTime.Now;
-  private DocumentEventSource? source;
+  private DocumentKeyboardEventSource? source;
+  private DocumentPasteEventSource? pasteSource;
 
   private IObservable<string>? CardId;
 
@@ -34,7 +36,7 @@ Welcome to your new app.
   {
     if (source is null)
     {
-      source = await dsService.Connect();
+      source = await dkbsService.Connect();
       source.KeyPress += KeyPress!;
 
       @* TODO: guarda per fc *@
@@ -46,6 +48,12 @@ Welcome to your new app.
       .Where(p => p.Length == 3);
 
       CardId.Subscribe(p => Console.WriteLine(p));
+    }
+
+    if (pasteSource is null)
+    {
+      pasteSource = await dpsService.Connect();
+      pasteSource.Paste += Paste!;
     }
   }
   private async Task AllFullscreen()
@@ -60,5 +68,30 @@ Welcome to your new app.
   {
     Console.WriteLine(evt.Key);
   }
-} using System.Reactive.Linq;
-using System.Reactive.Linq;
+
+  private void Paste(object sender, PasteEventArgs evt)
+  {
+    Task.Run(async () =>
+    {
+      Console.WriteLine(evt);
+      Console.WriteLine(evt.Files.Count());
+      foreach (var file in evt.Files)
+      {
+        try
+        {
+          var streamRef = await pasteSource.ReadFile(file.FileId, true);
+          Console.WriteLine($"{file.Name}, size: {streamRef.Length}");
+
+          using var stream = await streamRef.OpenReadStreamAsync(maxAllowedSize: 100_000_000);
+          using var reader = new StreamReader(stream);
+
+          Console.WriteLine(await reader.ReadToEndAsync());
+        }
+        catch (Exception e)
+        {
+          Console.WriteLine(e.Message);
+        }
+      }
+    });
+  }
+}

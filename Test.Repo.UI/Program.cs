@@ -15,10 +15,6 @@ builder.Services.AddLocalization(); ;
 
 var app = builder.Build();
 
-var loc = app.Services.GetRequiredService<MudLocalizer>();
-
-var test = loc["MudDataGrid.Cancel"];
-
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
