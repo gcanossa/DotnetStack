@@ -5,11 +5,48 @@ using MudBlazor;
 
 namespace GKit.MudBlazorExt;
 
+public enum EntityGridRowControlsVariant
+{
+  Expanded,
+  Menu
+}
+
+public class EntityGridRowControlDescriptor<T>
+{
+  public required string Text { get; set; }
+  public required Func<CellContext<T>, Task> Action { get; set; }
+
+  public string? Icon { get; set; }
+
+  public Color Color { get; set; } = Color.Default;
+
+  public Func<CellContext<T>, bool>? Disabled { get; set; }
+}
+
 [CascadingTypeParameter(nameof(T))]
 public partial class EntityGrid<T, TDialog>
   where T : class
   where TDialog : IEditEntityDialog<T>, IComponent
 {
+  protected override async Task OnInitializedAsync()
+  {
+    await base.OnInitializedAsync();
+
+    _defaultControls.Add(new EntityGridRowControlDescriptor<T>
+    {
+      Text = "Modifica",
+      Action = ctx => EditAsync(ctx.Item),
+      Icon = Icons.Material.Filled.Edit
+    });
+    _defaultControls.Add(new EntityGridRowControlDescriptor<T>
+    {
+      Text = "Elimina",
+      Action = ctx => DeleteAsync(ctx.Item),
+      Icon = Icons.Material.Filled.Delete,
+      Color = Color.Error
+    });
+  }
+
   public async Task WithLoading(Func<Task> fn)
   {
     try

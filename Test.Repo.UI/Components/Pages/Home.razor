@@ -4,6 +4,7 @@
 @inject FullscreenService fsService
 @inject DocumentKeyboardEventService dkbsService
 @inject DocumentPasteEventService dpsService
+@inject DocumentDropEventService dropService
 
 
 <PageTitle>Home</PageTitle>
@@ -29,6 +30,7 @@ Welcome to your new app.
   private DateTime _now = DateTime.Now;
   private DocumentKeyboardEventSource? source;
   private DocumentPasteEventSource? pasteSource;
+  private DocumentDropEventSource? dropSource;
 
   private IObservable<string>? CardId;
 
@@ -55,6 +57,12 @@ Welcome to your new app.
       pasteSource = await dpsService.Connect();
       pasteSource.Paste += Paste!;
     }
+
+    if (dropSource is null)
+    {
+      dropSource = await dropService.Connect();
+      dropSource.Drop += Drop!;
+    }
   }
   private async Task AllFullscreen()
   {
@@ -68,7 +76,6 @@ Welcome to your new app.
   {
     Console.WriteLine(evt.Key);
   }
-
   private void Paste(object sender, PasteEventArgs evt)
   {
     Task.Run(async () =>
@@ -80,7 +87,34 @@ Welcome to your new app.
         try
         {
           var streamRef = await pasteSource.ReadFile(file.FileId, true);
-          Console.WriteLine($"{file.Name}, size: {streamRef.Length}");
+          Console.WriteLine($"{file.Name}, contentType: {file.ContentType}, size: {streamRef.Length}");
+
+          using var stream = await streamRef.OpenReadStreamAsync(maxAllowedSize: 100_000_000);
+          using var reader = new StreamReader(stream);
+
+          Console.WriteLine(await reader.ReadToEndAsync());
+        }
+        catch (Exception e)
+        {
+          Console.WriteLine(e.Message);
+        }
+      }
+    });
+  }
+
+  private void Drop(object sender, DropEventArgs evt)
+  {
+    Task.Run(async () =>
+    {
+      Console.WriteLine("DROP");
+      Console.WriteLine(evt);
+      Console.WriteLine(evt.Files.Count());
+      foreach (var file in evt.Files)
+      {
+        try
+        {
+          var streamRef = await dropSource.ReadFile(file.FileId, true);
+          Console.WriteLine($"{file.Name}, contentType: {file.ContentType}, size: {streamRef.Length}");
 
           using var stream = await streamRef.OpenReadStreamAsync(maxAllowedSize: 100_000_000);
           using var reader = new StreamReader(stream);

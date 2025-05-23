@@ -6,11 +6,11 @@ using Microsoft.JSInterop;
 
 namespace GKit.BlazorExt;
 
-public class PasteEventArgs
+public class DropEventArgs
 {
-  public IEnumerable<PastedItem> Files { get; set; } = [];
+  public IEnumerable<DroppedItem> Files { get; set; } = [];
 
-  public class PastedItem
+  public class DroppedItem
   {
     public required string ContentType { get; set; }
     public required string Name { get; set; }
@@ -19,20 +19,20 @@ public class PasteEventArgs
 }
 
 
-public class DocumentPasteEventSource : DocumentEventSourceBase
+public class DocumentDropEventSource : DocumentEventSourceBase
 {
 
-  [DynamicDependency(nameof(Paste))]
-  public DocumentPasteEventSource(IJSObjectReference module) : base(module)
+  [DynamicDependency(nameof(Drop))]
+  public DocumentDropEventSource(IJSObjectReference module) : base(module)
   {
   }
 
-  public event EventHandler<PasteEventArgs>? Paste;
+  public event EventHandler<DropEventArgs>? Drop;
 
   [JSInvokable]
-  public Task OnPaste(PasteEventArgs args)
+  public Task OnDrop(DropEventArgs args)
   {
-    Paste?.Invoke(this, args);
+    Drop?.Invoke(this, args);
 
     return Task.CompletedTask;
   }
@@ -50,15 +50,15 @@ public class DocumentPasteEventSource : DocumentEventSourceBase
   }
 }
 
-public class DocumentPasteEventService : DocumentEventServiceBase<DocumentPasteEventSource>
+public class DocumentDropEventService : DocumentEventServiceBase<DocumentDropEventSource>
 {
 
-  public DocumentPasteEventService(IJSRuntime jsRuntime) : base(jsRuntime)
+  public DocumentDropEventService(IJSRuntime jsRuntime) : base(jsRuntime)
   {
   }
 
-  protected override DocumentPasteEventSource CreateEventSource(IJSObjectReference module)
+  protected override DocumentDropEventSource CreateEventSource(IJSObjectReference module)
   {
-    return new DocumentPasteEventSource(module);
+    return new DocumentDropEventSource(module);
   }
 }

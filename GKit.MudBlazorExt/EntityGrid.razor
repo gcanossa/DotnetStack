@@ -13,7 +13,8 @@
 
 <MudDataGrid @ref="_dataGrid" T="T" VirtualizeServerData="LoadServerData" Height="75vh" ItemSize="43" FixedHeader
   FixedFooter Filterable SortMode="SortMode.Multiple" Virtualize Dense Hover ShowColumnOptions
-  RowClassFunc="RowClassFunc" Loading="_loading">
+  DragDropColumnReordering="@DragDropColumnReordering" DragIndicatorIcon="@Icons.Material.Filled.DragIndicator"
+  ApplyDropClassesOnDragStarted="true" RowClassFunc="RowClassFunc" Loading="_loading">
   <ToolBarContent>
     <MudText Typo="Typo.h6">@Title</MudText>
     <MudSpacer />
@@ -37,20 +38,28 @@
   <Columns>
     <TemplateColumn CellClass="d-flex justify-end" HeaderStyle="width: 6rem;" StickyLeft="true">
       <CellTemplate>
-        <MudStack Row>
-          <MudTooltip Text="Modifica">
-            <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" aria-label="edit"
-              OnClick="() => EditAsync(context.Item)" />
-          </MudTooltip>
-          <MudTooltip Text="Elimina">
-            <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" aria-label="delete"
-              Color="Color.Error" OnClick="() => DeleteAsync(context.Item)" />
-          </MudTooltip>
-          @if (Controls != null)
-          {
-            @Controls(context)
-          }
-        </MudStack>
+        @if (RowControlsVariant == EntityGridRowControlsVariant.Expanded)
+        {
+          <MudStack Row>
+            @foreach (var control in _defaultControls.Concat(RowControls))
+            {
+              <MudTooltip Text="@control.Text">
+                <MudIconButton Icon="@control.Icon" Size="Size.Small" Color="@control.Color"
+                  OnClick="() => control.Action.Invoke(context)" Disabled="@(control.Disabled?.Invoke(context) ?? false)" />
+              </MudTooltip>
+            }
+          </MudStack>
+        }
+        else if (RowControlsVariant == EntityGridRowControlsVariant.Menu)
+        {
+          <MudMenu Icon="@Icons.Material.Filled.MoreVert" AriaLabel="Open user menu" Dense Size="Size.Small">
+            @foreach (var control in _defaultControls.Concat(RowControls))
+            {
+              <MudMenuItem Icon="@control.Icon" IconColor="@control.Color" Label="@control.Text" Size="Size.Small"
+                OnClick="() => control.Action.Invoke(context)" Disabled="@(control.Disabled?.Invoke(context) ?? false)" />
+            }
+          </MudMenu>
+        }
       </CellTemplate>
     </TemplateColumn>
     @Columns
@@ -63,6 +72,9 @@
 </MudDataGrid>
 
 @code {
+
+  private ICollection<EntityGridRowControlDescriptor<T>> _defaultControls = [];
+
   [Parameter]
   public string? Title { get; set; }
 
@@ -70,7 +82,10 @@
   public RenderFragment HeaderControls { get; set; } = default!;
 
   [Parameter]
-  public RenderFragment<CellContext<T>> Controls { get; set; } = default!;
+  public ICollection<EntityGridRowControlDescriptor<T>> RowControls { get; set; } = [];
+
+  [Parameter]
+  public EntityGridRowControlsVariant RowControlsVariant { get; set; } = EntityGridRowControlsVariant.Expanded;
 
   [Parameter, EditorRequired]
   public RenderFragment Columns { get; set; } = default!;
@@ -95,6 +110,9 @@
 
   [Parameter, EditorRequired]
   public Func<DbContext> ContextFactory { get; set; } = default!;
+
+  [Parameter]
+  public bool DragDropColumnReordering { get; set; } = false;
 
   private bool _loading = false;
 

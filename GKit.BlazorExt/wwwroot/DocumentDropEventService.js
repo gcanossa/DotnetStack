@@ -2,10 +2,10 @@ import * as store from "./FileStore.js";
 
 let proxy = null;
 
-async function serializePasteEvent(evt) {
+async function serializeDropEvent(evt) {
   evt.preventDefault();
 
-  const items = Array.from(evt.clipboardData.items);
+  const items = Array.from(evt.dataTransfer.items);
 
   return {
     files: await Promise.all(
@@ -32,11 +32,13 @@ async function serializePasteEvent(evt) {
 
 export function connect(dotNetProxy) {
   proxy = dotNetProxy;
-  document.addEventListener("paste", paste);
+  document.addEventListener("drop", drop);
+  window.addEventListener("dragover", preventDefault);
 }
 
 export function disconnect(dotNetProxy) {
-  document.removeEventListener("paste", paste);
+  document.removeEventListener("drop", drop);
+  window.removeEventListener("dragover", preventDefault);
   proxy = null;
 }
 
@@ -54,7 +56,11 @@ export async function removeFile(fileId) {
   await store.removeFile(fileId);
 }
 
-async function paste(evt) {
+async function drop(evt) {
   if (proxy)
-    await proxy.invokeMethodAsync("OnPaste", await serializePasteEvent(evt));
+    await proxy.invokeMethodAsync("OnDrop", await serializeDropEvent(evt));
+}
+
+function preventDefault(evt) {
+  evt.preventDefault();
 }

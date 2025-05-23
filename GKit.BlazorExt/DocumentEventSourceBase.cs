@@ -21,7 +21,7 @@ public abstract class DocumentEventSourceBase : IAsyncDisposable
         await _module.InvokeVoidAsync("disconnect", this);
       }
       catch { }
-      await _module.DisposeAsync();
+      // await _module.DisposeAsync();
       _disposed = true;
     }
   }
