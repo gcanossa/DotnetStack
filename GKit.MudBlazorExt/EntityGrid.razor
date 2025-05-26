@@ -14,7 +14,8 @@
 <MudDataGrid @ref="_dataGrid" T="T" VirtualizeServerData="LoadServerData" Height="75vh" ItemSize="43" FixedHeader
   FixedFooter Filterable SortMode="SortMode.Multiple" Virtualize Dense Hover ShowColumnOptions
   DragDropColumnReordering="@DragDropColumnReordering" DragIndicatorIcon="@Icons.Material.Filled.DragIndicator"
-  ApplyDropClassesOnDragStarted="true" RowClassFunc="RowClassFunc" Loading="_loading">
+  ApplyDropClassesOnDragStarted="true" RowClassFunc="RowClassFunc" Loading="_loading"
+  ColumnResizeMode="ColumnResizeMode">
   <ToolBarContent>
     <MudText Typo="Typo.h6">@Title</MudText>
     <MudSpacer />
@@ -113,6 +114,9 @@
 
   [Parameter]
   public bool DragDropColumnReordering { get; set; } = false;
+
+  [Parameter]
+  public ResizeMode ColumnResizeMode { get; set; } = ResizeMode.None;
 
   private bool _loading = false;
 
