@@ -5,6 +5,7 @@
 @inject DocumentKeyboardEventService dkbsService
 @inject DocumentPasteEventService dpsService
 @inject DocumentDropEventService dropService
+@inject ClipboardService clipboard
 
 
 <PageTitle>Home</PageTitle>
@@ -25,6 +26,8 @@ Welcome to your new app.
 <div id="div">
   Hi I am DIV
 </div>
+<button @onclick="ClipboardCopy">Copia</button>
+<button @onclick="ClipboardPaste">Incolla</button>
 
 @code {
   private DateTime _now = DateTime.Now;
@@ -127,5 +130,33 @@ Welcome to your new app.
         }
       }
     });
+  }
+
+  public async Task ClipboardCopy()
+  {
+    await clipboard.WriteText("Ciao");
+  }
+  public async Task ClipboardPaste()
+  {
+    var result = await clipboard.ReadItems();
+
+    Console.WriteLine(result.Files.Count());
+    foreach (var file in result.Files)
+    {
+      try
+      {
+        var streamRef = await clipboard.ReadFile(file.FileId, true);
+        Console.WriteLine($"{file.Name}, contentType: {file.ContentType}, size: {streamRef.Length}");
+
+        using var stream = await streamRef.OpenReadStreamAsync(maxAllowedSize: 100_000_000);
+        using var reader = new StreamReader(stream);
+
+        Console.WriteLine(await reader.ReadToEndAsync());
+      }
+      catch (Exception e)
+      {
+        Console.WriteLine(e.Message);
+      }
+    }
   }
 }
