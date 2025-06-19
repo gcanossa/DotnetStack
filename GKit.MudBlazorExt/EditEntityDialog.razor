@@ -8,16 +8,15 @@
     <MudText Typo="Typo.h6">@Title</MudText>
   </TitleContent>
   <DialogContent>
-    <MudForm @ref="_form" Model="@Model" Validation="@(Validator.ValidateValue)" ValidationDelay="0"
+    <MudForm @ref="_form" Model="@Model" Validation="@(Validator.ValidateValueAsync)" ValidationDelay="0"
       IsValidChanged="p => { }" IsTouchedChanged="p => { }">
       <DynamicComponent Type="typeof(TForm)" Parameters="_formParameters" />
     </MudForm>
   </DialogContent>
   <DialogActions>
     <MudStack Row>
-      <MudButton Color="Color.Primary" OnClick="() => _mudDialog.Close<T>(Model)"
-        Disabled="!(_form?.IsTouched ?? false) || !(_form?.IsValid ?? false)">Salva</MudButton>
-      <MudButton Color="Color.Error" OnClick="() => _mudDialog.Cancel()">Annulla</MudButton>
+      <MudButton Color="Color.Primary" OnClick="SubmitAsync" Disabled="!(_form?.IsTouched ?? false)">Salva</MudButton>
+      <MudButton Color="Color.Error" OnClick="CancelAsync">Annulla</MudButton>
     </MudStack>
   </DialogActions>
 </MudDialog>
@@ -47,5 +46,18 @@
 { nameof(IEditEntityForm<T>.Model), Model },
 { nameof(IEditEntityForm<T>.Context), Context }
 };
+  }
+
+  protected async Task SubmitAsync()
+  {
+    await _form!.Validate();
+    if (_form.IsValid)
+      _mudDialog.Close<T>(Model);
+  }
+
+  protected async Task CancelAsync()
+  {
+    _form!.ResetValidation();
+    _mudDialog.Cancel();
   }
 }
