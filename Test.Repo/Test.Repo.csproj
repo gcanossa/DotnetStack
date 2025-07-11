@@ -28,6 +28,7 @@
     <ProjectReference Include="..\GKit.Authentication.ActiveDirectory\GKit.Authentication.ActiveDirectory.csproj" />
     <ProjectReference Include="..\Test.Repo.UI\Test.Repo.UI.csproj" />
     <ProjectReference Include="..\GKit.Reporting\GKit.Reporting.csproj" />
+    <ProjectReference Include="..\GKit.EntityFramework\GKit.EntityFramework.csproj" />
   </ItemGroup>
 
 </Project>

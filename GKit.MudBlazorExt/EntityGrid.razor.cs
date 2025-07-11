@@ -11,6 +11,8 @@ public enum EntityGridRowControlsVariant
   Menu
 }
 
+public record NewValueResult<N>(bool Canceled, N Value);
+
 public class EntityGridRowControlDescriptor<T>
 {
   public required string Text { get; set; }
@@ -155,10 +157,21 @@ public partial class EntityGrid<T, TDialog>
 
   protected async Task NewAsync()
   {
+    T newEntity = null!;
+    if (NewValueFactory != null)
+    {
+      var result = await NewValueFactory();
+      if (result.Canceled)
+        return;
+
+      newEntity = result.Value;
+    }
+
     using var ctx = ContextFactory.Invoke();
     var dialog = await dialogService.ShowAsync<TDialog>("Crea Elemento", new DialogParameters<TDialog> {
       {p => p.Context, ctx},
-      {p => p.Title, (object)"Crea Elemento"}
+      {p => p.Title, (object)"Crea Elemento"},
+      {p => p.Model, newEntity}
     });
 
     var shouldSave = await dialog.Result;

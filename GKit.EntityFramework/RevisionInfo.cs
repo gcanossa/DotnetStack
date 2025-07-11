@@ -16,11 +16,21 @@ public class RevisionInfo
 
   public RevisionInfo NewRevision(bool current = true)
   {
+    var rev = Clone();
+    rev.Revision++;
+    rev.CreatedAt = DateTime.Now;
+    rev.IsCurrent = current;
+
+    return rev;
+  }
+
+  public RevisionInfo Clone()
+  {
     return new RevisionInfo
     {
-      IsCurrent = current,
-      CreatedAt = DateTime.Now,
-      Revision = Revision + 1,
+      IsCurrent = IsCurrent,
+      CreatedAt = CreatedAt,
+      Revision = Revision,
       DocumentId = DocumentId
     };
   }
