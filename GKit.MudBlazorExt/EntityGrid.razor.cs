@@ -157,6 +157,8 @@ public partial class EntityGrid<T, TDialog>
 
   protected async Task NewAsync()
   {
+    using var ctx = ContextFactory.Invoke();
+
     T newEntity = null!;
     if (NewValueFactory != null)
     {
@@ -165,9 +167,10 @@ public partial class EntityGrid<T, TDialog>
         return;
 
       newEntity = result.Value;
+      if (newEntity != null)
+        ctx.Attach(newEntity);
     }
 
-    using var ctx = ContextFactory.Invoke();
     var dialog = await dialogService.ShowAsync<TDialog>("Crea Elemento", new DialogParameters<TDialog> {
       {p => p.Context, ctx},
       {p => p.Title, (object)"Crea Elemento"},
@@ -179,11 +182,11 @@ public partial class EntityGrid<T, TDialog>
     {
       try
       {
-        ctx.Attach((T)shouldSave.Data!);
+        if (newEntity == null)
+          ctx.Attach((T)shouldSave.Data!);
 
         await ctx.SaveChangesAsync();
         snackbar.Add("Elemento aggiunto con successo", Severity.Success);
-
       }
       catch (Exception e)
       {
