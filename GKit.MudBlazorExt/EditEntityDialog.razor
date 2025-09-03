@@ -1,17 +1,22 @@
 ﻿@using FluentValidation
+@using GKit.BlazorExt
 @using Microsoft.EntityFrameworkCore
 @typeparam T where T : class
-@typeparam TForm where TForm : IComponent, IEditEntityForm<T>
+  @typeparam TForm where TForm : IComponent, IEditEntityForm<T>
+
+@inject HtmlAttrSetterService setter
 
 <MudDialog>
   <TitleContent>
     <MudText Typo="Typo.h6">@Title</MudText>
   </TitleContent>
   <DialogContent>
-    <MudForm @ref="_form" Model="@Model" Validation="@(Validator.ValidateValueAsync)" ValidationDelay="0"
-      IsValidChanged="p => { }" IsTouchedChanged="p => { }">
-      <DynamicComponent Type="typeof(TForm)" Parameters="_formParameters" />
-    </MudForm>
+    <div @ref="container">
+      <MudForm @ref="_form" Model="@Model" Validation="@(Validator.ValidateValueAsync)" ValidationDelay="0"
+               IsValidChanged="p => { }" IsTouchedChanged="p => { }">
+        <DynamicComponent Type="typeof(TForm)" Parameters="_formParameters"/>
+      </MudForm>
+    </div>
   </DialogContent>
   <DialogActions>
     <MudStack Row>
@@ -23,18 +28,15 @@
 
 @code {
   protected MudForm? _form;
+  ElementReference container;
 
-  [CascadingParameter]
-  protected IMudDialogInstance _mudDialog { get; set; } = default!;
+  [CascadingParameter] protected IMudDialogInstance _mudDialog { get; set; } = default!;
 
-  [Parameter]
-  public string Title { get; set; } = "Modifica Elemento";
+  [Parameter] public string Title { get; set; } = "Modifica Elemento";
 
-  [Parameter]
-  public T Model { get; set; } = default!;
+  [Parameter] public T Model { get; set; } = default!;
 
-  [Parameter]
-  public DbContext Context { get; set; } = default!;
+  [Parameter] public DbContext Context { get; set; } = default!;
 
   protected Dictionary<string, object> _formParameters = new Dictionary<string, object>();
 
@@ -42,10 +44,18 @@
   {
     Model = Model ?? EmptyValueFactory();
 
-    _formParameters = new Dictionary<string, object>() {
-{ nameof(IEditEntityForm<T>.Model), Model },
-{ nameof(IEditEntityForm<T>.Context), Context }
-};
+    _formParameters = new Dictionary<string, object>()
+    {
+      { nameof(IEditEntityForm<T>.Model), Model },
+      { nameof(IEditEntityForm<T>.Context), Context }
+    };
+  }
+
+  protected override async Task OnAfterRenderAsync(bool firstRender)
+  {
+    await setter.SetAttributes(container, new Dictionary<string, object>() { { "autocomplete", "--off" } }, "input");
+
+    await base.OnAfterRenderAsync(firstRender);
   }
 
   protected async Task SubmitAsync()
@@ -60,4 +70,5 @@
     _form!.ResetValidation();
     _mudDialog.Cancel();
   }
+
 }

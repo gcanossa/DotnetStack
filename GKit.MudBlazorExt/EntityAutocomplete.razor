@@ -11,7 +11,7 @@
 
 <MudAutocomplete T="T" @ref="component" For="@For" Label="@Label" ToStringFunc="@ToStringFunc" SearchFunc="Search"
   Clearable Value="@Value" ValueChanged="ValueChangedHandler" ShowProgressIndicator Disabled="Disabled"
-  ResetValueOnEmptyText>
+  ResetValueOnEmptyText data-attr-setter="force">
   <NoItemsTemplate>
     <MudStack Row Justify="Justify.Center" Style="border-bottom: 1px solid lightgray;">
       @if (EditDialog != null)
