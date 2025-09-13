@@ -26,9 +26,20 @@
 
   <ItemGroup>
     <ProjectReference Include="..\GKit.Authentication.ActiveDirectory\GKit.Authentication.ActiveDirectory.csproj" />
+    <ProjectReference Include="..\GKit.Pdf\GKit.Pdf.csproj" />
     <ProjectReference Include="..\Test.Repo.UI\Test.Repo.UI.csproj" />
     <ProjectReference Include="..\GKit.Reporting\GKit.Reporting.csproj" />
     <ProjectReference Include="..\GKit.EntityFramework\GKit.EntityFramework.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Pdf\MNLRM.000351.CP.pdf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="Pdf\test\MNLRM.000351.CP.pdf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>
