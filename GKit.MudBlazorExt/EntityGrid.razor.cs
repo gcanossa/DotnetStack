@@ -1,3 +1,4 @@
+using System.Data.Common;
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -205,7 +206,8 @@ public partial class EntityGrid<T, TDialog>
       using var ctx = ContextFactory.Invoke();
       var result = new GridData<T>();
 
-      var query = QueryFactory?.Invoke(ctx)?.AsNoTracking()?.IgnoreQueryFilters() ?? throw new InvalidOperationException($"{nameof(QueryFactory)} is not set");
+      var query = QueryFactory?.Invoke(ctx)?.AsNoTracking()?.IgnoreQueryFilters() ??
+                  throw new InvalidOperationException($"{nameof(QueryFactory)} is not set");
 
       query = QueryFilterExtensions.Where(query, gridState.FilterDefinitions);
       query = QuerySortExtensions.OrderBy(query, gridState.SortDefinitions);
@@ -218,6 +220,19 @@ public partial class EntityGrid<T, TDialog>
     }
     catch (TaskCanceledException)
     {
+      return new GridData<T>
+      {
+        Items = [],
+        TotalItems = 0
+      };
+    }
+    catch (DbException e)
+    {
+
+      if (!e.Message.Contains("aborted", StringComparison.InvariantCultureIgnoreCase) &&
+          !e.Message.Contains("cancelled", StringComparison.InvariantCultureIgnoreCase))
+        throw;
+      
       return new GridData<T>
       {
         Items = [],
