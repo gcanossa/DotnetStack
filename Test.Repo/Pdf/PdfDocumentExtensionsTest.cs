@@ -6,7 +6,7 @@ using PdfSharp.Pdf.IO;
 
 namespace Test.Repo.Pdf;
 
-public class PdfStamperTest
+public class PdfDocumentExtensionsTest
 {
     [Fact]
     public async Task Test1()

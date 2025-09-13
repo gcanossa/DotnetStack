@@ -1,35 +1,22 @@
-﻿using System.Globalization;
-using System.Runtime.InteropServices.ComTypes;
-using PdfSharp.Drawing;
+﻿using PdfSharp.Drawing;
 using PdfSharp.Drawing.Layout;
 using PdfSharp.Pdf;
-using PdfSharp.Pdf.IO;
 
 namespace GKit.Pdf;
 
-public static class PdfStamper
+public abstract class AbstractPdfStamper<T> where T : class
 {
-    public static Task StampWithModel<T>(this PdfDocument pdfDocument, T model, Stream outputPdf)
-    {
-        return pdfDocument.StampWithModel(model, outputPdf, CultureInfo.InvariantCulture);
-    }
-    
-    public static Task StampWithModel<T>(this PdfDocument pdfDocument, T model, Stream outputPdf, IFormatProvider formatProvider)
+    public async Task StampWithModelAsync(PdfDocument pdfDocument, T model, Stream outputPdf, IFormatProvider formatProvider)
     {
         _ = pdfDocument ??  throw new ArgumentNullException(nameof(pdfDocument));
         _ = model ??  throw new ArgumentNullException(nameof(model));
-
-        var fields = typeof(T).GetProperties()
-            .ToDictionary(
-                p => p,
-                p => p.GetCustomAttributes(true).FirstOrDefault(t => t is PdfStamperFieldAttribute) as PdfStamperFieldAttribute);
+        _ = outputPdf ??  throw new ArgumentNullException(nameof(outputPdf));
+        _ = formatProvider ??  throw new ArgumentNullException(nameof(formatProvider));
 
         var fonts = new List<XFont>();
         var pages = new Dictionary<int, XTextFormatter>();
-        foreach (var (field, spec) in fields)
+        foreach (var spec in GetFields())
         {
-            if(spec == null) continue;
-            
             var font = fonts.FirstOrDefault(p => p.FontFamily.Name == spec.FontName && Math.Abs(p.Size - spec.FontSize) < 0.01);
             if (font == null)
                 fonts.Add(font = new XFont(spec.FontName, spec.FontSize));
@@ -39,7 +26,7 @@ public static class PdfStamper
             
             var page =  pages[spec.Page];
 
-            var propertyValue = field.GetValue(model);
+            var propertyValue = spec.SelectValue(model);
             var isNumber = propertyValue is int or long or double or float or decimal;
             var text = propertyValue is null ? string.Empty : string.Format(formatProvider, isNumber ? "{0:N}" : "{0}", propertyValue);
 
@@ -57,6 +44,8 @@ public static class PdfStamper
 
         pdfDocument.Save(outputPdf, false);
 
-        return Task.CompletedTask;
+        await Task.CompletedTask;
     }
+
+    protected abstract IEnumerable<PdfStamperField<T>> GetFields();
 }
