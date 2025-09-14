@@ -1,10 +1,11 @@
-﻿@using FluentValidation
-@using GKit.BlazorExt
+﻿@using GKit.BlazorExt
 @using Microsoft.EntityFrameworkCore
 @typeparam T where T : class
-  @typeparam TForm where TForm : IComponent, IEditEntityForm<T>
+@typeparam TForm where TForm : IComponent, IEditEntityForm<T>
+@typeparam TValidator where TValidator : AbstractValidatorBase<T>
 
 @inject HtmlAttrSetterService setter
+@inject TValidator validator
 
 <MudDialog>
   <TitleContent>
@@ -12,9 +13,9 @@
   </TitleContent>
   <DialogContent>
     <div @ref="container">
-      <MudForm @ref="_form" Model="@Model" Validation="@(Validator.ValidateValueAsync)" ValidationDelay="0"
+      <MudForm @ref="_form" Model="@Model" Validation="@(validator.ValidateValueAsync)" ValidationDelay="0"
                IsValidChanged="p => { }" IsTouchedChanged="p => { }">
-        <DynamicComponent Type="typeof(TForm)" Parameters="_formParameters"/>
+        <DynamicComponent @ref="_dynamicComponent" Type="typeof(TForm)" Parameters="_formParameters"/>
       </MudForm>
     </div>
   </DialogContent>
@@ -28,6 +29,8 @@
 
 @code {
   protected MudForm? _form;
+  protected DynamicComponent? _dynamicComponent;
+  
   ElementReference container;
 
   [CascadingParameter] protected IMudDialogInstance _mudDialog { get; set; } = default!;
@@ -60,7 +63,12 @@
 
   protected async Task SubmitAsync()
   {
+    await ((_dynamicComponent?.Instance as IEditEntityForm<T>)?.OnBeforeValidationAsync() ?? Task.CompletedTask);
+    
     await _form!.Validate();
+    
+    await ((_dynamicComponent?.Instance as IEditEntityForm<T>)?.OnAfterValidationAsync(_form.IsValid) ?? Task.CompletedTask);
+    
     if (_form.IsValid)
       _mudDialog.Close<T>(Model);
   }

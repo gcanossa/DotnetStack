@@ -5,7 +5,7 @@ namespace GKit.Pdf;
 
 public static class GKitPdfExtensions
 {
-    public static IServiceCollection AddGKitBlazorServices(this IServiceCollection ext, Action<GKitPdfOptions> configure = null)
+    public static IServiceCollection AddGKitPdfServices(this IServiceCollection ext, Action<GKitPdfOptions> configure = null)
     {
         var options = new GKitPdfOptions();
         configure?.Invoke(options);

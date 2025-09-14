@@ -1,17 +1,20 @@
 ﻿using PdfSharp.Drawing;
 using PdfSharp.Drawing.Layout;
 using PdfSharp.Pdf;
+using PdfSharp.Pdf.IO;
 
 namespace GKit.Pdf;
 
 public abstract class AbstractPdfStamper<T> where T : class
 {
-    public async Task StampWithModelAsync(PdfDocument pdfDocument, T model, Stream outputPdf, IFormatProvider formatProvider)
+    public async Task StampWithModelAsync(Stream pdfStream, T model, Stream outputPdf, IFormatProvider formatProvider)
     {
-        _ = pdfDocument ??  throw new ArgumentNullException(nameof(pdfDocument));
+        _ = pdfStream ??  throw new ArgumentNullException(nameof(pdfStream));
         _ = model ??  throw new ArgumentNullException(nameof(model));
         _ = outputPdf ??  throw new ArgumentNullException(nameof(outputPdf));
         _ = formatProvider ??  throw new ArgumentNullException(nameof(formatProvider));
+
+        var pdfDocument = PdfReader.Open(pdfStream);
 
         var fonts = new List<XFont>();
         var pages = new Dictionary<int, XTextFormatter>();
@@ -21,10 +24,10 @@ public abstract class AbstractPdfStamper<T> where T : class
             if (font == null)
                 fonts.Add(font = new XFont(spec.FontName, spec.FontSize));
             
-            if(!pages.ContainsKey(spec.Page))
-                pages.Add(spec.Page, new XTextFormatter(XGraphics.FromPdfPage(pdfDocument.Pages[spec.Page - 1])));
+            if(!pages.ContainsKey(spec.PageNumber))
+                pages.Add(spec.PageNumber, new XTextFormatter(XGraphics.FromPdfPage(pdfDocument.Pages[spec.PageNumber - 1])));
             
-            var page =  pages[spec.Page];
+            var page =  pages[spec.PageNumber];
 
             var propertyValue = spec.SelectValue(model);
             var isNumber = propertyValue is int or long or double or float or decimal;
@@ -42,9 +45,7 @@ public abstract class AbstractPdfStamper<T> where T : class
                 });
         }
 
-        pdfDocument.Save(outputPdf, false);
-
-        await Task.CompletedTask;
+        await pdfDocument.SaveAsync(outputPdf, false);
     }
 
     protected abstract IEnumerable<PdfStamperField<T>> GetFields();

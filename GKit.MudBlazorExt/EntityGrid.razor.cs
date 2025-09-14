@@ -116,6 +116,7 @@ public partial class EntityGrid<T, TDialog>
   protected async Task EditAsync(T entity)
   {
     using var ctx = ContextFactory.Invoke();
+    
     try
     {
       ctx.Attach(entity);

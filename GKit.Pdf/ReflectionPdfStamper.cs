@@ -10,7 +10,7 @@ public class ReflectionPdfStamper<T> : AbstractPdfStamper<T> where T : class
                 p => p.GetCustomAttributes(true).FirstOrDefault(t => t is PdfStamperFieldAttribute) as PdfStamperFieldAttribute);
         
         return fields.Where(kv => kv.Value is not null)
-            .Select(kv => new PdfStamperField<T>(p => kv.Key.GetValue(p), kv.Value!.Left, kv.Value!.Top, kv.Value!.Page)
+            .Select(kv => new PdfStamperField<T>(p => kv.Key.GetValue(p), kv.Value!.Left, kv.Value!.Top, kv.Value!.PageNumber)
             {
                 Width = kv.Value.Width,
                 Height = kv.Value.Height,

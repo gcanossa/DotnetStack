@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Text.RegularExpressions;
 using GKit.Pdf;
 using PdfSharp.Fonts;
 using PdfSharp.Pdf;
@@ -9,9 +10,9 @@ namespace Test.Repo.Pdf;
 public class PdfDocumentExtensionsTest
 {
     [Fact]
-    public async Task Test1()
+    public async Task ShouldStampPdf()
     {
-        GKitPdfExtensions.AddGKitBlazorServices(null);
+        GKitPdfExtensions.AddGKitPdfServices(null);
         
         var input = File.Open("../../../Pdf/test/MNLRM.000351.CP.pdf", FileMode.Open, FileAccess.Read);
         var output = File.Open("../../../Pdf/test/Result.pdf", FileMode.OpenOrCreate, FileAccess.Write);
@@ -26,7 +27,16 @@ public class PdfDocumentExtensionsTest
 
         var cultureInfo = new CultureInfo("it-IT");
         cultureInfo.NumberFormat.NumberDecimalDigits = 2;
-        await PdfReader.Open(input).StampWithModel(model, output, cultureInfo);
+        await input.StampWithModel(model, output, cultureInfo);
+    }
+
+    [Fact]
+    public async Task ShouldReadPdfContent()
+    {
+        var input = File.Open("../../../Pdf/test/MNLRM.000351.CP.pdf", FileMode.Open, FileAccess.Read);
+        var text = await input.ReadAllText(1);
+
+        Assert.NotEmpty(text);
     }
 
     class TestModel
