@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace GKit.BlazorExt;
@@ -16,5 +17,12 @@ public static class GKitBlazorExtensions
     ext.AddScoped<ClipboardService>();
 
     return ext;
+  }
+  
+  public static IServiceCollection AddNotifyingCascadingValue<T>(
+    this IServiceCollection ext, T state, bool isFixed = false)
+    where T : INotifyPropertyChanged
+  {
+    return ext.AddCascadingValue<T>(sp => new CascadingStateValueSource<T>(state, isFixed));
   }
 }

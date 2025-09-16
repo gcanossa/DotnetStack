@@ -97,6 +97,16 @@ public partial class EntityGrid<T, TDialog>
       try
       {
         using var ctx = ContextFactory.Invoke();
+        
+        try
+        {
+          ctx.Attach(entity);
+        }
+        catch (InvalidOperationException)
+        {
+          ctx.Attach(entity);
+        }
+        
         ctx.Remove(entity!);
         await ctx.SaveChangesAsync();
         snackbar.Add("Elemento eliminato con successo", Severity.Success);
