@@ -6,4 +6,12 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua" Version="1.5.377.11-preview" />
+      <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua.Client" Version="1.5.377.11-preview" />
+      <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua.Client.ComplexTypes" Version="1.5.377.11-preview" />
+      <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua.Configuration" Version="1.5.377.11-preview" />
+      <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua.Core" Version="1.5.377.11-preview" />
+    </ItemGroup>
+
 </Project>
