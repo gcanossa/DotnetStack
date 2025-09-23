@@ -23,10 +23,10 @@ public class OpcUaConnection : IDisposable
     internal OpcUaConnection(IOpcUaContextOptions options)
     {
         Options = options;
-        ReverseConnectManager = options.ReverseConnectManager?.Invoke();
-        CertificateValidator = options.CertificateValidator?.Invoke();
+        ReverseConnectManager = options.ReverseConnectManager;
+        CertificateValidator = options.CertificateValidator;
         ApplicationConfiguration = options.ApplicationConfiguration;
-        UserIdentity = options.UserIdentity?.Invoke();
+        UserIdentity = options.UserIdentity;
     }
 
     public void Dispose()
@@ -123,7 +123,7 @@ public class OpcUaConnection : IDisposable
                     connection == null,
                     false,
                     $"{ApplicationConfiguration.ApplicationName}-{Guid.NewGuid():N}",
-                    Options.SessionLifeTime,
+                    (uint)Options.SessionLifeTime.TotalMilliseconds,
                     UserIdentity,
                     null,
                     ct
@@ -136,7 +136,7 @@ public class OpcUaConnection : IDisposable
                 Session = session;
 
                 // override keep alive interval
-                Session.KeepAliveInterval = Options.KeepAliveInterval;
+                Session.KeepAliveInterval = (int)Options.KeepAliveInterval.TotalMilliseconds;
 
                 // support transfer
                 Session.DeleteSubscriptionsOnClose = false;
@@ -148,7 +148,7 @@ public class OpcUaConnection : IDisposable
                 // prepare a reconnect handler
                 SessionReconnectHandler = new SessionReconnectHandler(
                     true,
-                    Options.ReconnectPeriodExponentialBackoff);
+                    (int)Options.ReconnectPeriodExponentialBackoff.TotalMilliseconds);
             }
 
             // Session created successfully.
@@ -160,7 +160,7 @@ public class OpcUaConnection : IDisposable
         }
         catch (Exception ex)
         {
-            Logger.LogWarning("Create Session Error : {Message}", ex.Message);
+            Logger.LogWarning(ex, "Create Session Error");
             return false;
         }
     }
@@ -206,7 +206,7 @@ public class OpcUaConnection : IDisposable
         catch (Exception ex)
         {
             // Log Error
-            Logger.LogError("Disconnect Error : {Message}", ex.Message);
+            Logger.LogError(ex, "Disconnect Error");
         }
     }
 
@@ -243,7 +243,7 @@ public class OpcUaConnection : IDisposable
             // start reconnect sequence on communication error.
             if (ServiceResult.IsBad(e.Status) && ReverseConnectManager is not null)
             {
-                if (Options.ReconnectPeriod <= 0)
+                if ((int)Options.ReconnectPeriod.TotalMilliseconds <= 0)
                 {
                     Logger.LogWarning(
                         "KeepAlive status {KeepAliveStatus}, but reconnect is disabled.",
@@ -255,7 +255,7 @@ public class OpcUaConnection : IDisposable
                     .BeginReconnect(
                         Session,
                         ReverseConnectManager!,
-                        Options.ReconnectPeriod,
+                        (int)Options.ReconnectPeriod.TotalMilliseconds,
                         Client_ReconnectComplete!
                     );
                 if (state == SessionReconnectHandler.ReconnectState.Triggered)

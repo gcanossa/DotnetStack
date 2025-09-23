@@ -1,12 +1,7 @@
 ﻿namespace GKit.Quartz;
 
 [AttributeUsage(AttributeTargets.Class)]
-public class CronScheduleAttribute : Attribute
+public class CronScheduleAttribute(string value) : Attribute
 {
-    public CronScheduleAttribute(string value)
-    {
-        Value = value;
-    }
-
-    public string Value { get; set; }
+    public string Value { get; } = value;
 }

@@ -1,6 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 using Opc.Ua;
 using Opc.Ua.Client;
+using Opc.Ua.Client.ComplexTypes;
 
 namespace GKit.OpcUa;
 
@@ -22,6 +23,22 @@ public abstract class OpcUaContext
     {
         var connected = await Connection.ConnectAsync(ct).ConfigureAwait(false);
         if (!connected) throw new InvalidOperationException("Connection failed");
+    }
+    /// <summary>
+    /// Loads the custom type system of the server in the session.
+    /// </summary>
+    /// <remarks>
+    /// Outputs elapsed time information for perf testing and lists all
+    /// types that were successfully added to the session encodeable type factory.
+    /// </remarks>
+    public async Task<ComplexTypeSystem> LoadTypeSystemAsync(CancellationToken ct = default)
+    {
+        await EnsureConnected(ct).ConfigureAwait(false);
+        
+        var complexTypeSystem = new ComplexTypeSystem(Connection.Session!);
+        await complexTypeSystem.LoadAsync(ct: ct).ConfigureAwait(false);
+
+        return complexTypeSystem;
     }
 
     public async Task<IEnumerable<DataValue>> ReadNodesAsync(IEnumerable<ReadValueId> nodes,CancellationToken ct = default)
@@ -58,7 +75,7 @@ public abstract class OpcUaContext
         var nodesToWrite = new WriteValueCollection(values);
 
         // Call Write Service
-        var response = await Connection.Session.WriteAsync(
+        var response = await Connection.Session!.WriteAsync(
             null,
             nodesToWrite,
             ct).ConfigureAwait(false);
@@ -70,31 +87,129 @@ public abstract class OpcUaContext
 
         return results;
     }
-
+    
     /// <summary>
-    /// Browse Server nodes
+    /// Browse full address space using the ManagedBrowseMethod, which
+    /// will take care of not sending to many nodes to the server,
+    /// calling BrowseNext and dealing with the status codes
+    /// BadNoContinuationPoint and BadInvalidContinuationPoint.
     /// </summary>
-    public async Task<IEnumerable<ReferenceDescription>> BrowseAsync(CancellationToken ct = default)
+    /// <param name="uaClient">The UAClient with a session to use.</param>
+    /// <param name="startingNode">The node where the browse operation starts.</param>
+    /// <param name="browseDescription">An optional BrowseDescription to use.</param>
+    public async Task<ReferenceDescriptionCollection> BrowseAsync(
+        NodeId startingNode = null,
+        BrowseDescription browseDescription = null,
+        CancellationToken ct = default)
     {
         await EnsureConnected(ct).ConfigureAwait(false);
-
-        // Create a Browser object
-        var browser = new Browser(Connection.Session)
+        
+        var policyBackup = Connection.Session!.ContinuationPointPolicy;
+        try
         {
-            // Set browse parameters
-            BrowseDirection = BrowseDirection.Forward,
-            NodeClassMask = (int)NodeClass.Object | (int)NodeClass.Variable,
-            ReferenceTypeId = ReferenceTypeIds.HierarchicalReferences,
-            IncludeSubtypes = true
-        };
+            Connection.Session!.ContinuationPointPolicy = ContinuationPointPolicy.Default;
 
-        var nodeToBrowse = ObjectIds.Server;
+            var browseDirection = BrowseDirection.Forward;
+            var referenceTypeId = ReferenceTypeIds.HierarchicalReferences;
+            var includeSubtypes = true;
+            uint nodeClassMask = 0;
 
-        // Call Browse service
-        ReferenceDescriptionCollection browseResults =
-            await browser.BrowseAsync(nodeToBrowse, ct).ConfigureAwait(false);
+            if (browseDescription != null)
+            {
+                startingNode = browseDescription.NodeId;
+                browseDirection = browseDescription.BrowseDirection;
+                referenceTypeId = browseDescription.ReferenceTypeId;
+                includeSubtypes = browseDescription.IncludeSubtypes;
+                nodeClassMask = browseDescription.NodeClassMask;
+            }
 
-        return browseResults;
+            var nodesToBrowse = new List<NodeId> { startingNode ?? ObjectIds.RootFolder };
+
+            const int kMaxReferencesPerNode = 1000;
+
+            // Browse
+            var referenceDescriptions = new Dictionary<ExpandedNodeId, ReferenceDescription>();
+
+            var searchDepth = 0;
+            var maxNodesPerBrowse = Connection.Session!.OperationLimits.MaxNodesPerBrowse;
+
+            var allReferenceDescriptions = new List<ReferenceDescriptionCollection>();
+            var newReferenceDescriptions = new List<ReferenceDescriptionCollection>();
+            var allServiceResults = new List<ServiceResult>();
+
+            while (nodesToBrowse.Count != 0 && searchDepth < 256)
+            {
+                searchDepth++;
+
+                const bool repeatBrowse = false;
+
+                do
+                {
+                    if (ct.IsCancellationRequested)
+                    {
+                        break;
+                    }
+
+                    // the resultMask defaults to "all"
+                    // maybe the API should be extended to
+                    // support it. But that will then also be
+                    // necessary for BrowseAsync
+                    (IList<ReferenceDescriptionCollection> descriptions, IList<ServiceResult> errors) =
+                        await Connection
+                            .Session!.ManagedBrowseAsync(
+                                null,
+                                null,
+                                nodesToBrowse,
+                                kMaxReferencesPerNode,
+                                browseDirection,
+                                referenceTypeId,
+                                true,
+                                nodeClassMask,
+                                ct)
+                            .ConfigureAwait(false);
+
+                    allReferenceDescriptions.AddRange(descriptions);
+                    newReferenceDescriptions.AddRange(descriptions);
+                    allServiceResults.AddRange(errors);
+                } while (repeatBrowse);
+
+                // Build browse request for next level
+                var nodesForNextManagedBrowse = new List<NodeId>();
+                int duplicates = 0;
+                foreach (var reference in
+                         newReferenceDescriptions.SelectMany(referenceCollection => referenceCollection))
+                {
+                    if (referenceDescriptions.TryAdd(reference.NodeId, reference))
+                    {
+                        if (!reference.ReferenceTypeId.Equals(ReferenceTypeIds.HasProperty))
+                        {
+                            nodesForNextManagedBrowse.Add(
+                                ExpandedNodeId.ToNodeId(
+                                    reference.NodeId,
+                                    Connection.Session!.NamespaceUris));
+                        }
+                    }
+                    else
+                    {
+                        duplicates++;
+                    }
+                }
+
+                newReferenceDescriptions.Clear();
+
+                nodesToBrowse = nodesForNextManagedBrowse;
+            }
+
+            var result = new ReferenceDescriptionCollection(referenceDescriptions.Values);
+
+            result.Sort((x, y) => x.NodeId.CompareTo(y.NodeId));
+
+            return result;
+        }
+        finally
+        {
+            Connection.Session.ContinuationPointPolicy = policyBackup;
+        }
     }
 
     /// <summary>

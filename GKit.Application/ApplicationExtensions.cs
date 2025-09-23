@@ -63,24 +63,31 @@ public static class ApplicationExtensions
     return ext.MapHealthChecks(pattern, options);
   }
 
-  public static IApplicationBuilder ApplyPendingMigrations<T>(this WebApplication ext)
+  public static async Task ExecuteApplyPendingMigrations<T>(this IHost ext, CancellationToken ct = default)
     where T : DbContext
   {
-    if (!ext.Environment.IsDevelopment())
-    {
-      using var scope = ext.Services.CreateScope();
-      using var ctx = scope.ServiceProvider.GetRequiredService<T>();
+    using var scope = ext.Services.CreateScope();
+    await using var ctx = scope.ServiceProvider.GetRequiredService<T>();
 
-      var migrations = ctx.Database.GetPendingMigrations();
-      if (migrations.Any())
-      {
-        Log.Information("Found {Count} not applied migrations. Applying...", migrations.Count());
+    var migrationsCount = (await ctx.Database.GetPendingMigrationsAsync(ct)).Count();
+    
+    if (migrationsCount == 0) return;
+      
+    Log.Information("Found {Count} not applied migrations. Applying...", migrationsCount);
 
-        ctx.Database.Migrate();
+    await ctx.Database.MigrateAsync(ct);
 
-        Log.Information("Migrations applied");
-      }
-    }
+    Log.Information("Migrations applied");;
+  }
+  
+  public static IHost ApplyPendingMigrations<T>(this IHost ext)
+    where T : DbContext
+  {
+    var environment = ext.Services.GetRequiredService<IHostEnvironment>();
+    if (environment.IsDevelopment()) return ext;
+
+    ext.ExecuteApplyPendingMigrations<T>().ConfigureAwait(false).GetAwaiter().GetResult();
+
     return ext;
   }
 }

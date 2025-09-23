@@ -24,7 +24,7 @@ public static class GKitQuartzExtensions
     return services;
   }
   
-  public static async Task<IHost> UseGKitQuartz(this IHost host, string? schedulerName = null, params Assembly[] otherAssemblies)
+  public static async Task<IHost> UseGKitQuartz(this IHost host, string? schedulerName = null, Action<IScheduler>? config = null, params Assembly[] otherAssemblies)
   {
     using var scope = host.Services.CreateScope();
     var schedulerFactory = scope.ServiceProvider.GetRequiredService<ISchedulerFactory>();
@@ -65,6 +65,16 @@ public static class GKitQuartzExtensions
     logger.LogInformation("Scheduling {JobCount} jobs with {TriggerCount} triggers", jobConfigs.Count, jobConfigs.Values.Select(p => p.Count).Sum());
     await scheduler!.ScheduleJobs(jobConfigs, true);
     logger.LogInformation("Job scheduled");
+
+    if (config != null)
+    {
+      logger.LogInformation("Additional configuration found");
+      config.Invoke(scheduler);
+    }
+    else
+    {
+      logger.LogInformation("No additional configuration found");
+    }
 
     return host;
   }

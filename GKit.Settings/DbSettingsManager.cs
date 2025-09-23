@@ -11,38 +11,38 @@ public class DbSettingsManager<TOptions, TContext>(
     where TContext : DbContext
 {
 
-    protected readonly string _baseKey = typeof(TOptions).Name;
+    protected string BaseKey => typeof(TOptions).Name;
 
-    protected readonly TOptions _options = options.Value;
-    protected readonly IDbContextFactory<TContext> _dbContextFactory = dbContextFactory;
+    protected TOptions Options => options.Value;
+    protected IDbContextFactory<TContext> DbContextFactory => dbContextFactory;
 
     public override bool CanUpdate => true;
 
-    public override async Task<TOptions> GetOptionsAsync()
+    public override async Task<TOptions> GetOptionsAsync(CancellationToken ct = default)
     {
-        using var context = await _dbContextFactory.CreateDbContextAsync();
+        await using var context = await DbContextFactory.CreateDbContextAsync(ct);
 
-        var props = await context.Set<Setting>().Where(p => p.Key.StartsWith(_baseKey)).ToListAsync();
+        var props = await context.Set<Setting>().Where(p => p.Key.StartsWith(BaseKey)).ToListAsync(ct);
 
-        var options = new TOptions();
+        var newOptions = new TOptions();
         foreach (var prop in typeof(TOptions).GetProperties())
         {
-            prop.SetValue(options, prop.GetValue(_options), null);
+            prop.SetValue(newOptions, prop.GetValue(Options), null);
         }
 
         foreach (var item in props)
         {
-            var prop = typeof(TOptions).GetProperty(item.Key.Replace($"{_baseKey}:", string.Empty));
-            if (prop is not null)
-            {
-                if (prop.PropertyType == typeof(TimeSpan))
-                    prop!.SetValue(options, TimeSpan.Parse(item.Value));
-                else
-                    prop!.SetValue(options, Convert.ChangeType(item.Value, prop.PropertyType));
-            }
+            var prop = typeof(TOptions).GetProperty(item.Key.Replace($"{BaseKey}:", string.Empty));
+            if (prop is null) continue;
+
+            if (item.Value != null)
+                prop.SetValue(newOptions,
+                    prop.PropertyType == typeof(TimeSpan)
+                        ? TimeSpan.Parse(item.Value)
+                        : Convert.ChangeType(item.Value, prop.PropertyType));
         }
 
-        return options;
+        return newOptions;
     }
 
     protected virtual IEnumerable<PropertyInfo> SelectProperties()
@@ -50,19 +50,19 @@ public class DbSettingsManager<TOptions, TContext>(
         return typeof(TOptions).GetProperties();
     }
 
-    protected override async Task SaveOptionsAsync(TOptions options)
+    protected override async Task SaveOptionsAsync(TOptions savingOptions, CancellationToken ct = default)
     {
-        using var context = await _dbContextFactory.CreateDbContextAsync();
+        await using var context = await DbContextFactory.CreateDbContextAsync(ct);
 
         foreach (var prop in SelectProperties())
         {
-            var key = $"{_baseKey}:{prop.Name}";
-            var entity = await context.Set<Setting>().FindAsync(key) ?? (await context.AddAsync(
-                new Setting() { Key = key, TypeName = prop.PropertyType.AssemblyQualifiedName! })).Entity;
+            var key = $"{BaseKey}:{prop.Name}";
+            var entity = await context.Set<Setting>().FirstOrDefaultAsync(p => p.Key == key, ct) ?? (await context.AddAsync(
+                new Setting() { Key = key, TypeName = prop.PropertyType.AssemblyQualifiedName! }, ct)).Entity;
 
-            entity.Value = prop.GetValue(options)?.ToString() ?? "";
+            entity.Value = prop.GetValue(savingOptions)?.ToString() ?? "";
         }
 
-        await context.SaveChangesAsync();
+        await context.SaveChangesAsync(ct);
     }
 }

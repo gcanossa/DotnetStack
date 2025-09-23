@@ -1,12 +1,7 @@
 ﻿namespace GKit.Quartz;
 
 [AttributeUsage(AttributeTargets.Class)]
-public class TimeSpanScheduleAttribute : Attribute
+public class TimeSpanScheduleAttribute(TimeSpan value) : Attribute
 {
-    public TimeSpanScheduleAttribute(TimeSpan value)
-    {
-        Value = value;
-    }
-
-    public TimeSpan Value { get; set; }
+    public TimeSpan Value { get; } = value;
 }
