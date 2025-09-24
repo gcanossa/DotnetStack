@@ -41,7 +41,7 @@ public class TelegramConnection
         _broker = broker;
         _verificationCodeManager = verificationCodeManager;
 
-        _client.OnUpdate+=OnUpdate;
+        _client.OnUpdates+=OnUpdate;
 
         _contextProvider = contextProvider;
 
@@ -95,7 +95,7 @@ public class TelegramConnection
         {
             _client.Dispose();
             _contextProvider.InvalidateClient();
-            _client.OnUpdate-=OnUpdate;
+            _client.OnUpdates-=OnUpdate;
             _source.SetResult();
 
             _stopped = true;

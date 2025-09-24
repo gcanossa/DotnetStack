@@ -5,7 +5,7 @@ using Opc.Ua.Client.ComplexTypes;
 
 namespace GKit.OpcUa;
 
-public abstract class OpcUaContext
+public abstract class OpcUaContext : IDisposable
 {
     protected IOpcUaContextOptions Options { get; init; }
 
@@ -17,6 +17,20 @@ public abstract class OpcUaContext
         Options = options;
 
         OpcUaConnectionPool.Connections.TryAdd(Options, new OpcUaConnection(options));
+    }
+
+    private bool _disposed;
+    public void Dispose()
+    {
+        if (_disposed) return;
+        
+        OpcUaConnectionPool.Connections.Remove(Options, out var connection);
+            
+        connection?.Dispose();
+            
+        _disposed = true;
+            
+        GC.SuppressFinalize(this);
     }
 
     protected async Task EnsureConnected(CancellationToken ct = default)

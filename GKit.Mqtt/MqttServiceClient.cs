@@ -3,16 +3,15 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MQTTnet;
-using MQTTnet.Client;
-using MQTTnet.Extensions.ManagedClient;
 
 namespace GKit.Mqtt;
 
+//TODO: test and fix, due to the lack of a real ManagedMqttClient
 public class MqttServiceClient<T> : IHostedService where T : MqttControllerBase
 {
-    private readonly MqttFactory _factory;
+    private readonly MqttClientFactory _factory;
     private readonly MqttServiceClientOptions<T> _options;
-    private readonly IManagedMqttClient _client;
+    private readonly IMqttClient _client;
     private readonly IServiceProvider _provider;
 
     private readonly Dictionary<string, MethodInfo[]> _handlers;
@@ -27,8 +26,8 @@ public class MqttServiceClient<T> : IHostedService where T : MqttControllerBase
         _logger = logger;
         _provider = provider;
         _options = options;
-        _factory = new MqttFactory();
-        _client = _factory.CreateManagedMqttClient();
+        _factory = new MqttClientFactory();
+        _client = _factory.CreateMqttClient();
 
         _handlers = typeof(T).GetMethods()
             .Select(p => new
@@ -99,12 +98,9 @@ public class MqttServiceClient<T> : IHostedService where T : MqttControllerBase
             .WithCredentials(_options.UserName, _options.Password)
             .WithTcpServer(_options.Host, _options.Port)
             .Build();
-        var managedClientOptions = new ManagedMqttClientOptionsBuilder()
-            .WithClientOptions(clientOptions)
-            .Build();
         _client.ApplicationMessageReceivedAsync += HandleApplicationMessage;
 
-        await _client.StartAsync(managedClientOptions);
+        await _client.ConnectAsync(clientOptions, cancellationToken);
 
         var subscribeOptions = _factory.CreateSubscribeOptionsBuilder()
             .WithTopicFilter(f =>
@@ -113,12 +109,12 @@ public class MqttServiceClient<T> : IHostedService where T : MqttControllerBase
                     f.WithTopic(topic);
             }).Build();
 
-        await _client.SubscribeAsync(subscribeOptions.TopicFilters);
+        await _client.SubscribeAsync(subscribeOptions, cancellationToken);
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
-        await _client.StopAsync(true);
+        await _client.DisconnectAsync(cancellationToken: cancellationToken);
 
         _client.ApplicationMessageReceivedAsync -= HandleApplicationMessage;
 

@@ -86,14 +86,14 @@ public class TelegramBotService : BackgroundService
         var options = await _optionsManager.GetOptionsAsync();
         _clientAccessor.Client = new TelegramBotClient(options.BotToken);
 
-        var me = await _clientAccessor.Client.GetMeAsync(_opCts.Token);
+        var me = await _clientAccessor.Client.GetMe(_opCts.Token);
         _logger.LogInformation("Bot started for {UserId}: {UserUsername}", me.Id, me.Username);
 
         _botInfo.Name = me.Username;
 
         _clientAccessor.Client.StartReceiving(
             updateHandler: HandleUpdateAsync,
-            pollingErrorHandler: HandlePollingErrorAsync,
+            errorHandler: HandlePollingErrorAsync,
             receiverOptions: receiverOptions,
             cancellationToken: _opCts.Token
         );
@@ -183,8 +183,8 @@ public class TelegramBotService : BackgroundService
                 Status = TelegramUserStatus.Joining
             });
 
-            await botClient.SendTextMessageAsync(update.Message!.Chat.Id, "Condividi le tue informazioni di contatto", 
-                replyMarkup: new ReplyKeyboardMarkup(KeyboardButton.WithRequestContact("Invia")));
+            await botClient.SendMessage(update.Message!.Chat.Id, "Condividi le tue informazioni di contatto", 
+                replyMarkup: new ReplyKeyboardMarkup(KeyboardButton.WithRequestContact("Invia")), cancellationToken: cancellationToken);
 
             _logger.LogInformation("Registration started for {UserId}", userId.Value);
             return;
@@ -198,7 +198,7 @@ public class TelegramBotService : BackgroundService
                     _logger.LogWarning("Registration for {UserId}: missing contact info", userId.Value);
                     if(!await ErrorAndCheckLockout(user, options, _dataProvider))
                     {
-                        await botClient.SendTextMessageAsync(update.Message!.Chat.Id, "Condividi le tue informazioni di contatto", 
+                        await botClient.SendMessage(update.Message!.Chat.Id, "Condividi le tue informazioni di contatto", 
                             replyMarkup: new ReplyKeyboardMarkup(KeyboardButton.WithRequestContact("Invia")));
                     }
                 }
@@ -212,7 +212,7 @@ public class TelegramBotService : BackgroundService
                     user.FirstName = update.Message.Contact.FirstName;
                     user.LastName = update.Message.Contact.LastName;
 
-                    await botClient.SendTextMessageAsync(update.Message!.Chat.Id, "Inserisci il codice di verifica:",
+                    await botClient.SendMessage(update.Message!.Chat.Id, "Inserisci il codice di verifica:",
                         replyMarkup: new ReplyKeyboardRemove()
                     );
 
@@ -226,7 +226,7 @@ public class TelegramBotService : BackgroundService
                     _logger.LogWarning("Registration for {UserId}: missing verification code text", userId.Value);
                     if(!await ErrorAndCheckLockout(user, options, _dataProvider))
                     {
-                        await botClient.SendTextMessageAsync(update.Message!.Chat.Id, "Inserisci il codice di verifica:");
+                        await botClient.SendMessage(update.Message!.Chat.Id, "Inserisci il codice di verifica:");
                     }
                 }
                 else
@@ -236,7 +236,7 @@ public class TelegramBotService : BackgroundService
                         _logger.LogWarning("Registration for {UserId}: wrong or expired verification code", userId.Value);
                         if(!await ErrorAndCheckLockout(user, options, _dataProvider))
                         {
-                            await botClient.SendTextMessageAsync(update.Message!.Chat.Id, "Codice errato o scaduto. Riprova:");
+                            await botClient.SendMessage(update.Message!.Chat.Id, "Codice errato o scaduto. Riprova:");
                         }
                     }
                     else
@@ -249,7 +249,7 @@ public class TelegramBotService : BackgroundService
                         user.VerificationCode = null;
                         user.VerificationCodeExpiration = null;
 
-                        await botClient.SendTextMessageAsync(update.Message!.Chat.Id, $"Registrazione completata {user.FirstName}! 🚀");
+                        await botClient.SendMessage(update.Message!.Chat.Id, $"Registrazione completata {user.FirstName}! 🚀");
 
                         await _dataProvider.UpdateUser(user);
                     }

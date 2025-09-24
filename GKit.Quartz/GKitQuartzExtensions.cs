@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Quartz;
 
 namespace GKit.Quartz;
@@ -75,6 +76,11 @@ public static class GKitQuartzExtensions
     {
       logger.LogInformation("No additional configuration found");
     }
+    
+    logger.LogInformation("Scheduling health check job");
+    await QuartzHealthCheckExtensions.ScheduleQuartzCheck(scheduler,
+      host.Services.GetRequiredService<IOptions<QuartzHealthCheckOptions>>());
+    logger.LogInformation("Scheduled health check job");
 
     return host;
   }
@@ -114,7 +120,7 @@ public static class GKitQuartzExtensions
     var keys = await scheduler.GetTriggerKeys(global::Quartz.Impl.Matchers.GroupMatcher<TriggerKey>.AnyGroup());
     var list = new List<ITrigger>();
     foreach (var key in keys)
-      list.Add(await scheduler.GetTrigger(key));
+      list.Add((await scheduler.GetTrigger(key))!);
 
     return list;
   }
