@@ -1,0 +1,57 @@
+@using System.Linq.Expressions
+@using Microsoft.Extensions.Logging
+@typeparam T where T : class
+
+@inject ILogger<DataAutocomplete<T>> logger
+
+<MudAutocomplete T="T" For="@For" Label="@Label" ToStringFunc="@ToStringFunc" SearchFunc="Search"
+  Clearable Value="@Value" ValueChanged="ValueChangedHandler" ShowProgressIndicator Disabled="Disabled"
+  ResetValueOnEmptyText data-attr-setter="force">
+  <NoItemsTemplate>
+    <MudStack Row Justify="Justify.Center" Style="border-bottom: 1px solid lightgray;">
+    </MudStack>
+    <MudText>Nessun elemento trovato</MudText>
+  </NoItemsTemplate>
+  <BeforeItemsTemplate>
+    <MudStack Row Justify="Justify.Center" Style="border-bottom: 1px solid lightgray;">
+    </MudStack>
+  </BeforeItemsTemplate>
+</MudAutocomplete>
+
+@code
+{
+  [Parameter]
+  public bool Disabled { get; set; } = false;
+  [Parameter]
+  public T Value { get; set; } = default!;
+
+  [Parameter]
+  public EventCallback<T> ValueChanged { get; set; }
+  public void ValueChangedHandler(T value)
+  {
+    ValueChanged.InvokeAsync(value);
+  }
+
+  [Parameter]
+  public string Label { get; set; } = "";
+  [Parameter]
+  public Expression<Func<T>> For { get; set; } = default!;
+
+  [Parameter]
+  public Func<T, string> ToStringFunc { get; set; } = p => p?.ToString() ?? "";
+
+  [Parameter, EditorRequired]
+  public Func<Task<IQueryable<T>>> QueryFactory { get; set; } = default!;
+
+  [Parameter, EditorRequired]
+  public Func<string, Expression<Func<T, bool>>> SearchExp { get; set; } = default!;
+
+  public async Task<IEnumerable<T>> Search(string value, CancellationToken token)
+  {
+    var query = await QueryFactory();
+    if (string.IsNullOrEmpty(value))
+      return query.ToList();
+
+    return query.Where(SearchExp(value)).ToList();
+  }
+}

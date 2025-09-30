@@ -10,5 +10,8 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.9"/>
         <PackageReference Include="PCSC" Version="7.0.1"/>
+        <PackageReference Update="Nerdbank.GitVersioning">
+          <Version>3.8.118</Version>
+        </PackageReference>
     </ItemGroup>
 </Project>

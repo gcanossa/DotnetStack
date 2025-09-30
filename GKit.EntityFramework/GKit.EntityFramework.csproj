@@ -10,6 +10,9 @@
     <PackageReference Include="cuid.net" Version="6.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.9" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.9" />
+    <PackageReference Update="Nerdbank.GitVersioning">
+      <Version>3.8.118</Version>
+    </PackageReference>
   </ItemGroup>
 
 </Project>

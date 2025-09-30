@@ -33,6 +33,9 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="NPOI" Version="2.7.4" />
+    <PackageReference Update="Nerdbank.GitVersioning">
+      <Version>3.8.118</Version>
+    </PackageReference>
   </ItemGroup>
 
 </Project>

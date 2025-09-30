@@ -13,6 +13,9 @@
       <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua.Client.ComplexTypes" Version="1.5.377.21" />
       <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua.Configuration" Version="1.5.377.21" />
       <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua.Core" Version="1.5.377.21" />
+      <PackageReference Update="Nerdbank.GitVersioning">
+        <Version>3.8.118</Version>
+      </PackageReference>
     </ItemGroup>
 
 </Project>

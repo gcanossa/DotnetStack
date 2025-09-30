@@ -8,6 +8,9 @@
 
   <ItemGroup>
     <PackageReference Include="System.Reactive" Version="6.0.2" />
+    <PackageReference Update="Nerdbank.GitVersioning">
+      <Version>3.8.118</Version>
+    </PackageReference>
   </ItemGroup>
 
   <PropertyGroup>

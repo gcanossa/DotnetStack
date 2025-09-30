@@ -18,7 +18,8 @@ public class RevisionInterceptor : SaveChangesInterceptor
   {
     if (eventData.Context is null) return result;
 
-    foreach (var entry in eventData.Context.ChangeTracker.Entries())
+    var entries = eventData.Context.ChangeTracker.Entries().ToList();
+    foreach (var entry in entries)
     {
       if (entry is not { State: EntityState.Modified, Entity: IRevisionableEntity entity }
         || _updateRegistrations.Contains(entity)) continue;
