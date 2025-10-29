@@ -14,7 +14,7 @@ public static class GKitQuartzExtensions
     
     services.AddQuartz(q =>
     {
-      q.SchedulerName = schedulerName ?? Assembly.GetExecutingAssembly().FullName!;
+      q.SchedulerName = schedulerName ?? Assembly.GetEntryAssembly().FullName!;
     });
     services.AddQuartzHostedService(options =>
     {
@@ -29,14 +29,14 @@ public static class GKitQuartzExtensions
   {
     using var scope = host.Services.CreateScope();
     var schedulerFactory = scope.ServiceProvider.GetRequiredService<ISchedulerFactory>();
-    var scheduler = await schedulerFactory.GetScheduler(schedulerName ?? Assembly.GetExecutingAssembly().FullName!);
+    var scheduler = await schedulerFactory.GetScheduler(schedulerName ?? Assembly.GetEntryAssembly()!.FullName!);
 
-    var logger = scope.ServiceProvider.GetRequiredService<ILogger>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<IScheduler>>();
     
-    logger.LogInformation("Scanning {Assembly} for jobs", Assembly.GetExecutingAssembly().FullName);
-    var jobTypes = FindConfiguredJobTypes(Assembly.GetExecutingAssembly()).ToList();
+    logger.LogInformation("Scanning {Assembly} for jobs", Assembly.GetEntryAssembly()!.FullName);
+    var jobTypes = FindConfiguredJobTypes(Assembly.GetEntryAssembly()!).ToList();
     logger.LogInformation("Found {Count}", jobTypes.Count);
-    foreach (var assembly in otherAssemblies.Where(p => p != Assembly.GetExecutingAssembly()).Distinct())
+    foreach (var assembly in otherAssemblies.Where(p => p != Assembly.GetEntryAssembly()).Distinct())
     {
       logger.LogInformation("Scanning {Assembly} for jobs", assembly.FullName);
       var found = FindConfiguredJobTypes(assembly).ToList();

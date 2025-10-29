@@ -22,7 +22,17 @@ public static class Application
       Log.Information("Starting web application");
 
       var host = app();
-      var runners = host.Services.GetRequiredService<IEnumerable<ICommandLineRunner>>();
+      var runners = host.Services.GetRequiredService<IEnumerable<ICommandLineRunner>>().ToList();
+
+      if (args[0] == "--help")
+      {
+        Console.WriteLine("Available commands:");
+        foreach (var runner in runners)
+        {
+          Console.WriteLine(runner.Help);
+        }
+        return;
+      }
       
       var shouldRun = true;
       foreach (var runner in runners.Where(p => p.Matches(host, args)))

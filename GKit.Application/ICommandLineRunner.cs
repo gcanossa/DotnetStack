@@ -6,5 +6,6 @@ public interface ICommandLineRunner
 {
     public bool ShouldDisableHostRun(IHost host, string[] args);
     public bool Matches(IHost host, string[] args);
+    public string Help { get; }
     public Task Execute(IHost host, string[] args);
 }
