@@ -25,62 +25,72 @@ public static class GKitQuartzExtensions
     return services;
   }
   
-  public static async Task<IHost> UseGKitQuartz(this IHost host, string? schedulerName = null, Action<IScheduler>? config = null, params Assembly[] otherAssemblies)
+  public static IHost UseGKitQuartz(this IHost host, string? schedulerName = null, Action<IScheduler>? config = null, params Assembly[] otherAssemblies)
   {
-    using var scope = host.Services.CreateScope();
-    var schedulerFactory = scope.ServiceProvider.GetRequiredService<ISchedulerFactory>();
-    var scheduler = await schedulerFactory.GetScheduler(schedulerName ?? Assembly.GetEntryAssembly()!.FullName!);
-
-    var logger = scope.ServiceProvider.GetRequiredService<ILogger<IScheduler>>();
+    var appLifetime = host.Services.GetRequiredService<IHostApplicationLifetime>();
     
-    logger.LogInformation("Scanning {Assembly} for jobs", Assembly.GetEntryAssembly()!.FullName);
-    var jobTypes = FindConfiguredJobTypes(Assembly.GetEntryAssembly()!).ToList();
-    logger.LogInformation("Found {Count}", jobTypes.Count);
-    foreach (var assembly in otherAssemblies.Where(p => p != Assembly.GetEntryAssembly()).Distinct())
+    appLifetime.ApplicationStarted.Register(() =>
     {
-      logger.LogInformation("Scanning {Assembly} for jobs", assembly.FullName);
-      var found = FindConfiguredJobTypes(assembly).ToList();
-      jobTypes.AddRange(found);
-      logger.LogInformation("Found {Count}", found.Count);
-    }
+      using var scope = host.Services.CreateScope();
+      var schedulerFactory = scope.ServiceProvider.GetRequiredService<ISchedulerFactory>();
+      var scheduler = schedulerFactory.GetScheduler(schedulerName ?? Assembly.GetEntryAssembly()!.FullName!)
+        .ConfigureAwait(false).GetAwaiter().GetResult();
+      
+      if (scheduler is null)
+        throw new Exception("Could not find a valid scheduler");
 
-    var jobConfigs = jobTypes
-      .Select(type => new
+      var logger = scope.ServiceProvider.GetRequiredService<ILogger<IScheduler>>();
+      
+      logger.LogInformation("Scanning {Assembly} for jobs", Assembly.GetEntryAssembly()!.FullName);
+      var jobTypes = FindConfiguredJobTypes(Assembly.GetEntryAssembly()!).ToList();
+      logger.LogInformation("Found {Count}", jobTypes.Count);
+      foreach (var assembly in otherAssemblies.Where(p => p != Assembly.GetEntryAssembly()).Distinct())
       {
-        Type = type,
-        Schedules = type.GetCustomAttributes<CronScheduleAttribute>().Cast<object>()
-          .Union(type.GetCustomAttributes<TimeSpanScheduleAttribute>()).ToList(),
-        Detail = JobBuilder.Create().OfType(type).WithIdentity($"{type.Name}-{Guid.NewGuid():N}").Build()
-      })
-      .ToDictionary(
-        k => k.Detail,
-        v => v.Schedules.Select((p, i) => p switch
-        {
-          CronScheduleAttribute cron => ConfigureCronTrigger(v.Detail, cron.Value, i),
-          TimeSpanScheduleAttribute ts => ConfigureTimespanTrigger(v.Detail, ts.Value, i),
-          _ => throw new ArgumentException("Invalid schedule type")
-        }).ToList())
-      .ToDictionary<KeyValuePair<IJobDetail, List<ITrigger>>, IJobDetail, IReadOnlyCollection<ITrigger>>(
-        jobConfig => jobConfig.Key, jobConfig => jobConfig.Value);
-    
-    logger.LogInformation("Scheduling {JobCount} jobs with {TriggerCount} triggers", jobConfigs.Count, jobConfigs.Values.Select(p => p.Count).Sum());
-    await scheduler!.ScheduleJobs(jobConfigs, true);
-    logger.LogInformation("Job scheduled");
+        logger.LogInformation("Scanning {Assembly} for jobs", assembly.FullName);
+        var found = FindConfiguredJobTypes(assembly).ToList();
+        jobTypes.AddRange(found);
+        logger.LogInformation("Found {Count}", found.Count);
+      }
 
-    if (config != null)
-    {
-      logger.LogInformation("Additional configuration found");
-      config.Invoke(scheduler);
-    }
-    else
-    {
-      logger.LogInformation("No additional configuration found");
-    }
-    
-    logger.LogInformation("Scheduling health check job");
-    await QuartzHealthCheckExtensions.ScheduleQuartzCheck(scheduler,
-      host.Services.GetRequiredService<IOptions<QuartzHealthCheckOptions>>());
-    logger.LogInformation("Scheduled health check job");
+      var jobConfigs = jobTypes
+        .Select(type => new
+        {
+          Type = type,
+          Schedules = type.GetCustomAttributes<CronScheduleAttribute>().Cast<object>()
+            .Union(type.GetCustomAttributes<TimeSpanScheduleAttribute>()).ToList(),
+          Detail = JobBuilder.Create().OfType(type).WithIdentity($"{type.Name}-{Guid.NewGuid():N}").Build()
+        })
+        .ToDictionary(
+          k => k.Detail,
+          v => v.Schedules.Select((p, i) => p switch
+          {
+            CronScheduleAttribute cron => ConfigureCronTrigger(v.Detail, cron.Value, i),
+            TimeSpanScheduleAttribute ts => ConfigureTimespanTrigger(v.Detail, ts.Value, i),
+            _ => throw new ArgumentException("Invalid schedule type")
+          }).ToList())
+        .ToDictionary<KeyValuePair<IJobDetail, List<ITrigger>>, IJobDetail, IReadOnlyCollection<ITrigger>>(
+          jobConfig => jobConfig.Key, jobConfig => jobConfig.Value);
+      
+      logger.LogInformation("Scheduling {JobCount} jobs with {TriggerCount} triggers", jobConfigs.Count, jobConfigs.Values.Select(p => p.Count).Sum());
+      scheduler!.ScheduleJobs(jobConfigs, true).ConfigureAwait(false).GetAwaiter().GetResult();
+      logger.LogInformation("Jobs scheduled");
+
+      if (config != null)
+      {
+        logger.LogInformation("Additional configuration found");
+        config.Invoke(scheduler);
+      }
+      else
+      {
+        logger.LogInformation("No additional configuration found");
+      }
+      
+      logger.LogInformation("Scheduling health check job");
+      QuartzHealthCheckExtensions.ScheduleQuartzCheck(scheduler,
+        host.Services.GetRequiredService<IOptions<QuartzHealthCheckOptions>>())
+        .ConfigureAwait(false).GetAwaiter().GetResult();
+      logger.LogInformation("Scheduled health check job");
+    });
 
     return host;
   }
