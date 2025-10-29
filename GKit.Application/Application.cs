@@ -24,7 +24,7 @@ public static class Application
       var host = app();
       var runners = host.Services.GetRequiredService<IEnumerable<ICommandLineRunner>>().ToList();
 
-      if (args[0] == "--help")
+      if (args.Length == 1 && args[0] == "--help")
       {
         Console.WriteLine("Available commands:");
         foreach (var runner in runners)
