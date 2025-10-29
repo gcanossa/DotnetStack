@@ -7,6 +7,7 @@ public class BlockingApplyDbContextMigrationRunner<T> : ICommandLineRunner where
 {
     public bool ShouldDisableHostRun(IHost host, string[] args) => true;
     public bool Matches(IHost host, string[] args) => args.Any(p => p == "--apply-migrations");
+    public string Help => "Apply database migrations and exit.";
 
     public async Task Execute(IHost host, string[] args) => await host.ExecuteApplyPendingMigrations<T>();
 }
