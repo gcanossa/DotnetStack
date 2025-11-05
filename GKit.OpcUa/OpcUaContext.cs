@@ -36,9 +36,11 @@ public abstract partial class OpcUaContext : IDisposable
     {
         if (_disposed) return;
         
-        OpcUaConnectionPool.Connections.Remove(Options, out var connection);
+        EntityModels.Clear();
+        
+        // OpcUaConnectionPool.Connections.Remove(Options, out var connection);
             
-        connection?.Dispose();
+        // connection?.Dispose();
             
         _disposed = true;
             
