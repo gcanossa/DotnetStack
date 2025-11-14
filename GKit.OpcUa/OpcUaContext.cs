@@ -21,7 +21,7 @@ public abstract partial class OpcUaContext : IDisposable
         OnModelCreating(modelBuilder);
         EntityModels = modelBuilder.EntityModels;
 
-        OpcUaConnectionPool.Connections.TryAdd(Options, new OpcUaConnection(options));
+        RenewConnection();
     }
     
     internal Dictionary<Type, Dictionary<PropertyInfo, EntityPropertyDescriptor>> EntityModels { get; init; }
@@ -38,10 +38,6 @@ public abstract partial class OpcUaContext : IDisposable
         
         EntityModels.Clear();
         
-        // OpcUaConnectionPool.Connections.Remove(Options, out var connection);
-            
-        // connection?.Dispose();
-            
         _disposed = true;
             
         GC.SuppressFinalize(this);
@@ -52,6 +48,30 @@ public abstract partial class OpcUaContext : IDisposable
         var connected = await Connection.ConnectAsync(ct).ConfigureAwait(false);
         if (!connected) throw new InvalidOperationException("Connection failed");
     }
+
+    protected void RenewConnection()
+    {
+        OpcUaConnectionPool.Connections.Remove(Options, out var connection);
+        connection?.Dispose();
+        OpcUaConnectionPool.Connections.TryAdd(Options, new OpcUaConnection(Options));
+    }
     
-    
+    protected async Task<T> GuardRequestAsync<T>(Func<Task<T>> request, CancellationToken ct = default)
+    {
+        await EnsureConnected(ct).ConfigureAwait(false);
+
+        try
+        {
+            return await request().ConfigureAwait(false);
+        }
+        catch (ServiceResultException e)
+        {
+            if (e.StatusCode == StatusCodes.BadNotConnected)
+            {
+                RenewConnection();
+            }
+
+            throw;
+        }
+    }
 }

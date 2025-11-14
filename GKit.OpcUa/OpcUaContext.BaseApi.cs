@@ -15,35 +15,37 @@ public abstract partial class OpcUaContext
     /// </remarks>
     public async Task<ComplexTypeSystem> LoadTypeSystemAsync(CancellationToken ct = default)
     {
-        await EnsureConnected(ct).ConfigureAwait(false);
-        
-        var complexTypeSystem = new ComplexTypeSystem(Connection.Session!);
-        await complexTypeSystem.LoadAsync(ct: ct).ConfigureAwait(false);
+        return await GuardRequestAsync(async () =>
+        {
+            var complexTypeSystem = new ComplexTypeSystem(Connection.Session!);
+            await complexTypeSystem.LoadAsync(ct: ct).ConfigureAwait(false);
 
-        return complexTypeSystem;
+            return complexTypeSystem;
+        }, ct);
     }
 
     public async Task<IEnumerable<DataValue>> ReadNodesAsync(IEnumerable<ReadValueId> nodes,CancellationToken ct = default)
     {
-        await EnsureConnected(ct).ConfigureAwait(false);
+        return await GuardRequestAsync(async () =>
+        {
+            // build a list of nodes to be read
+            var nodesToRead = new ReadValueIdCollection(nodes);
 
-        // build a list of nodes to be read
-        var nodesToRead = new ReadValueIdCollection(nodes);
+            // Call Read Service
+            var response = await Connection.Session!.ReadAsync(
+                null,
+                0,
+                TimestampsToReturn.Both,
+                nodesToRead,
+                ct).ConfigureAwait(false);
 
-        // Call Read Service
-        var response = await Connection.Session!.ReadAsync(
-            null,
-            0,
-            TimestampsToReturn.Both,
-            nodesToRead,
-            ct).ConfigureAwait(false);
+            var resultsValues = response.Results;
 
-        var resultsValues = response.Results;
+            // Validate the results
+            ClientBase.ValidateResponse(resultsValues,nodesToRead);
 
-        // Validate the results
-        ClientBase.ValidateResponse(resultsValues,nodesToRead);
-
-        return resultsValues;
+            return resultsValues;
+        }, ct);
     }
 
     /// <summary>
@@ -51,23 +53,24 @@ public abstract partial class OpcUaContext
     /// </summary>
     public async Task<IEnumerable<StatusCode>> WriteNodesAsync(IEnumerable<WriteValue> values, CancellationToken ct = default)
     {
-        await EnsureConnected(ct).ConfigureAwait(false);
+        return await GuardRequestAsync(async () =>
+        {
+            // Write the configured nodes
+            var nodesToWrite = new WriteValueCollection(values);
 
-        // Write the configured nodes
-        var nodesToWrite = new WriteValueCollection(values);
+            // Call Write Service
+            var response = await Connection.Session!.WriteAsync(
+                null,
+                nodesToWrite,
+                ct).ConfigureAwait(false);
 
-        // Call Write Service
-        var response = await Connection.Session!.WriteAsync(
-            null,
-            nodesToWrite,
-            ct).ConfigureAwait(false);
+            var results = response.Results;
 
-        var results = response.Results;
+            // Validate the response
+            ClientBase.ValidateResponse(results, nodesToWrite);
 
-        // Validate the response
-        ClientBase.ValidateResponse(results, nodesToWrite);
-
-        return results;
+            return results;
+        }, ct);
     }
     
     /// <summary>
@@ -84,114 +87,115 @@ public abstract partial class OpcUaContext
         BrowseDescription browseDescription = null,
         CancellationToken ct = default)
     {
-        await EnsureConnected(ct).ConfigureAwait(false);
-        
-        var policyBackup = Connection.Session!.ContinuationPointPolicy;
-        try
+        return await GuardRequestAsync(async () =>
         {
-            Connection.Session!.ContinuationPointPolicy = ContinuationPointPolicy.Default;
-
-            var browseDirection = BrowseDirection.Forward;
-            var referenceTypeId = ReferenceTypeIds.HierarchicalReferences;
-            var includeSubtypes = true;
-            uint nodeClassMask = 0;
-
-            if (browseDescription != null)
+            var policyBackup = Connection.Session!.ContinuationPointPolicy;
+            try
             {
-                startingNode = browseDescription.NodeId;
-                browseDirection = browseDescription.BrowseDirection;
-                referenceTypeId = browseDescription.ReferenceTypeId;
-                includeSubtypes = browseDescription.IncludeSubtypes;
-                nodeClassMask = browseDescription.NodeClassMask;
-            }
+                Connection.Session!.ContinuationPointPolicy = ContinuationPointPolicy.Default;
 
-            var nodesToBrowse = new List<NodeId> { startingNode ?? ObjectIds.RootFolder };
+                var browseDirection = BrowseDirection.Forward;
+                var referenceTypeId = ReferenceTypeIds.HierarchicalReferences;
+                var includeSubtypes = true;
+                uint nodeClassMask = 0;
 
-            const int kMaxReferencesPerNode = 1000;
-
-            // Browse
-            var referenceDescriptions = new Dictionary<ExpandedNodeId, ReferenceDescription>();
-
-            var searchDepth = 0;
-            var maxNodesPerBrowse = Connection.Session!.OperationLimits.MaxNodesPerBrowse;
-
-            var allReferenceDescriptions = new List<ReferenceDescriptionCollection>();
-            var newReferenceDescriptions = new List<ReferenceDescriptionCollection>();
-            var allServiceResults = new List<ServiceResult>();
-
-            while (nodesToBrowse.Count != 0 && searchDepth < 256)
-            {
-                searchDepth++;
-
-                const bool repeatBrowse = false;
-
-                do
+                if (browseDescription != null)
                 {
-                    if (ct.IsCancellationRequested)
-                    {
-                        break;
-                    }
-
-                    // the resultMask defaults to "all"
-                    // maybe the API should be extended to
-                    // support it. But that will then also be
-                    // necessary for BrowseAsync
-                    (IList<ReferenceDescriptionCollection> descriptions, IList<ServiceResult> errors) =
-                        await Connection
-                            .Session!.ManagedBrowseAsync(
-                                null,
-                                null,
-                                nodesToBrowse,
-                                kMaxReferencesPerNode,
-                                browseDirection,
-                                referenceTypeId,
-                                true,
-                                nodeClassMask,
-                                ct)
-                            .ConfigureAwait(false);
-
-                    allReferenceDescriptions.AddRange(descriptions);
-                    newReferenceDescriptions.AddRange(descriptions);
-                    allServiceResults.AddRange(errors);
-                } while (repeatBrowse);
-
-                // Build browse request for next level
-                var nodesForNextManagedBrowse = new List<NodeId>();
-                int duplicates = 0;
-                foreach (var reference in
-                         newReferenceDescriptions.SelectMany(referenceCollection => referenceCollection))
-                {
-                    if (referenceDescriptions.TryAdd(reference.NodeId, reference))
-                    {
-                        if (!reference.ReferenceTypeId.Equals(ReferenceTypeIds.HasProperty))
-                        {
-                            nodesForNextManagedBrowse.Add(
-                                ExpandedNodeId.ToNodeId(
-                                    reference.NodeId,
-                                    Connection.Session!.NamespaceUris));
-                        }
-                    }
-                    else
-                    {
-                        duplicates++;
-                    }
+                    startingNode = browseDescription.NodeId;
+                    browseDirection = browseDescription.BrowseDirection;
+                    referenceTypeId = browseDescription.ReferenceTypeId;
+                    includeSubtypes = browseDescription.IncludeSubtypes;
+                    nodeClassMask = browseDescription.NodeClassMask;
                 }
 
-                newReferenceDescriptions.Clear();
+                var nodesToBrowse = new List<NodeId> { startingNode ?? ObjectIds.RootFolder };
 
-                nodesToBrowse = nodesForNextManagedBrowse;
+                const int kMaxReferencesPerNode = 1000;
+
+                // Browse
+                var referenceDescriptions = new Dictionary<ExpandedNodeId, ReferenceDescription>();
+
+                var searchDepth = 0;
+                var maxNodesPerBrowse = Connection.Session!.OperationLimits.MaxNodesPerBrowse;
+
+                var allReferenceDescriptions = new List<ReferenceDescriptionCollection>();
+                var newReferenceDescriptions = new List<ReferenceDescriptionCollection>();
+                var allServiceResults = new List<ServiceResult>();
+
+                while (nodesToBrowse.Count != 0 && searchDepth < 256)
+                {
+                    searchDepth++;
+
+                    const bool repeatBrowse = false;
+
+                    do
+                    {
+                        if (ct.IsCancellationRequested)
+                        {
+                            break;
+                        }
+
+                        // the resultMask defaults to "all"
+                        // maybe the API should be extended to
+                        // support it. But that will then also be
+                        // necessary for BrowseAsync
+                        (IList<ReferenceDescriptionCollection> descriptions, IList<ServiceResult> errors) =
+                            await Connection
+                                .Session!.ManagedBrowseAsync(
+                                    null,
+                                    null,
+                                    nodesToBrowse,
+                                    kMaxReferencesPerNode,
+                                    browseDirection,
+                                    referenceTypeId,
+                                    true,
+                                    nodeClassMask,
+                                    ct)
+                                .ConfigureAwait(false);
+
+                        allReferenceDescriptions.AddRange(descriptions);
+                        newReferenceDescriptions.AddRange(descriptions);
+                        allServiceResults.AddRange(errors);
+                    } while (repeatBrowse);
+
+                    // Build browse request for next level
+                    var nodesForNextManagedBrowse = new List<NodeId>();
+                    int duplicates = 0;
+                    foreach (var reference in
+                             newReferenceDescriptions.SelectMany(referenceCollection => referenceCollection))
+                    {
+                        if (referenceDescriptions.TryAdd(reference.NodeId, reference))
+                        {
+                            if (!reference.ReferenceTypeId.Equals(ReferenceTypeIds.HasProperty))
+                            {
+                                nodesForNextManagedBrowse.Add(
+                                    ExpandedNodeId.ToNodeId(
+                                        reference.NodeId,
+                                        Connection.Session!.NamespaceUris));
+                            }
+                        }
+                        else
+                        {
+                            duplicates++;
+                        }
+                    }
+
+                    newReferenceDescriptions.Clear();
+
+                    nodesToBrowse = nodesForNextManagedBrowse;
+                }
+
+                var result = new ReferenceDescriptionCollection(referenceDescriptions.Values);
+
+                result.Sort((x, y) => x.NodeId.CompareTo(y.NodeId));
+
+                return result;
             }
-
-            var result = new ReferenceDescriptionCollection(referenceDescriptions.Values);
-
-            result.Sort((x, y) => x.NodeId.CompareTo(y.NodeId));
-
-            return result;
-        }
-        finally
-        {
-            Connection.Session.ContinuationPointPolicy = policyBackup;
-        }
+            finally
+            {
+                Connection.Session.ContinuationPointPolicy = policyBackup;
+            }
+        }, ct);
     }
 
     /// <summary>
@@ -199,15 +203,16 @@ public abstract partial class OpcUaContext
     /// </summary>
     public async Task<IList<object>> CallMethodAsync(NodeId target, NodeId method, CancellationToken ct = default, params object[] arguments)
     {
-        await EnsureConnected(ct).ConfigureAwait(false);
-
-        var outputArguments = await Connection.Session.CallAsync(
-            target,
-            method,
-            ct,
-            arguments).ConfigureAwait(false);
+        return await GuardRequestAsync(async () =>
+        {
+            var outputArguments = await Connection.Session.CallAsync(
+                target,
+                method,
+                ct,
+                arguments).ConfigureAwait(false);
         
-        return outputArguments;
+            return outputArguments;
+        }, ct);
     }
 
     /// <summary>
@@ -220,68 +225,69 @@ public abstract partial class OpcUaContext
         bool enableDurableSubscriptions,
         CancellationToken ct = default)
     {
-        var isDurable = false;
-
-        await EnsureConnected(ct).ConfigureAwait(false);
-
-        // Create a subscription for receiving data change notifications
-        const int subscriptionPublishingInterval = 1000;
-        const int itemSamplingInterval = 1000;
-        uint queueSize = 10;
-        var lifetime = minLifeTime;
-
-        if (enableDurableSubscriptions)
+        return await GuardRequestAsync(async () =>
         {
-            queueSize = 100;
-            lifetime = 20;
-        }
+            var isDurable = false;
 
-        // Define Subscription parameters
-        var subscription = new Subscription(Connection.Session.DefaultSubscription)
-        {
-            DisplayName = $"Subscription-{Guid.NewGuid():N}",
-            PublishingEnabled = true,
-            PublishingInterval = subscriptionPublishingInterval,
-            LifetimeCount = 0,
-            MinLifetimeInterval = lifetime,
-            KeepAliveCount = 5
-        };
+            // Create a subscription for receiving data change notifications
+            const int subscriptionPublishingInterval = 1000;
+            const int itemSamplingInterval = 1000;
+            uint queueSize = 10;
+            var lifetime = minLifeTime;
 
-        Connection.Session.AddSubscription(subscription);
-
-        // Create the subscription on Server side
-        await subscription.CreateAsync(ct).ConfigureAwait(false);
-
-        if (enableDurableSubscriptions)
-        {
-            var (success, revisedLifetimeInHours) =
-                await subscription.SetSubscriptionDurableAsync(1, ct).ConfigureAwait(false);
-            if (success)
+            if (enableDurableSubscriptions)
             {
-                isDurable = true;
+                queueSize = 100;
+                lifetime = 20;
             }
-        }
 
-        foreach (var node in nodes)
-        {
-            var monitoredItem = new MonitoredItem(subscription.DefaultItem)
+            // Define Subscription parameters
+            var subscription = new Subscription(Connection.Session.DefaultSubscription)
             {
-                // Int32 Node - Objects\CTT\Scalar\Simulation\Int32
-                StartNodeId = node.NodeId,
-                AttributeId = Attributes.Value,
-                DisplayName = node.NodeId.ToString(),
-                SamplingInterval = itemSamplingInterval,
-                QueueSize = queueSize,
-                DiscardOldest = true
+                DisplayName = $"Subscription-{Guid.NewGuid():N}",
+                PublishingEnabled = true,
+                PublishingInterval = subscriptionPublishingInterval,
+                LifetimeCount = 0,
+                MinLifetimeInterval = lifetime,
+                KeepAliveCount = 5
             };
-            monitoredItem.Notification += handler;
-            
-            subscription.AddItem(monitoredItem);
-        }
 
-        // Create the monitored items on Server side
-        await subscription.ApplyChangesAsync(ct).ConfigureAwait(false);
+            Connection.Session.AddSubscription(subscription);
 
-        return isDurable;
+            // Create the subscription on Server side
+            await subscription.CreateAsync(ct).ConfigureAwait(false);
+
+            if (enableDurableSubscriptions)
+            {
+                var (success, revisedLifetimeInHours) =
+                    await subscription.SetSubscriptionDurableAsync(1, ct).ConfigureAwait(false);
+                if (success)
+                {
+                    isDurable = true;
+                }
+            }
+
+            foreach (var node in nodes)
+            {
+                var monitoredItem = new MonitoredItem(subscription.DefaultItem)
+                {
+                    // Int32 Node - Objects\CTT\Scalar\Simulation\Int32
+                    StartNodeId = node.NodeId,
+                    AttributeId = Attributes.Value,
+                    DisplayName = node.NodeId.ToString(),
+                    SamplingInterval = itemSamplingInterval,
+                    QueueSize = queueSize,
+                    DiscardOldest = true
+                };
+                monitoredItem.Notification += handler;
+                
+                subscription.AddItem(monitoredItem);
+            }
+
+            // Create the monitored items on Server side
+            await subscription.ApplyChangesAsync(ct).ConfigureAwait(false);
+
+            return isDurable;
+        }, ct);
     }
 }
