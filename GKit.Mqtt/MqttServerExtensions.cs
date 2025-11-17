@@ -14,12 +14,12 @@ public static class MqttServerExtensions
     {
         _ = ext ?? throw new ArgumentNullException(nameof(ext));
 
-        var endpoint = (await ext.GetClientsAsync()).FirstOrDefault(p => p.Id == clientId)?.Endpoint;
+        var endpoint = (await ext.GetClientsAsync()).FirstOrDefault(p => p.Id == clientId)?.RemoteEndPoint;
 
-        return endpoint is not null ? IPEndPoint.Parse(endpoint) : null;
+        return (IPEndPoint?)endpoint;
     }
 
-    public static WebApplication MapMqtt(this WebApplication ext, Action<MqttServer> configure = null)
+    public static WebApplication MapMqtt(this WebApplication ext, Action<MqttServer>? configure = null)
     {
         _ = ext ?? throw new ArgumentNullException(nameof(ext));
 

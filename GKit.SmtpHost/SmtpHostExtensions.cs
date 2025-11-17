@@ -1,12 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Threading.Tasks;
 using GKit.Settings;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-using SmtpServer;
 using SmtpServer.Authentication;
 using SmtpServer.Storage;
 
@@ -41,7 +34,7 @@ namespace GKit.SmtpHost
             return this;
         }
 
-        ISmtpHostBuilder ISmtpHostBuilder.AddMessageHandler<T>(Func<IServiceProvider, T>? factory = null)
+        ISmtpHostBuilder ISmtpHostBuilder.AddMessageHandler<T>(Func<IServiceProvider, T>? factory)
         {
             if(factory != null)
                 _services.AddScoped<IMessageHandler, T>(factory);

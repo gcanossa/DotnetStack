@@ -35,7 +35,7 @@ namespace GKit.TelegramHost
             return this;
         }
 
-        ITelegramHostBuilder ITelegramHostBuilder.AddRequestHandler<T>(Func<IServiceProvider, T>? factory = null)
+        ITelegramHostBuilder ITelegramHostBuilder.AddRequestHandler<T>(Func<IServiceProvider, T>? factory)
         {
             if(factory != null)
                 _services.AddScoped<IRequestHandler, T>(factory);
@@ -48,10 +48,10 @@ namespace GKit.TelegramHost
 
     public static class TelegramHostExtensions
     {
-        public static ITelegramHostBuilder AddTelegramHost(this IServiceCollection services, Action<TelegramHostOptions> config = null)
+        public static ITelegramHostBuilder AddTelegramHost(this IServiceCollection services, Action<TelegramHostOptions>? config = null)
         {
             if(config != null)
-                services.PostConfigure<TelegramHostOptions>(config);
+                services.PostConfigure(config);
 
             services.AddSingleton<ITelegramHostBroker, TelegramHostBroker>();
             services.AddScoped<IDeadLetterRequestHandler, LogDeadLetterRequestHandler>();

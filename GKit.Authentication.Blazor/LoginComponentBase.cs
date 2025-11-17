@@ -5,10 +5,9 @@ namespace GKit.Authentication.Blazor;
 public abstract class LoginComponentBase<T> : ComponentBase where T : new()
 {
   [Inject]
-  protected NavigationManager NavigationManager { get; set; } = default!;
+  protected NavigationManager NavigationManager { get; set; } = null!;
 
-  [SupplyParameterFromForm]
-  public T Model { get; set; } = new();
+  [SupplyParameterFromForm] public T? Model { get; set; }
 
   [SupplyParameterFromQuery]
   public string ReturnUrl { get; set; } = "/";
@@ -17,7 +16,7 @@ public abstract class LoginComponentBase<T> : ComponentBase where T : new()
 
   protected async Task LoginUser()
   {
-    var result = await SignInAsync(Model);
+    var result = await SignInAsync(Model ?? new T());
 
     if (result)
     {

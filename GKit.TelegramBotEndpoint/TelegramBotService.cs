@@ -3,14 +3,12 @@ using GKit.TelegramBotEndpoint.Data;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
-using GKit.TelegramBotEndpoint.Data;
 
 namespace GKit.TelegramBotEndpoint;
 
@@ -22,9 +20,9 @@ public class TelegramBotService : BackgroundService
     private readonly TelegramBotInfo _botInfo;
     private readonly IServiceProvider _provider;
 
-    private TaskCompletionSource _opCs;
-    private CancellationTokenSource _mainCts;
-    private CancellationTokenSource _opCts;
+    private TaskCompletionSource? _opCs;
+    private CancellationTokenSource? _mainCts;
+    private CancellationTokenSource? _opCts;
 
     public TelegramBotService(
         TelegramBotClientAccessor clientAccessor,
@@ -63,14 +61,14 @@ public class TelegramBotService : BackgroundService
         {
             _opCts?.Cancel();
             _clientAccessor.Client = null;
-            _opCs.SetResult();
+            _opCs?.SetResult();
             _opCs = null;
         }
     }
 
     protected async Task StartClientAsync(CancellationToken cancellationToken = default(CancellationToken))
     {
-        if(_clientAccessor.Client is {})
+        if(_clientAccessor.Client is not null)
         {
             throw new InvalidOperationException("Previous client must be stopped firtst.");
         }
@@ -84,7 +82,7 @@ public class TelegramBotService : BackgroundService
         };
 
         var options = await _optionsManager.GetOptionsAsync();
-        _clientAccessor.Client = new TelegramBotClient(options.BotToken);
+        _clientAccessor.Client = new TelegramBotClient(options.BotToken!);
 
         var me = await _clientAccessor.Client.GetMe(_opCts.Token);
         _logger.LogInformation("Bot started for {UserId}: {UserUsername}", me.Id, me.Username);

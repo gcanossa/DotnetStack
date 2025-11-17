@@ -12,7 +12,7 @@ public class PdfDocumentExtensionsTest
     [Fact]
     public async Task ShouldStampPdf()
     {
-        GKitPdfExtensions.AddGKitPdfServices(null);
+        GKitPdfExtensions.AddGKitPdfServices(null!);
         
         var input = File.Open("../../../Pdf/test/MNLRM.000351.CP.pdf", FileMode.Open, FileAccess.Read);
         var output = File.Open("../../../Pdf/test/Result.pdf", FileMode.OpenOrCreate, FileAccess.Write);
@@ -42,10 +42,10 @@ public class PdfDocumentExtensionsTest
     class TestModel
     {
         [PdfStamperField(104, 74, 1)]
-        public string ProducerName { get; set; }
+        public string? ProducerName { get; set; }
         
         [PdfStamperField(32, 669, 1, Width = 200)]
-        public string Notes { get; set; }
+        public string? Notes { get; set; }
         
         [PdfStamperField(360, 37, 1)]
         public DateOnly EmissionDate { get; set; }

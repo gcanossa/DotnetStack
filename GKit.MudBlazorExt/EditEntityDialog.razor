@@ -13,7 +13,7 @@
   </TitleContent>
   <DialogContent>
     <div @ref="container">
-      <MudForm @ref="_form" Model="@Model" Validation="@(validator.ValidateValueAsync)" ValidationDelay="0"
+      <MudForm @ref="_form" Model="@Model" Validation="@((object?)validator.ValidateValueAsync)" ValidationDelay="0"
                IsValidChanged="p => { }" IsTouchedChanged="p => { }">
         <DynamicComponent @ref="_dynamicComponent" Type="typeof(TForm)" Parameters="_formParameters"/>
       </MudForm>

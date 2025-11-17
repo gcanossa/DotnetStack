@@ -14,7 +14,7 @@ public static class GKitQuartzExtensions
     
     services.AddQuartz(q =>
     {
-      q.SchedulerName = schedulerName ?? Assembly.GetEntryAssembly().FullName!;
+      q.SchedulerName = schedulerName ?? Assembly.GetEntryAssembly()!.FullName!;
     });
     services.AddQuartzHostedService(options =>
     {

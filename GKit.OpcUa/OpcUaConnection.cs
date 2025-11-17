@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Opc.Ua;
 using Opc.Ua.Client;
 
@@ -9,16 +8,16 @@ public class OpcUaConnection : IDisposable
 {
     protected ILogger Logger => Utils.Logger;
     public ISession? Session { get; protected set; }
-    protected SessionReconnectHandler SessionReconnectHandler { get; set; }
+    protected SessionReconnectHandler? SessionReconnectHandler { get; set; }
     protected IOpcUaContextOptions Options { get; }
     protected CertificateValidator? CertificateValidator { get; }
     protected ReverseConnectManager? ReverseConnectManager { get; }
     protected IUserIdentity? UserIdentity { get; }
-    protected ApplicationConfiguration ApplicationConfiguration { get; }
+    protected ApplicationConfiguration? ApplicationConfiguration { get; }
 
     private bool _disposed;
     private bool _certificateValidatorRegistered;
-    private readonly Lock m_lock = new();
+    private readonly Lock _mLock = new();
 
     internal OpcUaConnection(IOpcUaContextOptions options)
     {
@@ -72,7 +71,7 @@ public class OpcUaConnection : IDisposable
                         cts.Token);
 
                     connection = await ReverseConnectManager
-                        .WaitForConnectionAsync(new Uri(Options.ServerUrl), null, linkedCts.Token);
+                        .WaitForConnectionAsync(new Uri(Options.ServerUrl!), null, linkedCts.Token);
 
                     if (connection == null)
                     {
@@ -89,7 +88,7 @@ public class OpcUaConnection : IDisposable
                         ApplicationConfiguration,
                         connection,
                         Options.UserIdentity is not null,
-                        ct
+                        linkedCts.Token
                     ).ConfigureAwait(false);
                     connection = null;
                 } while (connection == null);
@@ -122,7 +121,7 @@ public class OpcUaConnection : IDisposable
                     endpoint,
                     connection == null,
                     false,
-                    $"{ApplicationConfiguration.ApplicationName}-{Guid.NewGuid():N}",
+                    $"{ApplicationConfiguration!.ApplicationName}-{Guid.NewGuid():N}",
                     (uint)Options.SessionLifeTime.TotalMilliseconds,
                     UserIdentity,
                     null,
@@ -169,6 +168,7 @@ public class OpcUaConnection : IDisposable
     /// Disconnects the session.
     /// </summary>
     /// <param name="leaveChannelOpen">Leaves the channel open.</param>
+    /// <param name="ct">CancellationToken</param>
     public async Task DisconnectAsync(bool leaveChannelOpen = false, CancellationToken ct = default)
     {
         try
@@ -177,7 +177,7 @@ public class OpcUaConnection : IDisposable
             {
                 Logger.LogInformation("Disconnecting...");
 
-                lock (m_lock)
+                lock (_mLock)
                 {
                     Session.KeepAlive -= Session_KeepAlive;
                     SessionReconnectHandler?.Dispose();
@@ -251,7 +251,7 @@ public class OpcUaConnection : IDisposable
                     return;
                 }
 
-                var state = SessionReconnectHandler
+                var state = SessionReconnectHandler!
                     .BeginReconnect(
                         Session,
                         ReverseConnectManager!,
@@ -296,7 +296,7 @@ public class OpcUaConnection : IDisposable
             return;
         }
 
-        lock (m_lock)
+        lock (_mLock)
         {
             // if session recovered, Session property is null
             if (SessionReconnectHandler.Session != null)

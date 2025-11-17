@@ -48,7 +48,7 @@ public static class GKitOpcUaExtensions
 
     public static string DefaultApplicationName<T>(this OpcUaContextOptionsBuilder<T> builder) where T : OpcUaContext
     {
-        return typeof(T).FullName;
+        return typeof(T).FullName!;
     }
     
     public static string DefaultApplicationUri<T>(this OpcUaContextOptionsBuilder<T> builder) where T : OpcUaContext

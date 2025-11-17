@@ -17,19 +17,19 @@ public abstract partial class OpcUaContext : IDisposable
     {
         Options = options;
         
+        EntityModels = InitializeModels();
+    }
+
+    private Dictionary<Type,Dictionary<PropertyInfo,EntityPropertyDescriptor>> InitializeModels()
+    {
         var modelBuilder = new ModelBuilder();
         OnModelCreating(modelBuilder);
-        EntityModels = modelBuilder.EntityModels;
-
-        RenewConnection();
+        return modelBuilder.EntityModels;
     }
     
     internal Dictionary<Type, Dictionary<PropertyInfo, EntityPropertyDescriptor>> EntityModels { get; init; }
 
-    protected virtual void OnModelCreating(IModelBuilder modelBuilder)
-    {
-        
-    }
+    protected abstract void OnModelCreating(IModelBuilder modelBuilder);
     
     private bool _disposed;
     public void Dispose()
@@ -49,11 +49,37 @@ public abstract partial class OpcUaContext : IDisposable
         if (!connected) throw new InvalidOperationException("Connection failed");
     }
 
-    protected void RenewConnection()
+    protected async Task RenewConnection(CancellationToken ct = default)
+    {
+        try
+        {
+            await CloseConnectionAsync(ct);
+        }
+        catch
+        {
+            // ignored
+        }
+
+        await OpenConnectionAsync(ct);
+    }
+    
+    protected async Task OpenConnectionAsync(CancellationToken ct = default)
+    {
+        var connection = new OpcUaConnection(Options);
+        if(OpcUaConnectionPool.Connections.TryAdd(Options, connection))
+        {
+            await connection.ConnectAsync(ct).ConfigureAwait(false);
+        }
+    }
+    
+    protected async Task CloseConnectionAsync(CancellationToken ct = default)
     {
         OpcUaConnectionPool.Connections.Remove(Options, out var connection);
-        connection?.Dispose();
-        OpcUaConnectionPool.Connections.TryAdd(Options, new OpcUaConnection(Options));
+        if(connection != null)
+        {
+            await connection.DisconnectAsync(false, ct).ConfigureAwait(false);
+            connection.Dispose();
+        }
     }
     
     protected async Task<T> GuardRequestAsync<T>(Func<Task<T>> request, CancellationToken ct = default)
@@ -66,9 +92,9 @@ public abstract partial class OpcUaContext : IDisposable
         }
         catch (ServiceResultException e)
         {
-            if (e.StatusCode == StatusCodes.BadNotConnected)
+            if (e.StatusCode is StatusCodes.BadNotConnected or StatusCodes.BadTooManySessions)
             {
-                RenewConnection();
+                await RenewConnection(ct);
             }
 
             throw;

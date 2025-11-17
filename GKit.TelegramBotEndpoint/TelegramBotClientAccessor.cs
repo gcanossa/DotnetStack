@@ -4,5 +4,5 @@ namespace GKit.TelegramBotEndpoint;
 
 public class TelegramBotClientAccessor
 {
-    public ITelegramBotClient Client { get; internal set; }
+    public ITelegramBotClient? Client { get; internal set; }
 }

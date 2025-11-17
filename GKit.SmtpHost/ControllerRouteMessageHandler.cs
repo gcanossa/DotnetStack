@@ -37,11 +37,11 @@ namespace GKit.SmtpHost
                     {
                         using var methodScope = _logger.BeginScope(new { Action = method.Name });
                         try{
-                            var task = (Task)method.Invoke(obj, new[] { message })!;
+                            var task = (Task)method.Invoke(obj, [message])!;
 
-                            if(task is Task<SmtpControllerActionResult>)
+                            if(task is Task<SmtpControllerActionResult> tsk)
                             {
-                                var result = await (Task<SmtpControllerActionResult>)task switch
+                                var result = await tsk switch
                                 {
                                     SmtpControllerActionResult.Failure => throw new SmtpFailedActionException(),
                                     SmtpControllerActionResult.Skipped => throw new SmtpSkippedActionException(),
@@ -55,12 +55,12 @@ namespace GKit.SmtpHost
 
                             _logger.LogInformation("Success");
                         }
-                        catch(SmtpSkippedActionException e)
+                        catch(SmtpSkippedActionException)
                         {
                             _logger.LogInformation("Skipped by controller logic");
                             return await Task.FromResult(false);
                         }
-                        catch(SmtpFailedActionException e)
+                        catch(SmtpFailedActionException)
                         {
                             _logger.LogWarning("Failed by controller logic");
                             return await Task.FromResult(false);

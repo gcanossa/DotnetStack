@@ -33,11 +33,11 @@ public static class TelegramBotExtensions
         }
     }
 
-    public static ITelegramBotBuilder AddTelegramBot(this IServiceCollection services, Action<TelegramBotOptions> config = null)
+    public static ITelegramBotBuilder AddTelegramBot(this IServiceCollection services, Action<TelegramBotOptions>? config = null)
     {
         if(config is not null)
         {
-            services.PostConfigure<TelegramBotOptions>(config);
+            services.PostConfigure(config);
         }
 
         services.AddSingleton<TelegramBotInfo>();

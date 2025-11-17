@@ -89,8 +89,8 @@ Welcome to your new app.
       {
         try
         {
-          var streamRef = await pasteSource.ReadFile(file.FileId, true);
-          Console.WriteLine($"{file.Name}, contentType: {file.ContentType}, size: {streamRef.Length}");
+          var streamRef = await pasteSource!.ReadFile(file.FileId, true);
+          Console.WriteLine($"{file.Name}, contentType: {file.ContentType}, size: {streamRef!.Length}");
 
           using var stream = await streamRef.OpenReadStreamAsync(maxAllowedSize: 100_000_000);
           using var reader = new StreamReader(stream);
@@ -116,8 +116,8 @@ Welcome to your new app.
       {
         try
         {
-          var streamRef = await dropSource.ReadFile(file.FileId, true);
-          Console.WriteLine($"{file.Name}, contentType: {file.ContentType}, size: {streamRef.Length}");
+          var streamRef = await dropSource!.ReadFile(file.FileId, true);
+          Console.WriteLine($"{file.Name}, contentType: {file.ContentType}, size: {streamRef!.Length}");
 
           using var stream = await streamRef.OpenReadStreamAsync(maxAllowedSize: 100_000_000);
           using var reader = new StreamReader(stream);
@@ -146,7 +146,7 @@ Welcome to your new app.
       try
       {
         var streamRef = await clipboard.ReadFile(file.FileId, true);
-        Console.WriteLine($"{file.Name}, contentType: {file.ContentType}, size: {streamRef.Length}");
+        Console.WriteLine($"{file.Name}, contentType: {file.ContentType}, size: {streamRef!.Length}");
 
         using var stream = await streamRef.OpenReadStreamAsync(maxAllowedSize: 100_000_000);
         using var reader = new StreamReader(stream);

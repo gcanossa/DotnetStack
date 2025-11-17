@@ -81,9 +81,9 @@ internal class OpcUaContextOptionsSpecBuilder<T>(OpcUaContextOptionsBuilder<T> b
 
     public async Task<IOpcUaContextOptions<T>> BuildAsync()
     {
-        var appConfigurationBuilder = await builder.ApplicationConfigurationFactory.Invoke(builder.ClientApplicationBuilder, builder.ServiceProvider);
+        var appConfigurationBuilder = await builder.ApplicationConfigurationFactory!.Invoke(builder.ClientApplicationBuilder!, builder.ServiceProvider);
         
-        builder.Options.ApplicationConfiguration = await appConfigurationBuilder.Create();
+        builder.Options.ApplicationConfiguration = await appConfigurationBuilder.CreateAsync();
         
         builder.Options.ReverseConnectManager = builder.ReverseConnectManagerFactory is not null ? 
             await builder.ReverseConnectManagerFactory!.Invoke(builder.ServiceProvider) : null;

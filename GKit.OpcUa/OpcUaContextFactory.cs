@@ -1,13 +1,11 @@
-﻿using Microsoft.Extensions.Logging;
-
-namespace GKit.OpcUa;
+﻿namespace GKit.OpcUa;
 
 public interface IOpcUaContextFactory<T> where T : OpcUaContext
 {
     Task<T> CreateContextAsync(CancellationToken ct = default);
 }
 
-internal class OpcUaContextFactory<T>(IOpcUaContextOptions<T> options, ILogger<T> logger) : IOpcUaContextFactory<T>
+internal class OpcUaContextFactory<T>(IOpcUaContextOptions<T> options) : IOpcUaContextFactory<T>
     where T : OpcUaContext
 {
     private IOpcUaContextOptions<T> Options { get; } = options;

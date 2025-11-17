@@ -7,8 +7,8 @@ public class TelegramVerificationCodeManager
     private TaskCompletionSource<string>? _pendingRequest = null;
 
     public bool IsVerificationCodeRequested { get; private set; }
-    public event Action OnVerificationCodeRequest;
-    public event Action<string> OnVerificationCodeResponse;
+    public event Action? OnVerificationCodeRequest;
+    public event Action<string>? OnVerificationCodeResponse;
 
     public void RespondVerificationCode(string verificationCode)
     {

@@ -36,7 +36,7 @@ namespace GKit.TelegramHost
         {
             while (await Reader.WaitToReadAsync(cancellationToken))
             {
-                while (Reader.TryRead(out TL.IObject item))
+                while (Reader.TryRead(out var item))
                 {
                     yield return item;
                 }

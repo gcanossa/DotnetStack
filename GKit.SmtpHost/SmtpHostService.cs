@@ -19,7 +19,7 @@ namespace GKit.SmtpHost
         private IServiceProvider Provider { get; init; }
         private ISmtpHostBroker Broker { get; init; }
         private readonly ILogger<SmtpHostService> _logger;
-        private SmtpServer.SmtpServer _server;
+        private SmtpServer.SmtpServer? _server;
 
         public SmtpHostService(
             SmtpServerFactory smtpServerFactory,
@@ -48,8 +48,9 @@ namespace GKit.SmtpHost
 
         private async Task OnOptionsChanged(SmtpHostOptions options)
         {
-            _server.Shutdown();
-            await _server.ShutdownTask.ConfigureAwait(false);       
+            _server?.Shutdown();
+            if(_server != null)
+                await _server.ShutdownTask.ConfigureAwait(false);       
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)

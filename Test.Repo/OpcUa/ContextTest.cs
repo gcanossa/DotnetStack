@@ -21,6 +21,11 @@ public class ContextTest
         public TestContext(IOpcUaContextOptions<TestContext> options) : base(options)
         {
         }
+
+        protected override void OnModelCreating(IModelBuilder modelBuilder)
+        {
+            
+        }
     }
     
     [Fact]
@@ -43,7 +48,7 @@ public class ContextTest
         
         var factory  = scope.ServiceProvider.GetService<IOpcUaContextFactory<TestContext>>();
         
-        var ctx = await factory.CreateContextAsync();
+        var ctx = await factory!.CreateContextAsync();
 
         Assert.NotNull(ctx);
     }
@@ -68,7 +73,7 @@ public class ContextTest
         
         var factory  = scope.ServiceProvider.GetService<IOpcUaContextFactory<TestContext>>();
         
-        var ctx = await factory.CreateContextAsync();
+        var ctx = await factory!.CreateContextAsync();
 
         var nodes = await ctx.BrowseAsync();
         foreach (var node in nodes)
@@ -117,7 +122,7 @@ public class ContextTest
         
         var factory  = scope.ServiceProvider.GetService<IOpcUaContextFactory<TestContext>>();
         
-        var ctx = await factory.CreateContextAsync();
+        var ctx = await factory!.CreateContextAsync();
         
         var readVariables = await ctx.ReadNodesAsync([new ReadValueId()
         {

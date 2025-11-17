@@ -8,9 +8,9 @@ namespace GKit.TelegramHost
     [AttributeUsage(AttributeTargets.Method)]
     public class TelegramRouteAttribute : Attribute
     {
-        public Type EventType { get; init; }
+        public Type? EventType { get; init; }
 
-        public TelegramRouteAttribute(Type eventType = null)
+        public TelegramRouteAttribute(Type? eventType = null)
         {
             EventType = eventType;
         }

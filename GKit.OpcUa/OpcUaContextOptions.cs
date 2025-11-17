@@ -5,12 +5,12 @@ namespace GKit.OpcUa;
 
 public interface IOpcUaContextOptions
 {
-    public string ServerUrl { get; set; }
+    public string? ServerUrl { get; set; }
     
     public ReverseConnectManager? ReverseConnectManager { get; }
     public CertificateValidator? CertificateValidator { get; }
     public IUserIdentity? UserIdentity { get; }
-    public ApplicationConfiguration ApplicationConfiguration { get; }
+    public ApplicationConfiguration? ApplicationConfiguration { get; }
     
     public bool AcceptUntrustedCertificates { get; }
     public TimeSpan KeepAliveInterval { get; }
@@ -21,11 +21,11 @@ public interface IOpcUaContextOptions
 
 internal class OpcUaContextOptions : IOpcUaContextOptions
 {
-    public string ServerUrl { get; set; }
+    public string? ServerUrl { get; set; }
     public ReverseConnectManager? ReverseConnectManager { get; internal set; }
     public CertificateValidator? CertificateValidator { get; internal set; }
     public IUserIdentity? UserIdentity { get; internal set; }
-    public ApplicationConfiguration ApplicationConfiguration { get; internal set; }
+    public ApplicationConfiguration? ApplicationConfiguration { get; internal set; }
     
     public bool AcceptUntrustedCertificates { get; set; }
     public TimeSpan KeepAliveInterval { get; set; } = TimeSpan.FromMilliseconds(5000);

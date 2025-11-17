@@ -56,7 +56,7 @@
           <MudMenu Icon="@Icons.Material.Filled.MoreVert" AriaLabel="Open user menu" Dense Size="Size.Small">
             @foreach (var control in _defaultControls.Concat(RowControls))
             {
-              <MudMenuItem Icon="@control.Icon" IconColor="@control.Color" Label="@control.Text" Size="Size.Small"
+              <MudMenuItem Icon="@control.Icon" IconColor="@control.Color" Label="@control.Text"
                 OnClick="() => control.Action.Invoke(context)" Disabled="@(control.Disabled?.Invoke(context) ?? false)" />
             }
           </MudMenu>

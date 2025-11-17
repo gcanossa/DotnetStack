@@ -72,19 +72,19 @@ public abstract partial class OpcUaContext
             return results;
         }, ct);
     }
-    
+
     /// <summary>
     /// Browse full address space using the ManagedBrowseMethod, which
     /// will take care of not sending to many nodes to the server,
     /// calling BrowseNext and dealing with the status codes
     /// BadNoContinuationPoint and BadInvalidContinuationPoint.
     /// </summary>
-    /// <param name="uaClient">The UAClient with a session to use.</param>
     /// <param name="startingNode">The node where the browse operation starts.</param>
     /// <param name="browseDescription">An optional BrowseDescription to use.</param>
+    /// <param name="ct">CancellationToken</param>
     public async Task<ReferenceDescriptionCollection> BrowseAsync(
-        NodeId startingNode = null,
-        BrowseDescription browseDescription = null,
+        NodeId? startingNode = null,
+        BrowseDescription? browseDescription = null,
         CancellationToken ct = default)
     {
         return await GuardRequestAsync(async () =>
@@ -96,7 +96,6 @@ public abstract partial class OpcUaContext
 
                 var browseDirection = BrowseDirection.Forward;
                 var referenceTypeId = ReferenceTypeIds.HierarchicalReferences;
-                var includeSubtypes = true;
                 uint nodeClassMask = 0;
 
                 if (browseDescription != null)
@@ -104,7 +103,7 @@ public abstract partial class OpcUaContext
                     startingNode = browseDescription.NodeId;
                     browseDirection = browseDescription.BrowseDirection;
                     referenceTypeId = browseDescription.ReferenceTypeId;
-                    includeSubtypes = browseDescription.IncludeSubtypes;
+                    // includeSubtypes = browseDescription.IncludeSubtypes;
                     nodeClassMask = browseDescription.NodeClassMask;
                 }
 
@@ -116,11 +115,11 @@ public abstract partial class OpcUaContext
                 var referenceDescriptions = new Dictionary<ExpandedNodeId, ReferenceDescription>();
 
                 var searchDepth = 0;
-                var maxNodesPerBrowse = Connection.Session!.OperationLimits.MaxNodesPerBrowse;
+                // var maxNodesPerBrowse = Connection.Session!.OperationLimits.MaxNodesPerBrowse;
 
-                var allReferenceDescriptions = new List<ReferenceDescriptionCollection>();
+                //var allReferenceDescriptions = new List<ReferenceDescriptionCollection>();
                 var newReferenceDescriptions = new List<ReferenceDescriptionCollection>();
-                var allServiceResults = new List<ServiceResult>();
+                //var allServiceResults = new List<ServiceResult>();
 
                 while (nodesToBrowse.Count != 0 && searchDepth < 256)
                 {
@@ -153,14 +152,14 @@ public abstract partial class OpcUaContext
                                     ct)
                                 .ConfigureAwait(false);
 
-                        allReferenceDescriptions.AddRange(descriptions);
+                        // allReferenceDescriptions.AddRange(descriptions);
                         newReferenceDescriptions.AddRange(descriptions);
-                        allServiceResults.AddRange(errors);
+                        // allServiceResults.AddRange(errors);
                     } while (repeatBrowse);
 
                     // Build browse request for next level
                     var nodesForNextManagedBrowse = new List<NodeId>();
-                    int duplicates = 0;
+                    // int duplicates = 0;
                     foreach (var reference in
                              newReferenceDescriptions.SelectMany(referenceCollection => referenceCollection))
                     {
@@ -174,10 +173,10 @@ public abstract partial class OpcUaContext
                                         Connection.Session!.NamespaceUris));
                             }
                         }
-                        else
-                        {
-                            duplicates++;
-                        }
+                        // else
+                        // {
+                        //     duplicates++;
+                        // }
                     }
 
                     newReferenceDescriptions.Clear();
@@ -205,7 +204,7 @@ public abstract partial class OpcUaContext
     {
         return await GuardRequestAsync(async () =>
         {
-            var outputArguments = await Connection.Session.CallAsync(
+            var outputArguments = await Connection.Session!.CallAsync(
                 target,
                 method,
                 ct,
@@ -242,7 +241,7 @@ public abstract partial class OpcUaContext
             }
 
             // Define Subscription parameters
-            var subscription = new Subscription(Connection.Session.DefaultSubscription)
+            var subscription = new Subscription(Connection.Session!.DefaultSubscription)
             {
                 DisplayName = $"Subscription-{Guid.NewGuid():N}",
                 PublishingEnabled = true,
