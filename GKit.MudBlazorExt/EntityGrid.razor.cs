@@ -255,4 +255,9 @@ public partial class EntityGrid<T, TDialog>
       await OnLoadedServerData.InvokeAsync(gridState);
     }
   }
+  
+  protected async Task RowClick(DataGridRowClickEventArgs<T> arg)
+  {
+    await OnRowClick.InvokeAsync(arg);
+  }
 }
