@@ -1,5 +1,6 @@
 using System.Data.Common;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Web;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MudBlazor;
@@ -259,5 +260,17 @@ public partial class EntityGrid<T, TDialog>
   protected async Task RowClick(DataGridRowClickEventArgs<T> arg)
   {
     await OnRowClick.InvokeAsync(arg);
+  }
+
+  protected async Task OnRowControlClick(MouseEventArgs args, EntityGridRowControlDescriptor<T> control,
+    CellContext<T> context)
+  {
+    if(OnBeforeRowControlAction != null && !await OnBeforeRowControlAction.Invoke(control, context))
+      return;
+
+    await control.Action.Invoke(context);
+
+    if (OnAfterRowControlAction != null)
+      await OnAfterRowControlAction(control, context);
   }
 }

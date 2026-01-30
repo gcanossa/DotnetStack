@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using PdfSharp.Fonts;
+using PdfSharp.Snippets.Font;
 
 namespace GKit.Pdf;
 
@@ -19,7 +20,7 @@ public static class GKitPdfExtensions
         }
         else
         {
-            throw new NotSupportedException("No font resolver available for the current platform");
+            GlobalFontSettings.FontResolver = new FailsafeFontResolver();
         }
         
         return ext;

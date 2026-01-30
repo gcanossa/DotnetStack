@@ -46,7 +46,7 @@
             {
               <MudTooltip Text="@control.Text">
                 <MudIconButton Icon="@control.Icon" Size="Size.Small" Color="@control.Color"
-                  OnClick="() => control.Action.Invoke(context)" Disabled="@(control.Disabled?.Invoke(context) ?? false)" />
+                  OnClick="(evt) => OnRowControlClick(evt, control, context)" Disabled="@(control.Disabled?.Invoke(context) ?? false)" />
               </MudTooltip>
             }
           </MudStack>
@@ -57,7 +57,7 @@
             @foreach (var control in _defaultControls.Concat(RowControls))
             {
               <MudMenuItem Icon="@control.Icon" IconColor="@control.Color" Label="@control.Text"
-                OnClick="() => control.Action.Invoke(context)" Disabled="@(control.Disabled?.Invoke(context) ?? false)" />
+                OnClick="((evt) => OnRowControlClick(evt, control, context))" Disabled="@(control.Disabled?.Invoke(context) ?? false)" />
             }
           </MudMenu>
         }
@@ -114,6 +114,12 @@
   
   [Parameter]
   public EventCallback<DataGridRowClickEventArgs<T>> OnRowClick { get; set; } = default!;
+
+  [Parameter]
+  public Func<EntityGridRowControlDescriptor<T>, CellContext<T>, Task<bool>>? OnBeforeRowControlAction { get; set; } = default;
+
+  [Parameter]
+  public Func<EntityGridRowControlDescriptor<T>, CellContext<T>, Task>? OnAfterRowControlAction { get; set; } = default;
 
   [Parameter, EditorRequired]
   public Func<DbContext> ContextFactory { get; set; } = default!;
