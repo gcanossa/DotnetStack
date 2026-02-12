@@ -5973,7 +5973,7 @@ namespace GKit.RENTRI.Stubs.Formulari
         /// <param name="confermate">Filtra le copie dei FIR digitali confermate o non confermate.</param>
         /// <param name="data_emissione_da">Data di emissione a partire dalla quale si richiedono le copie dei FIR digitali (formato ISO 8601 UTC)</param>
         /// <param name="data_emissione_a">Data massima di emissione entro la quale si richiedono le copie dei FIR digitali (formato ISO 8601 UTC)</param>
-        /// <param name="num_iscr_sito">Eventuale numero di iscrizione dell'unità locale per la quale si richiedeono le copie cartacee dei FIR.
+        /// <param name="num_iscr_sito">Eventuale numero di iscrizione dell'unità locale per la quale si richiedono le copie cartacee dei FIR.
         /// <br/>Se non indicato ma si richiedono le sole copie cartacee confermate, verranno restituite solo le copie cartacee che sono state confermate senza essere associate ad alcuna unità locale</param>
         /// <param name="ruolo">Specifica il ruolo per cui si richiedono le copie cartacee dei FIR. 
         /// <br/>Se non indicato ma si indica una unità locale, vengono considerati tutti i ruoli associati all'unità locale specificata.</param>
@@ -5998,7 +5998,7 @@ namespace GKit.RENTRI.Stubs.Formulari
         /// <param name="confermate">Filtra le copie dei FIR digitali confermate o non confermate.</param>
         /// <param name="data_emissione_da">Data di emissione a partire dalla quale si richiedono le copie dei FIR digitali (formato ISO 8601 UTC)</param>
         /// <param name="data_emissione_a">Data massima di emissione entro la quale si richiedono le copie dei FIR digitali (formato ISO 8601 UTC)</param>
-        /// <param name="num_iscr_sito">Eventuale numero di iscrizione dell'unità locale per la quale si richiedeono le copie cartacee dei FIR.
+        /// <param name="num_iscr_sito">Eventuale numero di iscrizione dell'unità locale per la quale si richiedono le copie cartacee dei FIR.
         /// <br/>Se non indicato ma si richiedono le sole copie cartacee confermate, verranno restituite solo le copie cartacee che sono state confermate senza essere associate ad alcuna unità locale</param>
         /// <param name="ruolo">Specifica il ruolo per cui si richiedono le copie cartacee dei FIR. 
         /// <br/>Se non indicato ma si indica una unità locale, vengono considerati tutti i ruoli associati all'unità locale specificata.</param>
@@ -6588,7 +6588,7 @@ namespace GKit.RENTRI.Stubs.Formulari
         /// <br/>La dimensione massima accettata del file xFIR è 3 MB.
         /// <br/>
         /// <br/>Con l'identificativo della transazione restituito è possibile consultare lo stato di avanzamento dell'elaborazione e richiederne l'esito.
-        /// <br/>&lt;hr/&gt;&lt;i&gt;Servizio richiamabile esclusivamente in modalità &lt;b&gt;STUB&lt;/b&gt; (le richieste restituiranno sempre un codice di stato 422).&lt;/i&gt;&lt;hr/&gt;&lt;br/&gt;Se viene specificato un URL nell'header &lt;i&gt;X-ReplyTo&lt;/i&gt;, al termine dell'elaborazione dei dati, il fruitore riceverà una notifica con l'esito dell'elaborazione all'URL specificato.
+        /// <br/>&lt;br/&gt;Se viene specificato un URL nell'header &lt;i&gt;X-ReplyTo&lt;/i&gt;, al termine dell'elaborazione dei dati, il fruitore riceverà una notifica con l'esito dell'elaborazione all'URL specificato.
         /// </remarks>
         /// <param name="numero_fir">Numero del FIR incluso nel file xFIR</param>
         /// <param name="x_ReplyTo">URL di callback alla quale verrà inviata la notifica di fine elaborazione</param>
@@ -6621,7 +6621,7 @@ namespace GKit.RENTRI.Stubs.Formulari
         /// <br/>La dimensione massima accettata del file xFIR è 3 MB.
         /// <br/>
         /// <br/>Con l'identificativo della transazione restituito è possibile consultare lo stato di avanzamento dell'elaborazione e richiederne l'esito.
-        /// <br/>&lt;hr/&gt;&lt;i&gt;Servizio richiamabile esclusivamente in modalità &lt;b&gt;STUB&lt;/b&gt; (le richieste restituiranno sempre un codice di stato 422).&lt;/i&gt;&lt;hr/&gt;&lt;br/&gt;Se viene specificato un URL nell'header &lt;i&gt;X-ReplyTo&lt;/i&gt;, al termine dell'elaborazione dei dati, il fruitore riceverà una notifica con l'esito dell'elaborazione all'URL specificato.
+        /// <br/>&lt;br/&gt;Se viene specificato un URL nell'header &lt;i&gt;X-ReplyTo&lt;/i&gt;, al termine dell'elaborazione dei dati, il fruitore riceverà una notifica con l'esito dell'elaborazione all'URL specificato.
         /// </remarks>
         /// <param name="numero_fir">Numero del FIR incluso nel file xFIR</param>
         /// <param name="x_ReplyTo">URL di callback alla quale verrà inviata la notifica di fine elaborazione</param>
@@ -6758,7 +6758,7 @@ namespace GKit.RENTRI.Stubs.Formulari
         /// Copie FIR digitali caricate
         /// </summary>
         /// <remarks>
-        /// Ottiene la lista delle copie dei FIR digitali caricate dal destinatario e rese disponibili agli altri soggetti del FIR.&lt;hr/&gt;&lt;i&gt;Servizio richiamabile esclusivamente in modalità &lt;b&gt;STUB&lt;/b&gt; (le richieste restituiranno sempre una risposta vuota).&lt;/i&gt;&lt;hr/&gt;
+        /// Ottiene la lista delle copie dei FIR digitali caricate dal destinatario e rese disponibili agli altri soggetti del FIR.
         /// </remarks>
         /// <param name="num_iscr_sito">Numero iscrizione unità locale del destinatario che ha caricato le copie dei FIR digitali</param>
         /// <param name="numero_fir">Numero FIR della copia del FIR digitale</param>
@@ -6784,7 +6784,7 @@ namespace GKit.RENTRI.Stubs.Formulari
         /// Copie FIR digitali caricate
         /// </summary>
         /// <remarks>
-        /// Ottiene la lista delle copie dei FIR digitali caricate dal destinatario e rese disponibili agli altri soggetti del FIR.&lt;hr/&gt;&lt;i&gt;Servizio richiamabile esclusivamente in modalità &lt;b&gt;STUB&lt;/b&gt; (le richieste restituiranno sempre una risposta vuota).&lt;/i&gt;&lt;hr/&gt;
+        /// Ottiene la lista delle copie dei FIR digitali caricate dal destinatario e rese disponibili agli altri soggetti del FIR.
         /// </remarks>
         /// <param name="num_iscr_sito">Numero iscrizione unità locale del destinatario che ha caricato le copie dei FIR digitali</param>
         /// <param name="numero_fir">Numero FIR della copia del FIR digitale</param>
@@ -6950,7 +6950,7 @@ namespace GKit.RENTRI.Stubs.Formulari
         /// Dettaglio copia FIR digitale
         /// </summary>
         /// <remarks>
-        /// Recupera le informazioni di dettaglio del caricamento della copia del FIR digitale.&lt;hr/&gt;&lt;i&gt;Servizio richiamabile esclusivamente in modalità &lt;b&gt;STUB&lt;/b&gt; (le richieste restituiranno sempre una risposta vuota).&lt;/i&gt;&lt;hr/&gt;
+        /// Recupera le informazioni di dettaglio del caricamento della copia del FIR digitale.
         /// </remarks>
         /// <param name="num_iscr_sito">Numero iscrizione unità locale del destinatario che ha caricato la copia del FIR digitale.
         /// <br/>            Per recuperare i numeri di iscrizione attribuiti alle unità locali è possibile utilizzare /anagrafiche/v1.0/operatore/{num_iscr}/siti.</param>
@@ -6967,7 +6967,7 @@ namespace GKit.RENTRI.Stubs.Formulari
         /// Dettaglio copia FIR digitale
         /// </summary>
         /// <remarks>
-        /// Recupera le informazioni di dettaglio del caricamento della copia del FIR digitale.&lt;hr/&gt;&lt;i&gt;Servizio richiamabile esclusivamente in modalità &lt;b&gt;STUB&lt;/b&gt; (le richieste restituiranno sempre una risposta vuota).&lt;/i&gt;&lt;hr/&gt;
+        /// Recupera le informazioni di dettaglio del caricamento della copia del FIR digitale.
         /// </remarks>
         /// <param name="num_iscr_sito">Numero iscrizione unità locale del destinatario che ha caricato la copia del FIR digitale.
         /// <br/>            Per recuperare i numeri di iscrizione attribuiti alle unità locali è possibile utilizzare /anagrafiche/v1.0/operatore/{num_iscr}/siti.</param>
@@ -7100,7 +7100,7 @@ namespace GKit.RENTRI.Stubs.Formulari
         /// </summary>
         /// <remarks>
         /// Elimina il caricamento della copia del FIR digitale.
-        /// <br/>L'operazione è possibile solo se nessuno dei soggetti a cui è stata resa disponibile la copia del FIR digitale ne ha già preso visione con l'operazione di conferma.&lt;hr/&gt;&lt;i&gt;Servizio richiamabile esclusivamente in modalità &lt;b&gt;STUB&lt;/b&gt; (le richieste restituiranno sempre un codice di stato 422).&lt;/i&gt;&lt;hr/&gt;
+        /// <br/>L'operazione è possibile solo se nessuno dei soggetti a cui è stata resa disponibile la copia del FIR digitale ne ha già preso visione con l'operazione di conferma.
         /// </remarks>
         /// <param name="num_iscr_sito">Numero iscrizione unità locale del destinatario che ha caricato la copia del FIR digitale.
         /// <br/>            Per recuperare i numeri di iscrizione attribuiti alle unità locali è possibile utilizzare /anagrafiche/v1.0/operatore/{num_iscr}/siti.</param>
@@ -7118,7 +7118,7 @@ namespace GKit.RENTRI.Stubs.Formulari
         /// </summary>
         /// <remarks>
         /// Elimina il caricamento della copia del FIR digitale.
-        /// <br/>L'operazione è possibile solo se nessuno dei soggetti a cui è stata resa disponibile la copia del FIR digitale ne ha già preso visione con l'operazione di conferma.&lt;hr/&gt;&lt;i&gt;Servizio richiamabile esclusivamente in modalità &lt;b&gt;STUB&lt;/b&gt; (le richieste restituiranno sempre un codice di stato 422).&lt;/i&gt;&lt;hr/&gt;
+        /// <br/>L'operazione è possibile solo se nessuno dei soggetti a cui è stata resa disponibile la copia del FIR digitale ne ha già preso visione con l'operazione di conferma.
         /// </remarks>
         /// <param name="num_iscr_sito">Numero iscrizione unità locale del destinatario che ha caricato la copia del FIR digitale.
         /// <br/>            Per recuperare i numeri di iscrizione attribuiti alle unità locali è possibile utilizzare /anagrafiche/v1.0/operatore/{num_iscr}/siti.</param>
@@ -7244,7 +7244,7 @@ namespace GKit.RENTRI.Stubs.Formulari
         /// Documento copia FIR digitale
         /// </summary>
         /// <remarks>
-        /// Restituisce il file xFIR precedentemente caricato dal destinatario stesso.&lt;hr/&gt;&lt;i&gt;Servizio richiamabile esclusivamente in modalità &lt;b&gt;STUB&lt;/b&gt; (le richieste restituiranno sempre una risposta vuota).&lt;/i&gt;&lt;hr/&gt;
+        /// Restituisce il file xFIR precedentemente caricato dal destinatario stesso.
         /// </remarks>
         /// <param name="num_iscr_sito">Numero iscrizione unità locale del destinatario che ha caricato la copia del FIR digitale.
         /// <br/>            Per recuperare i numeri di iscrizione attribuiti alle unità locali è possibile utilizzare /anagrafiche/v1.0/operatore/{num_iscr}/siti.</param>
@@ -7261,7 +7261,7 @@ namespace GKit.RENTRI.Stubs.Formulari
         /// Documento copia FIR digitale
         /// </summary>
         /// <remarks>
-        /// Restituisce il file xFIR precedentemente caricato dal destinatario stesso.&lt;hr/&gt;&lt;i&gt;Servizio richiamabile esclusivamente in modalità &lt;b&gt;STUB&lt;/b&gt; (le richieste restituiranno sempre una risposta vuota).&lt;/i&gt;&lt;hr/&gt;
+        /// Restituisce il file xFIR precedentemente caricato dal destinatario stesso.
         /// </remarks>
         /// <param name="num_iscr_sito">Numero iscrizione unità locale del destinatario che ha caricato la copia del FIR digitale.
         /// <br/>            Per recuperare i numeri di iscrizione attribuiti alle unità locali è possibile utilizzare /anagrafiche/v1.0/operatore/{num_iscr}/siti.</param>
@@ -7390,10 +7390,10 @@ namespace GKit.RENTRI.Stubs.Formulari
         /// Copie FIR digitali disponibili
         /// </summary>
         /// <remarks>
-        /// Ottiene la lista delle copie dei FIR digitali, disponibili per la conferma o già confermati, per il soggetto specificato.&lt;hr/&gt;&lt;i&gt;Servizio richiamabile esclusivamente in modalità &lt;b&gt;STUB&lt;/b&gt; (le richieste restituiranno sempre una risposta vuota).&lt;/i&gt;&lt;hr/&gt;
+        /// Ottiene la lista delle copie dei FIR digitali, disponibili per la conferma o già confermati, per il soggetto specificato.
         /// </remarks>
         /// <param name="identificativo_soggetto">Codice fiscale del soggetto per cui richiedere l'elenco delle copie dei FIR digitali disponibili</param>
-        /// <param name="num_iscr_sito">Eventuale numero di iscrizione dell'unità locale per la quale si richiedeono le copie dei FIR digitali</param>
+        /// <param name="num_iscr_sito">Eventuale numero di iscrizione dell'unità locale per la quale si richiedono le copie dei FIR digitali</param>
         /// <param name="numero_fir">Numero FIR della copia del FIR digitale</param>
         /// <param name="tipo_accettazione">Filtra le copia dei FIR digitali per tipo di accettazione del destinatario</param>
         /// <param name="confermate">Filtra le copie dei FIR digitali confermate o non confermate.</param>
@@ -7417,10 +7417,10 @@ namespace GKit.RENTRI.Stubs.Formulari
         /// Copie FIR digitali disponibili
         /// </summary>
         /// <remarks>
-        /// Ottiene la lista delle copie dei FIR digitali, disponibili per la conferma o già confermati, per il soggetto specificato.&lt;hr/&gt;&lt;i&gt;Servizio richiamabile esclusivamente in modalità &lt;b&gt;STUB&lt;/b&gt; (le richieste restituiranno sempre una risposta vuota).&lt;/i&gt;&lt;hr/&gt;
+        /// Ottiene la lista delle copie dei FIR digitali, disponibili per la conferma o già confermati, per il soggetto specificato.
         /// </remarks>
         /// <param name="identificativo_soggetto">Codice fiscale del soggetto per cui richiedere l'elenco delle copie dei FIR digitali disponibili</param>
-        /// <param name="num_iscr_sito">Eventuale numero di iscrizione dell'unità locale per la quale si richiedeono le copie dei FIR digitali</param>
+        /// <param name="num_iscr_sito">Eventuale numero di iscrizione dell'unità locale per la quale si richiedono le copie dei FIR digitali</param>
         /// <param name="numero_fir">Numero FIR della copia del FIR digitale</param>
         /// <param name="tipo_accettazione">Filtra le copia dei FIR digitali per tipo di accettazione del destinatario</param>
         /// <param name="confermate">Filtra le copie dei FIR digitali confermate o non confermate.</param>
@@ -7588,7 +7588,7 @@ namespace GKit.RENTRI.Stubs.Formulari
         /// Dettaglio copia digitale FIR disponibile
         /// </summary>
         /// <remarks>
-        /// Restituisce il dettaglio dei dati di caricamento della copia digitale del FIR caricata.&lt;hr/&gt;&lt;i&gt;Servizio richiamabile esclusivamente in modalità &lt;b&gt;STUB&lt;/b&gt; (le richieste restituiranno sempre una risposta vuota).&lt;/i&gt;&lt;hr/&gt;
+        /// Restituisce il dettaglio dei dati di caricamento della copia digitale del FIR caricata.
         /// </remarks>
         /// <param name="identificativo_soggetto">Codice fiscale del soggetto a cui è resa disponibile la copia del FIR digitale</param>
         /// <param name="identificativo">Identificativo della copia del FIR digitale per cui vengono richieste le informazioni di dettaglio</param>
@@ -7604,7 +7604,7 @@ namespace GKit.RENTRI.Stubs.Formulari
         /// Dettaglio copia digitale FIR disponibile
         /// </summary>
         /// <remarks>
-        /// Restituisce il dettaglio dei dati di caricamento della copia digitale del FIR caricata.&lt;hr/&gt;&lt;i&gt;Servizio richiamabile esclusivamente in modalità &lt;b&gt;STUB&lt;/b&gt; (le richieste restituiranno sempre una risposta vuota).&lt;/i&gt;&lt;hr/&gt;
+        /// Restituisce il dettaglio dei dati di caricamento della copia digitale del FIR caricata.
         /// </remarks>
         /// <param name="identificativo_soggetto">Codice fiscale del soggetto a cui è resa disponibile la copia del FIR digitale</param>
         /// <param name="identificativo">Identificativo della copia del FIR digitale per cui vengono richieste le informazioni di dettaglio</param>
@@ -7725,7 +7725,7 @@ namespace GKit.RENTRI.Stubs.Formulari
         /// Documento copia FIR digitale disponibile
         /// </summary>
         /// <remarks>
-        /// Restituisce il file xFIR che rappresenta la copia del FIR digitale caricata dal destinatario.&lt;hr/&gt;&lt;i&gt;Servizio richiamabile esclusivamente in modalità &lt;b&gt;STUB&lt;/b&gt; (le richieste restituiranno sempre una risposta vuota).&lt;/i&gt;&lt;hr/&gt;
+        /// Restituisce il file xFIR che rappresenta la copia del FIR digitale caricata dal destinatario.
         /// </remarks>
         /// <param name="identificativo_soggetto">Codice fiscale del soggetto per il quale si richiede il documento della copia del FIR digitale</param>
         /// <param name="identificativo">Identificativo della copia del FIR digitale caricata dal destinatario</param>
@@ -7741,7 +7741,7 @@ namespace GKit.RENTRI.Stubs.Formulari
         /// Documento copia FIR digitale disponibile
         /// </summary>
         /// <remarks>
-        /// Restituisce il file xFIR che rappresenta la copia del FIR digitale caricata dal destinatario.&lt;hr/&gt;&lt;i&gt;Servizio richiamabile esclusivamente in modalità &lt;b&gt;STUB&lt;/b&gt; (le richieste restituiranno sempre una risposta vuota).&lt;/i&gt;&lt;hr/&gt;
+        /// Restituisce il file xFIR che rappresenta la copia del FIR digitale caricata dal destinatario.
         /// </remarks>
         /// <param name="identificativo_soggetto">Codice fiscale del soggetto per il quale si richiede il documento della copia del FIR digitale</param>
         /// <param name="identificativo">Identificativo della copia del FIR digitale caricata dal destinatario</param>
@@ -7869,7 +7869,7 @@ namespace GKit.RENTRI.Stubs.Formulari
         /// Conferma copia FIR digitale disponibile
         /// </summary>
         /// <remarks>
-        /// Permette al soggetto a cui è stata resa disponibile la copia del FIR digitale di impostarne la stato di presa visione.&lt;hr/&gt;&lt;i&gt;Servizio richiamabile esclusivamente in modalità &lt;b&gt;STUB&lt;/b&gt; (le richieste restituiranno sempre un codice di stato 422).&lt;/i&gt;&lt;hr/&gt;
+        /// Permette al soggetto a cui è stata resa disponibile la copia del FIR digitale di impostarne la stato di presa visione.
         /// </remarks>
         /// <param name="num_iscr_sito">Numero iscrizione unità locale del soggetto che conferma la presa visione della copia del FIR digitale.
         /// <br/>            Per recuperare i numeri di iscrizione attribuiti alle unità locali è possibile utilizzare /anagrafiche/v1.0/operatore/{num_iscr}/siti.</param>
@@ -7889,7 +7889,7 @@ namespace GKit.RENTRI.Stubs.Formulari
         /// Conferma copia FIR digitale disponibile
         /// </summary>
         /// <remarks>
-        /// Permette al soggetto a cui è stata resa disponibile la copia del FIR digitale di impostarne la stato di presa visione.&lt;hr/&gt;&lt;i&gt;Servizio richiamabile esclusivamente in modalità &lt;b&gt;STUB&lt;/b&gt; (le richieste restituiranno sempre un codice di stato 422).&lt;/i&gt;&lt;hr/&gt;
+        /// Permette al soggetto a cui è stata resa disponibile la copia del FIR digitale di impostarne la stato di presa visione.
         /// </remarks>
         /// <param name="num_iscr_sito">Numero iscrizione unità locale del soggetto che conferma la presa visione della copia del FIR digitale.
         /// <br/>            Per recuperare i numeri di iscrizione attribuiti alle unità locali è possibile utilizzare /anagrafiche/v1.0/operatore/{num_iscr}/siti.</param>
@@ -8349,7 +8349,7 @@ namespace GKit.RENTRI.Stubs.Formulari
         /// Trasmissioni effettuate
         /// </summary>
         /// <remarks>
-        /// Ottiene la lista delle trasmissioni di dati di FIR digitali effettuate per l'unità locale specificata.&lt;hr/&gt;&lt;i&gt;Servizio richiamabile esclusivamente in modalità &lt;b&gt;STUB&lt;/b&gt; (le richieste restituiranno sempre una risposta vuota).&lt;/i&gt;&lt;hr/&gt;
+        /// Ottiene la lista delle trasmissioni di dati di FIR digitali effettuate per l'unità locale specificata.
         /// </remarks>
         /// <param name="num_iscr_sito">Numero iscrizione dell'unità locale per cui si vogliono recuperare le trasmissioni</param>
         /// <param name="numero_fir">Numero del FIR oggetto della trasmissione</param>
@@ -8374,7 +8374,7 @@ namespace GKit.RENTRI.Stubs.Formulari
         /// Trasmissioni effettuate
         /// </summary>
         /// <remarks>
-        /// Ottiene la lista delle trasmissioni di dati di FIR digitali effettuate per l'unità locale specificata.&lt;hr/&gt;&lt;i&gt;Servizio richiamabile esclusivamente in modalità &lt;b&gt;STUB&lt;/b&gt; (le richieste restituiranno sempre una risposta vuota).&lt;/i&gt;&lt;hr/&gt;
+        /// Ottiene la lista delle trasmissioni di dati di FIR digitali effettuate per l'unità locale specificata.
         /// </remarks>
         /// <param name="num_iscr_sito">Numero iscrizione dell'unità locale per cui si vogliono recuperare le trasmissioni</param>
         /// <param name="numero_fir">Numero del FIR oggetto della trasmissione</param>
@@ -8546,7 +8546,7 @@ namespace GKit.RENTRI.Stubs.Formulari
         /// <br/>La trasmissione dei dati del FIR digitale effettuata dal trasportatore per conto del produttore è possibile solo se il numero FIR è stato vidimato al soggetto trasportatore.
         /// <br/>
         /// <br/>È possibile trasmettere più volte i dati dello stesso formulario relativamente ad una stessa unità locale. 
-        /// <br/>In caso di trasmissioni ripetute per numero FIR e unità locale, l'ultima trasmissione dati effettuata in ordine temporale annulla e sostituisce le precedenti&lt;hr/&gt;&lt;i&gt;Servizio richiamabile esclusivamente in modalità &lt;b&gt;STUB&lt;/b&gt; (le richieste restituiranno sempre un codice di stato 422).&lt;/i&gt;&lt;hr/&gt;
+        /// <br/>In caso di trasmissioni ripetute per numero FIR e unità locale, l'ultima trasmissione dati effettuata in ordine temporale annulla e sostituisce le precedenti
         /// </remarks>
         /// <param name="num_iscr_sito">Numero di iscrizione dell'unità locale dell'operatore che effettua la trasmissione</param>
         /// <param name="num_iscr_sito_produttore">Eventuale numero di iscrizione dell'unità locale del produttore per il quale il trasportatore effettua la trasmissione dati</param>
@@ -8574,7 +8574,7 @@ namespace GKit.RENTRI.Stubs.Formulari
         /// <br/>La trasmissione dei dati del FIR digitale effettuata dal trasportatore per conto del produttore è possibile solo se il numero FIR è stato vidimato al soggetto trasportatore.
         /// <br/>
         /// <br/>È possibile trasmettere più volte i dati dello stesso formulario relativamente ad una stessa unità locale. 
-        /// <br/>In caso di trasmissioni ripetute per numero FIR e unità locale, l'ultima trasmissione dati effettuata in ordine temporale annulla e sostituisce le precedenti&lt;hr/&gt;&lt;i&gt;Servizio richiamabile esclusivamente in modalità &lt;b&gt;STUB&lt;/b&gt; (le richieste restituiranno sempre un codice di stato 422).&lt;/i&gt;&lt;hr/&gt;
+        /// <br/>In caso di trasmissioni ripetute per numero FIR e unità locale, l'ultima trasmissione dati effettuata in ordine temporale annulla e sostituisce le precedenti
         /// </remarks>
         /// <param name="num_iscr_sito">Numero di iscrizione dell'unità locale dell'operatore che effettua la trasmissione</param>
         /// <param name="num_iscr_sito_produttore">Eventuale numero di iscrizione dell'unità locale del produttore per il quale il trasportatore effettua la trasmissione dati</param>
@@ -8714,7 +8714,7 @@ namespace GKit.RENTRI.Stubs.Formulari
         /// Dettaglio trasmissione
         /// </summary>
         /// <remarks>
-        /// Recupera le informazioni di dettaglio della trasmissione di dati di FIR digitale corrispondente all'identificativo specificato&lt;hr/&gt;&lt;i&gt;Servizio richiamabile esclusivamente in modalità &lt;b&gt;STUB&lt;/b&gt; (le richieste restituiranno sempre una risposta vuota).&lt;/i&gt;&lt;hr/&gt;
+        /// Recupera le informazioni di dettaglio della trasmissione di dati di FIR digitale corrispondente all'identificativo specificato
         /// </remarks>
         /// <param name="num_iscr_sito">Numero iscrizione dell'unità locale per cui si vogliono recuperare le trasmissioni</param>
         /// <param name="identificativo">Identificativo della trasmissione</param>
@@ -8730,7 +8730,7 @@ namespace GKit.RENTRI.Stubs.Formulari
         /// Dettaglio trasmissione
         /// </summary>
         /// <remarks>
-        /// Recupera le informazioni di dettaglio della trasmissione di dati di FIR digitale corrispondente all'identificativo specificato&lt;hr/&gt;&lt;i&gt;Servizio richiamabile esclusivamente in modalità &lt;b&gt;STUB&lt;/b&gt; (le richieste restituiranno sempre una risposta vuota).&lt;/i&gt;&lt;hr/&gt;
+        /// Recupera le informazioni di dettaglio della trasmissione di dati di FIR digitale corrispondente all'identificativo specificato
         /// </remarks>
         /// <param name="num_iscr_sito">Numero iscrizione dell'unità locale per cui si vogliono recuperare le trasmissioni</param>
         /// <param name="identificativo">Identificativo della trasmissione</param>
@@ -8853,7 +8853,7 @@ namespace GKit.RENTRI.Stubs.Formulari
         /// <remarks>
         /// Pone in stato "annullata" la trasmissione di dati del FIR digitale specificata.
         /// <br/>
-        /// <br/>L'operazione non è reversibile.&lt;hr/&gt;&lt;i&gt;Servizio richiamabile esclusivamente in modalità &lt;b&gt;STUB&lt;/b&gt; (le richieste restituiranno sempre un codice di stato 422).&lt;/i&gt;&lt;hr/&gt;
+        /// <br/>L'operazione non è reversibile.
         /// </remarks>
         /// <returns>OK</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
@@ -8869,7 +8869,7 @@ namespace GKit.RENTRI.Stubs.Formulari
         /// <remarks>
         /// Pone in stato "annullata" la trasmissione di dati del FIR digitale specificata.
         /// <br/>
-        /// <br/>L'operazione non è reversibile.&lt;hr/&gt;&lt;i&gt;Servizio richiamabile esclusivamente in modalità &lt;b&gt;STUB&lt;/b&gt; (le richieste restituiranno sempre un codice di stato 422).&lt;/i&gt;&lt;hr/&gt;
+        /// <br/>L'operazione non è reversibile.
         /// </remarks>
         /// <returns>OK</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
@@ -9004,7 +9004,7 @@ namespace GKit.RENTRI.Stubs.Formulari
         /// <br/>
         /// <br/>La dimensione massima accettata del file xFIR da cui estrarre i dati è 3 MB.
         /// <br/>
-        /// <br/>Con l'identificativo della transazione restituito è possibile consultare lo stato di avanzamento dell'elaborazione e richiederne l'esito.&lt;hr/&gt;&lt;i&gt;Servizio richiamabile esclusivamente in modalità &lt;b&gt;STUB&lt;/b&gt; (le richieste restituiranno sempre un codice di stato 422).&lt;/i&gt;&lt;hr/&gt;&lt;br/&gt;Se viene specificato un URL nell'header &lt;i&gt;X-ReplyTo&lt;/i&gt;, al termine dell'elaborazione dei dati, il fruitore riceverà una notifica con l'esito dell'elaborazione all'URL specificato.
+        /// <br/>Con l'identificativo della transazione restituito è possibile consultare lo stato di avanzamento dell'elaborazione e richiederne l'esito.&lt;br/&gt;Se viene specificato un URL nell'header &lt;i&gt;X-ReplyTo&lt;/i&gt;, al termine dell'elaborazione dei dati, il fruitore riceverà una notifica con l'esito dell'elaborazione all'URL specificato.
         /// </remarks>
         /// <returns>Accepted</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
@@ -9029,7 +9029,7 @@ namespace GKit.RENTRI.Stubs.Formulari
         /// <br/>
         /// <br/>La dimensione massima accettata del file xFIR da cui estrarre i dati è 3 MB.
         /// <br/>
-        /// <br/>Con l'identificativo della transazione restituito è possibile consultare lo stato di avanzamento dell'elaborazione e richiederne l'esito.&lt;hr/&gt;&lt;i&gt;Servizio richiamabile esclusivamente in modalità &lt;b&gt;STUB&lt;/b&gt; (le richieste restituiranno sempre un codice di stato 422).&lt;/i&gt;&lt;hr/&gt;&lt;br/&gt;Se viene specificato un URL nell'header &lt;i&gt;X-ReplyTo&lt;/i&gt;, al termine dell'elaborazione dei dati, il fruitore riceverà una notifica con l'esito dell'elaborazione all'URL specificato.
+        /// <br/>Con l'identificativo della transazione restituito è possibile consultare lo stato di avanzamento dell'elaborazione e richiederne l'esito.&lt;br/&gt;Se viene specificato un URL nell'header &lt;i&gt;X-ReplyTo&lt;/i&gt;, al termine dell'elaborazione dei dati, il fruitore riceverà una notifica con l'esito dell'elaborazione all'URL specificato.
         /// </remarks>
         /// <returns>Accepted</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
@@ -9169,7 +9169,7 @@ namespace GKit.RENTRI.Stubs.Formulari
         /// Trasmissioni effettuate
         /// </summary>
         /// <remarks>
-        /// Ottiene la lista delle trasmissioni di dati di FIR digitali effettuate per l'unità locale specificata.&lt;hr/&gt;&lt;i&gt;Servizio richiamabile esclusivamente in modalità &lt;b&gt;STUB&lt;/b&gt; (le richieste restituiranno sempre una risposta vuota).&lt;/i&gt;&lt;hr/&gt;
+        /// Ottiene la lista delle trasmissioni di dati di FIR digitali effettuate per l'unità locale specificata.
         /// </remarks>
         /// <param name="num_iscr_sito">Numero iscrizione dell'unità locale per cui si vogliono recuperare le trasmissioni</param>
         /// <param name="numero_fir">Numero del FIR oggetto della trasmissione</param>
@@ -9194,7 +9194,7 @@ namespace GKit.RENTRI.Stubs.Formulari
         /// Trasmissioni effettuate
         /// </summary>
         /// <remarks>
-        /// Ottiene la lista delle trasmissioni di dati di FIR digitali effettuate per l'unità locale specificata.&lt;hr/&gt;&lt;i&gt;Servizio richiamabile esclusivamente in modalità &lt;b&gt;STUB&lt;/b&gt; (le richieste restituiranno sempre una risposta vuota).&lt;/i&gt;&lt;hr/&gt;
+        /// Ottiene la lista delle trasmissioni di dati di FIR digitali effettuate per l'unità locale specificata.
         /// </remarks>
         /// <param name="num_iscr_sito">Numero iscrizione dell'unità locale per cui si vogliono recuperare le trasmissioni</param>
         /// <param name="numero_fir">Numero del FIR oggetto della trasmissione</param>
@@ -9368,7 +9368,6 @@ namespace GKit.RENTRI.Stubs.Formulari
         /// <br/>
         /// <br/>È possibile trasmettere più volte i dati dello stesso formulario relativamente ad una stessa unità locale. 
         /// <br/>In caso di trasmissioni ripetute per numero FIR e unità locale, l'ultima trasmissione dati effettuata in ordine temporale annulla e sostituisce le precedenti.
-        /// <br/>&lt;hr/&gt;&lt;i&gt;Servizio richiamabile esclusivamente in modalità &lt;b&gt;STUB&lt;/b&gt; (le richieste restituiranno sempre un codice di stato 422).&lt;/i&gt;&lt;hr/&gt;
         /// </remarks>
         /// <param name="num_iscr_sito">Numero di iscrizione dell'unità locale alla quale è riferita la trasmissione dei dati del FIR digitale</param>
         /// <param name="num_iscr_sito_trasportatore">Eventuale numero di iscrizione dell'unità locale del trasportatore che effettua la trasmissione per conto del produttore</param>
@@ -9398,7 +9397,6 @@ namespace GKit.RENTRI.Stubs.Formulari
         /// <br/>
         /// <br/>È possibile trasmettere più volte i dati dello stesso formulario relativamente ad una stessa unità locale. 
         /// <br/>In caso di trasmissioni ripetute per numero FIR e unità locale, l'ultima trasmissione dati effettuata in ordine temporale annulla e sostituisce le precedenti.
-        /// <br/>&lt;hr/&gt;&lt;i&gt;Servizio richiamabile esclusivamente in modalità &lt;b&gt;STUB&lt;/b&gt; (le richieste restituiranno sempre un codice di stato 422).&lt;/i&gt;&lt;hr/&gt;
         /// </remarks>
         /// <param name="num_iscr_sito">Numero di iscrizione dell'unità locale alla quale è riferita la trasmissione dei dati del FIR digitale</param>
         /// <param name="num_iscr_sito_trasportatore">Eventuale numero di iscrizione dell'unità locale del trasportatore che effettua la trasmissione per conto del produttore</param>
@@ -9538,7 +9536,7 @@ namespace GKit.RENTRI.Stubs.Formulari
         /// Dettaglio trasmissione
         /// </summary>
         /// <remarks>
-        /// Recupera le informazioni di dettaglio della trasmissione di dati di FIR digitale corrispondente all'identificativo specificato&lt;hr/&gt;&lt;i&gt;Servizio richiamabile esclusivamente in modalità &lt;b&gt;STUB&lt;/b&gt; (le richieste restituiranno sempre una risposta vuota).&lt;/i&gt;&lt;hr/&gt;
+        /// Recupera le informazioni di dettaglio della trasmissione di dati di FIR digitale corrispondente all'identificativo specificato
         /// </remarks>
         /// <param name="num_iscr_sito">Numero iscrizione dell'unità locale per cui si vogliono recuperare le trasmissioni</param>
         /// <param name="identificativo">Identificativo della trasmissione</param>
@@ -9554,7 +9552,7 @@ namespace GKit.RENTRI.Stubs.Formulari
         /// Dettaglio trasmissione
         /// </summary>
         /// <remarks>
-        /// Recupera le informazioni di dettaglio della trasmissione di dati di FIR digitale corrispondente all'identificativo specificato&lt;hr/&gt;&lt;i&gt;Servizio richiamabile esclusivamente in modalità &lt;b&gt;STUB&lt;/b&gt; (le richieste restituiranno sempre una risposta vuota).&lt;/i&gt;&lt;hr/&gt;
+        /// Recupera le informazioni di dettaglio della trasmissione di dati di FIR digitale corrispondente all'identificativo specificato
         /// </remarks>
         /// <param name="num_iscr_sito">Numero iscrizione dell'unità locale per cui si vogliono recuperare le trasmissioni</param>
         /// <param name="identificativo">Identificativo della trasmissione</param>
@@ -9677,7 +9675,7 @@ namespace GKit.RENTRI.Stubs.Formulari
         /// <remarks>
         /// Pone in stato "annullata" la trasmissione di dati del FIR digitale specificata.
         /// <br/>
-        /// <br/>L'operazione non è reversibile.&lt;hr/&gt;&lt;i&gt;Servizio richiamabile esclusivamente in modalità &lt;b&gt;STUB&lt;/b&gt; (le richieste restituiranno sempre un codice di stato 422).&lt;/i&gt;&lt;hr/&gt;
+        /// <br/>L'operazione non è reversibile.
         /// </remarks>
         /// <returns>OK</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
@@ -9693,7 +9691,7 @@ namespace GKit.RENTRI.Stubs.Formulari
         /// <remarks>
         /// Pone in stato "annullata" la trasmissione di dati del FIR digitale specificata.
         /// <br/>
-        /// <br/>L'operazione non è reversibile.&lt;hr/&gt;&lt;i&gt;Servizio richiamabile esclusivamente in modalità &lt;b&gt;STUB&lt;/b&gt; (le richieste restituiranno sempre un codice di stato 422).&lt;/i&gt;&lt;hr/&gt;
+        /// <br/>L'operazione non è reversibile.
         /// </remarks>
         /// <returns>OK</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
@@ -9828,7 +9826,7 @@ namespace GKit.RENTRI.Stubs.Formulari
         /// <br/>
         /// <br/>La dimensione massima accettata del file xFIR da cui estrarre i dati è 3 MB.
         /// <br/>
-        /// <br/>Con l'identificativo della transazione restituito è possibile consultare lo stato di avanzamento dell'elaborazione e richiederne l'esito.&lt;hr/&gt;&lt;i&gt;Servizio richiamabile esclusivamente in modalità &lt;b&gt;STUB&lt;/b&gt; (le richieste restituiranno sempre un codice di stato 422).&lt;/i&gt;&lt;hr/&gt;&lt;br/&gt;Se viene specificato un URL nell'header &lt;i&gt;X-ReplyTo&lt;/i&gt;, al termine dell'elaborazione dei dati, il fruitore riceverà una notifica con l'esito dell'elaborazione all'URL specificato.
+        /// <br/>Con l'identificativo della transazione restituito è possibile consultare lo stato di avanzamento dell'elaborazione e richiederne l'esito.&lt;br/&gt;Se viene specificato un URL nell'header &lt;i&gt;X-ReplyTo&lt;/i&gt;, al termine dell'elaborazione dei dati, il fruitore riceverà una notifica con l'esito dell'elaborazione all'URL specificato.
         /// </remarks>
         /// <returns>Accepted</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
@@ -9853,7 +9851,7 @@ namespace GKit.RENTRI.Stubs.Formulari
         /// <br/>
         /// <br/>La dimensione massima accettata del file xFIR da cui estrarre i dati è 3 MB.
         /// <br/>
-        /// <br/>Con l'identificativo della transazione restituito è possibile consultare lo stato di avanzamento dell'elaborazione e richiederne l'esito.&lt;hr/&gt;&lt;i&gt;Servizio richiamabile esclusivamente in modalità &lt;b&gt;STUB&lt;/b&gt; (le richieste restituiranno sempre un codice di stato 422).&lt;/i&gt;&lt;hr/&gt;&lt;br/&gt;Se viene specificato un URL nell'header &lt;i&gt;X-ReplyTo&lt;/i&gt;, al termine dell'elaborazione dei dati, il fruitore riceverà una notifica con l'esito dell'elaborazione all'URL specificato.
+        /// <br/>Con l'identificativo della transazione restituito è possibile consultare lo stato di avanzamento dell'elaborazione e richiederne l'esito.&lt;br/&gt;Se viene specificato un URL nell'header &lt;i&gt;X-ReplyTo&lt;/i&gt;, al termine dell'elaborazione dei dati, il fruitore riceverà una notifica con l'esito dell'elaborazione all'URL specificato.
         /// </remarks>
         /// <returns>Accepted</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
@@ -10264,6 +10262,34 @@ namespace GKit.RENTRI.Stubs.Formulari
             var result = System.Convert.ToString(value, cultureInfo);
             return result == null ? "" : result;
         }
+    }
+
+    /// <summary>
+    /// Dati di accettazione del rifiuto
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class AccettazioneItemResult
+    {
+
+        /// <summary>
+        /// Tipo accettazione&lt;p&gt;Valori ammessi:&lt;ul style="margin:0"&gt;&lt;li&gt;&lt;i&gt;A&lt;/i&gt; - Accettato per intero&lt;/li&gt;&lt;li&gt;&lt;i&gt;P&lt;/i&gt; - Accettato parzialmente&lt;/li&gt;&lt;li&gt;&lt;i&gt;R&lt;/i&gt; - Respinto&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("tipo_accettazione")]
+        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<TipiAccettazione>))]
+        public TipiAccettazione? Tipo_accettazione { get; set; }
+
+        /// <summary>
+        /// Quantità accettata in kg
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("quantita_accettata")]
+        public double? Quantita_accettata { get; set; }
+
+        /// <summary>
+        /// Data ora arrivo (formato ISO 8601 UTC)
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("data_ora_arrivo")]
+        public System.DateTimeOffset? Data_ora_arrivo { get; set; }
+
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
@@ -11352,7 +11378,7 @@ namespace GKit.RENTRI.Stubs.Formulari
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("contenuto")]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [System.ComponentModel.DataAnnotations.StringLength(1024000)]
+        [System.ComponentModel.DataAnnotations.StringLength(1048576)]
         public byte[] Contenuto { get; set; }
 
         /// <summary>
@@ -11884,7 +11910,7 @@ namespace GKit.RENTRI.Stubs.Formulari
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class DatiDestinazioniSuccessiveResultMdodel
+    public partial class DatiDestinazioniSuccessiveResultModel
     {
 
         /// <summary>
@@ -13884,7 +13910,7 @@ namespace GKit.RENTRI.Stubs.Formulari
         /// Dati relativi alle eventuali destinazioni successive inserite per il rifiuto a seguito di respingimenti
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("dati_destinazioni_successive")]
-        public System.Collections.Generic.ICollection<DatiDestinazioniSuccessiveResultMdodel> Dati_destinazioni_successive { get; set; }
+        public System.Collections.Generic.ICollection<DatiDestinazioniSuccessiveResultModel> Dati_destinazioni_successive { get; set; }
 
     }
 
@@ -14572,6 +14598,9 @@ namespace GKit.RENTRI.Stubs.Formulari
         [System.Text.Json.Serialization.JsonPropertyName("num_iscr_sito")]
         public string Num_iscr_sito { get; set; }
 
+        /// <summary>
+        /// Identificativo del soggetto
+        /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("identificativo_soggetto")]
         public string Identificativo_soggetto { get; set; }
 
@@ -14648,6 +14677,12 @@ namespace GKit.RENTRI.Stubs.Formulari
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("intermediari")]
         public System.Collections.Generic.ICollection<IntermediarioItemResult> Intermediari { get; set; }
+
+        /// <summary>
+        /// Dati di accettazione del rifiuto
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("accettazione")]
+        public AccettazioneItemResult Accettazione { get; set; }
 
         /// <summary>
         /// Stato del formulario&lt;p&gt;Valori ammessi:&lt;ul style="margin:0"&gt;&lt;li&gt;&lt;i&gt;InserimentoQuantita&lt;/i&gt; - Il formulario necessita dei dati sulla quantità del rifiuto&lt;/li&gt;&lt;li&gt;&lt;i&gt;InserimentoQuantitaTrasportoIniziale&lt;/i&gt; - Il formulario necessita dei dati sulla quantità del rifiuto e dei dati del trasporto iniziale&lt;/li&gt;&lt;li&gt;&lt;i&gt;InserimentoTrasportoIniziale&lt;/i&gt; - Il formulario necessita dei dati del trasporto iniziale&lt;/li&gt;&lt;li&gt;&lt;i&gt;FirmaProduttoreTrasportatoreIniziale&lt;/i&gt; - Il formulario necessita della firma del produttore e del trasportatore iniziale&lt;/li&gt;&lt;li&gt;&lt;i&gt;FirmaTrasportatoreIniziale&lt;/i&gt; - Il formulario necessita della firma del trasportatore iniziale&lt;/li&gt;&lt;li&gt;&lt;i&gt;FirmaProduttore&lt;/i&gt; - Il formulario necessita della firma del produttore&lt;/li&gt;&lt;li&gt;&lt;i&gt;InserimentoTrasportoSuccessivo&lt;/i&gt; - Il formulario è in carico ad un traportatore e necessita dell'inserimento dei dati del trasporto successivo;
@@ -15608,7 +15643,7 @@ namespace GKit.RENTRI.Stubs.Formulari
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("tipo")]
         [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<TipoTrasmissione>))]
-        public TipoTrasmissione Tipo { get; set; }
+        public TipoTrasmissione? Tipo { get; set; }
 
         /// <summary>
         /// Stato della trasmissione

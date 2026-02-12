@@ -3843,6 +3843,7 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// Numero iscrizione unità locale.
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("num_iscr_sito")]
+        [System.ComponentModel.DataAnnotations.Required]
         [System.ComponentModel.DataAnnotations.StringLength(22, MinimumLength = 22)]
         public string Num_iscr_sito { get; set; }
 

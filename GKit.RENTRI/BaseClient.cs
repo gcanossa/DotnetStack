@@ -96,4 +96,44 @@ public abstract class BaseClient : IDisposable
     }
 
     public abstract void Dispose();
+
+    public Context? CurrentContext { get; protected set; }
+    private readonly Lock _lock = new();
+
+    private  readonly SemaphoreSlim _semaphore = new(1);
+    public Context UseContext()
+    {
+        _semaphore.Wait();
+        CurrentContext = new Context(_semaphore);
+        return CurrentContext;
+    }
+
+    public async Task<T> WithContext<T>(Func<Context, Task<T>> func)
+    {
+        using var ctx = UseContext();
+
+        return await func(ctx);
+    }
+
+    protected void ApplyPagingHeadersToContext(HttpResponseMessage response)
+    {
+        if(CurrentContext == null) return;
+
+        CurrentContext.PageSize = response.Headers.GetValues("Paging-PageSize").Select(p => (int?)Convert.ToInt32(p)).FirstOrDefault() ?? 0;
+        CurrentContext.PageCount = response.Headers.GetValues("Paging-PageCount").Select(p => (int?)Convert.ToInt32(p)).FirstOrDefault() ?? 0;
+        CurrentContext.PageNumber = response.Headers.GetValues("Paging-Page").Select(p => (int?)Convert.ToInt32(p)).FirstOrDefault() ?? 0;
+        CurrentContext.TotalItems = response.Headers.GetValues("Paging-TotalRecordCount").Select(p => (int?)Convert.ToInt32(p)).FirstOrDefault() ?? 0;
+    }
+
+    public class Context(SemaphoreSlim semaphore) : IDisposable
+    {
+        public int? PageSize { get; set; }
+        public int? PageCount { get; set; }
+        public int? PageNumber { get; set; }
+        public int? TotalItems { get; set; }
+        public void Dispose()
+        {
+            semaphore.Release();
+        }
+    }
 }
