@@ -1,0 +1,131 @@
+@using GKit.BlazorExt
+@using Microsoft.Extensions.Logging
+
+@attribute [CascadingTypeParameter(nameof(T))]
+@typeparam T where T : class
+
+@inject ISnackbar snackbar
+@inject IDialogService dialogService
+@inject ILogger<ManagedGrid<T>> logger
+@inject DownloadFileService downloadFileService
+
+<MudDataGrid @ref="_dataGrid" T="T" VirtualizeServerData="ManagedLoadServerData" Height="75vh" ItemSize="43" FixedHeader
+  FixedFooter Filterable SortMode="SortMode.Multiple" Virtualize Dense Hover ShowColumnOptions
+  DragDropColumnReordering="@DragDropColumnReordering" DragIndicatorIcon="@Icons.Material.Filled.DragIndicator"
+  ApplyDropClassesOnDragStarted="true" RowClassFunc="RowClassFunc" Loading="_loading"
+  ColumnResizeMode="ColumnResizeMode" RowClick="RowClick">
+  <ToolBarContent>
+    <MudText Typo="Typo.h6">@Title</MudText>
+    <MudSpacer />
+    @if (HeaderControls != null)
+    {
+      @HeaderControls
+    }
+    @if (Exportable)
+    {
+      <MudFab StartIcon="@Icons.Material.Filled.Download" Size="Size.Small" Color="Color.Default"
+        OnClick="() => ExportXlsAsync()" Class="mx-2" />
+    }
+    @if (Refreshable)
+    {
+      <MudFab StartIcon="@Icons.Material.Filled.Refresh" Size="Size.Small" Color="Color.Default"
+        OnClick="() => RefreshDataAsync()" Class="mx-2" />
+    }
+  </ToolBarContent>
+  <Columns>
+    <TemplateColumn CellClass="d-flex justify-end" HeaderStyle="width: 6rem;" StickyLeft="true">
+      <CellTemplate>
+        @if (RowControlsVariant == ManagedGridRowControlsVariant.Expanded)
+        {
+          <MudStack Row>
+            @foreach (var control in _defaultControls.Concat(RowControls))
+            {
+              <MudTooltip Text="@control.Text">
+                <MudIconButton Icon="@control.Icon" Size="Size.Small" Color="@control.Color"
+                  OnClick="(evt) => OnRowControlClick(evt, control, context)" Disabled="@(control.Disabled?.Invoke(context) ?? false)" />
+              </MudTooltip>
+            }
+          </MudStack>
+        }
+        else if (RowControlsVariant == ManagedGridRowControlsVariant.Menu)
+        {
+          <MudMenu Icon="@Icons.Material.Filled.MoreVert" AriaLabel="Open user menu" Dense Size="Size.Small">
+            @foreach (var control in _defaultControls.Concat(RowControls))
+            {
+              <MudMenuItem Icon="@control.Icon" IconColor="@control.Color" Label="@control.Text"
+                OnClick="((evt) => OnRowControlClick(evt, control, context))" Disabled="@(control.Disabled?.Invoke(context) ?? false)" />
+            }
+          </MudMenu>
+        }
+      </CellTemplate>
+    </TemplateColumn>
+    @Columns
+  </Columns>
+  <NoRecordsContent>
+    <MudStack>
+      <MudText Typo="Typo.body1">Nessun elemento presente</MudText>
+    </MudStack>
+  </NoRecordsContent>
+</MudDataGrid>
+
+@code {
+
+  private ICollection<ManagedGridRowControlDescriptor<T>> _defaultControls = [];
+
+  [Parameter, EditorRequired]
+  public Func<GridStateVirtualize<T>, CancellationToken, Task<GridData<T>>> LoadServerData { get; set; } = default!;
+
+  [Parameter, EditorRequired]
+  public Func<CancellationToken, Task<IQueryable<T>>> ExportServerData { get; set; } = default!;
+
+  [Parameter]
+  public string? Title { get; set; }
+
+  [Parameter]
+  public RenderFragment HeaderControls { get; set; } = default!;
+
+  [Parameter]
+  public ICollection<ManagedGridRowControlDescriptor<T>> RowControls { get; set; } = [];
+
+  [Parameter]
+  public ManagedGridRowControlsVariant RowControlsVariant { get; set; } = ManagedGridRowControlsVariant.Expanded;
+
+  [Parameter, EditorRequired]
+  public RenderFragment Columns { get; set; } = default!;
+
+  [Parameter]
+  public Func<T, string> ToStringFunc { get; set; } = default!;
+
+  [Parameter]
+  public bool Exportable { get; set; } = false;
+
+  [Parameter]
+  public bool Refreshable { get; set; } = false;
+
+  [Parameter]
+  public Func<T, int, string> RowClassFunc { get; set; } = default!;
+
+  [Parameter]
+  public EventCallback<GridStateVirtualize<T>> OnLoadedServerData { get; set; } = default!;
+
+  [Parameter]
+  public EventCallback<DataGridRowClickEventArgs<T>> OnRowClick { get; set; } = default!;
+
+  [Parameter]
+  public Func<ManagedGridRowControlDescriptor<T>, CellContext<T>, Task<bool>>? OnBeforeRowControlAction { get; set; } = default;
+
+  [Parameter]
+  public Func<ManagedGridRowControlDescriptor<T>, CellContext<T>, Task>? OnAfterRowControlAction { get; set; } = default;
+
+  [Parameter]
+  public bool DragDropColumnReordering { get; set; } = false;
+
+  [Parameter]
+  public ResizeMode ColumnResizeMode { get; set; } = ResizeMode.None;
+
+  private bool _loading = false;
+
+  MudDataGrid<T> _dataGrid = default!;
+
+  public IEnumerable<IFilterDefinition<T>> FilterDefinitions => _dataGrid.FilterDefinitions;
+}
