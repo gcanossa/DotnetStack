@@ -1,0 +1,57 @@
+@using GKit.BlazorExt
+@using System.Linq.Expressions
+@using Microsoft.Extensions.Logging
+@typeparam T
+
+@inject ISnackbar snackbar
+@inject ILogger<ManagedAutocomplete<T>> logger
+
+<MudAutocomplete T="T" For="@For" Label="@Label" ToStringFunc="@ToStringFunc" SearchFunc="Search"
+  Clearable Value="@Value" ValueChanged="ValueChangedHandler" ShowProgressIndicator Disabled="Disabled"
+  ResetValueOnEmptyText data-attr-setter="force">
+  <NoItemsTemplate>
+    <MudText>Nessun elemento trovato</MudText>
+  </NoItemsTemplate>
+</MudAutocomplete>
+
+@code
+{
+
+  [Parameter, EditorRequired]
+  public Func<string, Task<IQueryable<T>>> FetchData { get; set; } = default!;
+
+  [Parameter]
+  public bool Disabled { get; set; } = false;
+  [Parameter]
+  public T Value { get; set; } = default!;
+
+  [Parameter]
+  public EventCallback<T> ValueChanged { get; set; }
+  public void ValueChangedHandler(T value)
+  {
+    ValueChanged.InvokeAsync(value);
+  }
+
+  [Parameter]
+  public string Label { get; set; } = "";
+  [Parameter]
+  public Expression<Func<T>> For { get; set; } = default!;
+
+  [Parameter]
+  public Func<T, string> ToStringFunc { get; set; } = p => p?.ToString() ?? "";
+
+  public async Task<IEnumerable<T>> Search(string value, CancellationToken token)
+  {
+    try
+    {
+      return await FetchData(value);
+    }
+    catch (Exception e)
+    {
+      snackbar.Add("Impossibile recuperare i valori", MudBlazor.Severity.Error);
+      logger.LogWarning(e, "Error fetching data");
+    }
+
+    return Enumerable.Empty<T>();
+  }
+}

@@ -7,12 +7,15 @@ public static class RentriExtensions
 {
     private static void AddRentriClientFactories(IServiceCollection serviceCollection, ClientOptions clientOptions)
     {
-        serviceCollection.AddSingleton(new AnagraficheClientFactory(clientOptions));
-        serviceCollection.AddSingleton(new CaRentriClientFactory(clientOptions));
-        serviceCollection.AddSingleton(new CodificheClientFactory(clientOptions));
-        serviceCollection.AddSingleton(new DatiRegistriClientFactory(clientOptions));
-        serviceCollection.AddSingleton(new FormulariClientFactory(clientOptions));
-        serviceCollection.AddSingleton(new VidimazioneFormulariClientFactory(clientOptions));
+        serviceCollection.AddSingleton<ApiStatusProvider>();
+        serviceCollection.AddHostedService<ApiStatusService>();
+
+        serviceCollection.AddSingleton(provider => new AnagraficheClientFactory(clientOptions, provider.GetRequiredService<ApiStatusProvider>()));
+        serviceCollection.AddSingleton(provider => new CaRentriClientFactory(clientOptions, provider.GetRequiredService<ApiStatusProvider>()));
+        serviceCollection.AddSingleton(provider => new CodificheClientFactory(clientOptions, provider.GetRequiredService<ApiStatusProvider>()));
+        serviceCollection.AddSingleton(provider => new DatiRegistriClientFactory(clientOptions, provider.GetRequiredService<ApiStatusProvider>()));
+        serviceCollection.AddSingleton(provider => new FormulariClientFactory(clientOptions, provider.GetRequiredService<ApiStatusProvider>()));
+        serviceCollection.AddSingleton(provider => new VidimazioneFormulariClientFactory(clientOptions, provider.GetRequiredService<ApiStatusProvider>()));
     }
 
     public static IServiceCollection AddRentriProductionFactories(this IServiceCollection serviceCollection,

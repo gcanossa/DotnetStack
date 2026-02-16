@@ -24,7 +24,8 @@ do
     /output:"Stubs/${API_NAME}Stub.cs" \
     /jsonlibrary:SystemTextJson \
     /jsonpolymorphicserializationstyle:SystemTextJson \
-    /clientbaseclass:BaseClient
+    /clientbaseclass:BaseClient \
+    /generateexceptionclasses:false
 
   rm "${API_NAME}.json"
 done

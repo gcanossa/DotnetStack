@@ -33,32 +33,35 @@
     }
   </ToolBarContent>
   <Columns>
-    <TemplateColumn CellClass="d-flex justify-end" HeaderStyle="width: 6rem;" StickyLeft="true">
-      <CellTemplate>
-        @if (RowControlsVariant == ManagedGridRowControlsVariant.Expanded)
-        {
-          <MudStack Row>
-            @foreach (var control in _defaultControls.Concat(RowControls))
-            {
-              <MudTooltip Text="@control.Text">
-                <MudIconButton Icon="@control.Icon" Size="Size.Small" Color="@control.Color"
-                  OnClick="(evt) => OnRowControlClick(evt, control, context)" Disabled="@(control.Disabled?.Invoke(context) ?? false)" />
-              </MudTooltip>
-            }
-          </MudStack>
-        }
-        else if (RowControlsVariant == ManagedGridRowControlsVariant.Menu)
-        {
-          <MudMenu Icon="@Icons.Material.Filled.MoreVert" AriaLabel="Open user menu" Dense Size="Size.Small">
-            @foreach (var control in _defaultControls.Concat(RowControls))
-            {
-              <MudMenuItem Icon="@control.Icon" IconColor="@control.Color" Label="@control.Text"
-                OnClick="((evt) => OnRowControlClick(evt, control, context))" Disabled="@(control.Disabled?.Invoke(context) ?? false)" />
-            }
-          </MudMenu>
-        }
-      </CellTemplate>
-    </TemplateColumn>
+    @if (EffectiveRowControls.Any())
+    {
+      <TemplateColumn CellClass="d-flex justify-end" HeaderStyle="width: 6rem;" StickyLeft="true">
+        <CellTemplate>
+          @if (RowControlsVariant == ManagedGridRowControlsVariant.Expanded)
+          {
+            <MudStack Row>
+              @foreach (var control in EffectiveRowControls)
+              {
+                <MudTooltip Text="@control.Text">
+                  <MudIconButton Icon="@control.Icon" Size="Size.Small" Color="@control.Color"
+                                 OnClick="(evt) => OnRowControlClick(evt, control, context)" Disabled="@(control.Disabled?.Invoke(context) ?? false)"/>
+                </MudTooltip>
+              }
+            </MudStack>
+          }
+          else if (RowControlsVariant == ManagedGridRowControlsVariant.Menu)
+          {
+            <MudMenu Icon="@Icons.Material.Filled.MoreVert" AriaLabel="Open user menu" Dense Size="Size.Small">
+              @foreach (var control in EffectiveRowControls)
+              {
+                <MudMenuItem Icon="@control.Icon" IconColor="@control.Color" Label="@control.Text"
+                             OnClick="((evt) => OnRowControlClick(evt, control, context))" Disabled="@(control.Disabled?.Invoke(context) ?? false)"/>
+              }
+            </MudMenu>
+          }
+        </CellTemplate>
+      </TemplateColumn>
+    }
     @Columns
   </Columns>
   <NoRecordsContent>
@@ -71,6 +74,8 @@
 @code {
 
   private ICollection<ManagedGridRowControlDescriptor<T>> _defaultControls = [];
+
+  private IEnumerable<ManagedGridRowControlDescriptor<T>> EffectiveRowControls => _defaultControls.Concat(RowControls);
 
   [Parameter, EditorRequired]
   public Func<GridStateVirtualize<T>, CancellationToken, Task<GridData<T>>> LoadServerData { get; set; } = default!;

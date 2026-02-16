@@ -4,15 +4,12 @@ public partial class CaRentriStub : BaseClient
 {
     partial void PrepareRequest(HttpClient client, HttpRequestMessage request, string url)
     {
-        AddAuthToHttpRequestMessage(request);
-
-        if (request.Content is not null)
-            AddIntegrityHttpRequestMessage(request);
+        OnPrepareRequest(client, request, url);
     }
 
     partial void ProcessResponse(HttpClient client, HttpResponseMessage response)
     {
-        ApplyPagingHeadersToContext(response);
+        OnProcessResponse(client, response);
     }
 
     private bool _diposed = false;

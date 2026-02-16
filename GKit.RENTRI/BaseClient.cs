@@ -100,11 +100,11 @@ public abstract class BaseClient : IDisposable
     public Context? CurrentContext { get; protected set; }
     private readonly Lock _lock = new();
 
-    private  readonly SemaphoreSlim _semaphore = new(1);
+    private  readonly SemaphoreSlim _contextSemaphore = new(1, 1);
     public Context UseContext()
     {
-        _semaphore.Wait();
-        CurrentContext = new Context(_semaphore);
+        _contextSemaphore.Wait();
+        CurrentContext = new Context(_contextSemaphore);
         return CurrentContext;
     }
 
@@ -143,5 +143,25 @@ public abstract class BaseClient : IDisposable
         {
             semaphore.Release();
         }
+    }
+
+    internal Action<HttpClient, HttpRequestMessage, string>? PrepareRequestHandler;
+
+    protected void OnPrepareRequest(HttpClient client, HttpRequestMessage request, string url)
+    {
+        AddAuthToHttpRequestMessage(request);
+
+        if (request.Content is not null)
+            AddIntegrityHttpRequestMessage(request);
+
+        PrepareRequestHandler?.Invoke(client, request, url);
+    }
+
+    internal Action<HttpClient, HttpResponseMessage>? ProcessResponseHandler;
+    protected void OnProcessResponse(HttpClient client, HttpResponseMessage response)
+    {
+        ApplyPagingHeadersToContext(response);
+
+        ProcessResponseHandler?.Invoke(client, response);
     }
 }
