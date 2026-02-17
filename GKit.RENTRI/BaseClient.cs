@@ -45,20 +45,11 @@ public abstract class BaseClient : IDisposable
         };
     }
 
-    private string? IdAuthToken { get; set; }
-
     private string GetIdAuthJwt()
     {
-        if (string.IsNullOrEmpty(IdAuthToken))
-        {
-            var tokenHandler = new JsonWebTokenHandler();
+        var tokenHandler = new JsonWebTokenHandler();
 
-            IdAuthToken = tokenHandler.CreateToken(CreateBaseTokenDescriptor(Options.Certificate));
-        }
-
-        ;
-
-        return IdAuthToken;
+        return tokenHandler.CreateToken(CreateBaseTokenDescriptor(Options.Certificate));
     }
 
     private record IntegrityValues(string Signature, string Digest);
@@ -100,7 +91,8 @@ public abstract class BaseClient : IDisposable
     public Context? CurrentContext { get; protected set; }
     private readonly Lock _lock = new();
 
-    private  readonly SemaphoreSlim _contextSemaphore = new(1, 1);
+    private readonly SemaphoreSlim _contextSemaphore = new(1, 1);
+
     public Context UseContext()
     {
         _contextSemaphore.Wait();
@@ -117,19 +109,24 @@ public abstract class BaseClient : IDisposable
 
     protected void ApplyPagingHeadersToContext(HttpResponseMessage response)
     {
-        if(CurrentContext == null) return;
+        if (CurrentContext == null) return;
 
-        CurrentContext.PageSize = !response.Headers.Contains("Paging-PageSize") ? 0 :
-            Convert.ToInt32(response.Headers.GetValues("Paging-PageSize").First());
-        CurrentContext.PageCount = !response.Headers.Contains("Paging-PageCount") ? 0 :
-            Convert.ToInt32(response.Headers.GetValues("Paging-PageCount").First());
-        CurrentContext.PageNumber = !response.Headers.Contains("Paging-Page") ? 0 :
-            Convert.ToInt32(response.Headers.GetValues("Paging-Page").First());
-        CurrentContext.TotalItems = !response.Headers.Contains("Paging-TotalRecordCount") ? 0 :
-            Convert.ToInt32(response.Headers.GetValues("Paging-TotalRecordCount").First());
+        CurrentContext.PageSize = !response.Headers.Contains("Paging-PageSize")
+            ? 0
+            : Convert.ToInt32(response.Headers.GetValues("Paging-PageSize").First());
+        CurrentContext.PageCount = !response.Headers.Contains("Paging-PageCount")
+            ? 0
+            : Convert.ToInt32(response.Headers.GetValues("Paging-PageCount").First());
+        CurrentContext.PageNumber = !response.Headers.Contains("Paging-Page")
+            ? 0
+            : Convert.ToInt32(response.Headers.GetValues("Paging-Page").First());
+        CurrentContext.TotalItems = !response.Headers.Contains("Paging-TotalRecordCount")
+            ? 0
+            : Convert.ToInt32(response.Headers.GetValues("Paging-TotalRecordCount").First());
 
-        CurrentContext.RetryAfter = !response.Headers.Contains("Retry-After") ? null :
-            TimeSpan.Parse(response.Headers.GetValues("Retry-After").First());
+        CurrentContext.RetryAfter = !response.Headers.Contains("Retry-After")
+            ? null
+            : TimeSpan.Parse(response.Headers.GetValues("Retry-After").First());
     }
 
     public class Context(SemaphoreSlim semaphore) : IDisposable
@@ -139,6 +136,7 @@ public abstract class BaseClient : IDisposable
         public int? PageNumber { get; set; }
         public int? TotalItems { get; set; }
         public TimeSpan? RetryAfter { get; set; }
+
         public void Dispose()
         {
             semaphore.Release();
@@ -158,6 +156,7 @@ public abstract class BaseClient : IDisposable
     }
 
     internal Action<HttpClient, HttpResponseMessage>? ProcessResponseHandler;
+
     protected void OnProcessResponse(HttpClient client, HttpResponseMessage response)
     {
         ApplyPagingHeadersToContext(response);

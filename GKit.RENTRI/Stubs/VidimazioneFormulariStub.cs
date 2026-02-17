@@ -32,8 +32,8 @@ namespace GKit.RENTRI.Stubs.VidimazioneFormulari
         #pragma warning restore 8618
 
         private System.Net.Http.HttpClient _httpClient;
-        private static System.Lazy<System.Text.Json.JsonSerializerOptions> _settings = new System.Lazy<System.Text.Json.JsonSerializerOptions>(CreateSerializerSettings, true);
-        private System.Text.Json.JsonSerializerOptions _instanceSettings;
+        private static System.Lazy<Newtonsoft.Json.JsonSerializerSettings> _settings = new System.Lazy<Newtonsoft.Json.JsonSerializerSettings>(CreateSerializerSettings, true);
+        private Newtonsoft.Json.JsonSerializerSettings _instanceSettings;
 
     #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         public VidimazioneFormulariStub(System.Net.Http.HttpClient httpClient)
@@ -44,9 +44,9 @@ namespace GKit.RENTRI.Stubs.VidimazioneFormulari
             Initialize();
         }
 
-        private static System.Text.Json.JsonSerializerOptions CreateSerializerSettings()
+        private static Newtonsoft.Json.JsonSerializerSettings CreateSerializerSettings()
         {
-            var settings = new System.Text.Json.JsonSerializerOptions();
+            var settings = new Newtonsoft.Json.JsonSerializerSettings();
             UpdateJsonSerializerSettings(settings);
             return settings;
         }
@@ -62,9 +62,9 @@ namespace GKit.RENTRI.Stubs.VidimazioneFormulari
             }
         }
 
-        protected System.Text.Json.JsonSerializerOptions JsonSerializerSettings { get { return _instanceSettings ?? _settings.Value; } }
+        protected Newtonsoft.Json.JsonSerializerSettings JsonSerializerSettings { get { return _instanceSettings ?? _settings.Value; } }
 
-        static partial void UpdateJsonSerializerSettings(System.Text.Json.JsonSerializerOptions settings);
+        static partial void UpdateJsonSerializerSettings(Newtonsoft.Json.JsonSerializerSettings settings);
 
         partial void Initialize();
 
@@ -1749,10 +1749,10 @@ namespace GKit.RENTRI.Stubs.VidimazioneFormulari
                 var responseText = await ReadAsStringAsync(response.Content, cancellationToken).ConfigureAwait(false);
                 try
                 {
-                    var typedBody = System.Text.Json.JsonSerializer.Deserialize<T>(responseText, JsonSerializerSettings);
+                    var typedBody = Newtonsoft.Json.JsonConvert.DeserializeObject<T>(responseText, JsonSerializerSettings);
                     return new ObjectResponseResult<T>(typedBody, responseText);
                 }
-                catch (System.Text.Json.JsonException exception)
+                catch (Newtonsoft.Json.JsonException exception)
                 {
                     var message = "Could not deserialize the response body string as " + typeof(T).FullName + ".";
                     throw new ApiException(message, (int)response.StatusCode, responseText, headers, exception);
@@ -1763,12 +1763,15 @@ namespace GKit.RENTRI.Stubs.VidimazioneFormulari
                 try
                 {
                     using (var responseStream = await ReadAsStreamAsync(response.Content, cancellationToken).ConfigureAwait(false))
+                    using (var streamReader = new System.IO.StreamReader(responseStream))
+                    using (var jsonTextReader = new Newtonsoft.Json.JsonTextReader(streamReader))
                     {
-                        var typedBody = await System.Text.Json.JsonSerializer.DeserializeAsync<T>(responseStream, JsonSerializerSettings, cancellationToken).ConfigureAwait(false);
+                        var serializer = Newtonsoft.Json.JsonSerializer.Create(JsonSerializerSettings);
+                        var typedBody = serializer.Deserialize<T>(jsonTextReader);
                         return new ObjectResponseResult<T>(typedBody, string.Empty);
                     }
                 }
-                catch (System.Text.Json.JsonException exception)
+                catch (Newtonsoft.Json.JsonException exception)
                 {
                     var message = "Could not deserialize the response body stream as " + typeof(T).FullName + ".";
                     throw new ApiException(message, (int)response.StatusCode, string.Empty, headers, exception);
@@ -1838,80 +1841,80 @@ namespace GKit.RENTRI.Stubs.VidimazioneFormulari
         /// <summary>
         /// Stato di attivazione del blocco virtuale
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("disattivo")]
+        [Newtonsoft.Json.JsonProperty("disattivo", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public bool Disattivo { get; set; }
 
         /// <summary>
         /// Codice fiscale del soggetto a cui è associato il blocco
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("identificativo_soggetto")]
+        [Newtonsoft.Json.JsonProperty("identificativo_soggetto", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.StringLength(255)]
         public string Identificativo_soggetto { get; set; }
 
         /// <summary>
         /// Denominazione del soggetto a cui è associato il blocco
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("denominazione_soggetto")]
+        [Newtonsoft.Json.JsonProperty("denominazione_soggetto", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Denominazione_soggetto { get; set; }
 
         /// <summary>
         /// Codice del blocco virtuale
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("codice_blocco")]
+        [Newtonsoft.Json.JsonProperty("codice_blocco", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Codice_blocco { get; set; }
 
         /// <summary>
         /// Descrizione del blocco virtuale
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("descrizione")]
+        [Newtonsoft.Json.JsonProperty("descrizione", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Descrizione { get; set; }
 
         /// <summary>
         /// Codice fiscale dell'utente che ha creato il blocco
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("codice_fiscale_utente")]
+        [Newtonsoft.Json.JsonProperty("codice_fiscale_utente", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Codice_fiscale_utente { get; set; }
 
         /// <summary>
         /// Formato ISO 8601 UTC
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("data_creazione")]
+        [Newtonsoft.Json.JsonProperty("data_creazione", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset? Data_creazione { get; set; }
 
         /// <summary>
         /// Contatore dei FIR vidimati sul blocco virtuale
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("numero_fir_vidimati")]
+        [Newtonsoft.Json.JsonProperty("numero_fir_vidimati", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public int Numero_fir_vidimati { get; set; }
 
         /// <summary>
         /// Formato ISO 8601 UTC
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("data_ultimo_utilizzo")]
+        [Newtonsoft.Json.JsonProperty("data_ultimo_utilizzo", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset? Data_ultimo_utilizzo { get; set; }
 
         /// <summary>
         /// Numero di iscrizione dell'unità locale a cui è associato il blocco virtuale
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("num_iscr_sito")]
+        [Newtonsoft.Json.JsonProperty("num_iscr_sito", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Num_iscr_sito { get; set; }
 
         /// <summary>
         /// Indirizzo dell'unità locale a cui è associato il blocco virtuale
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("indirizzo")]
+        [Newtonsoft.Json.JsonProperty("indirizzo", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Indirizzo { get; set; }
 
         /// <summary>
         /// Numero civico dell'indirizzo dell'unità locale a cui è associato il blocco virtuale
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("civico")]
+        [Newtonsoft.Json.JsonProperty("civico", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Civico { get; set; }
 
         /// <summary>
         /// Codice ISTAT del comune dell'unità locale a cui è associato il blocco virtuale
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("comune_id")]
+        [Newtonsoft.Json.JsonProperty("comune_id", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Comune_id { get; set; }
 
     }
@@ -1920,10 +1923,10 @@ namespace GKit.RENTRI.Stubs.VidimazioneFormulari
     public partial class CertificateModel
     {
 
-        [System.Text.Json.Serialization.JsonPropertyName("certificato")]
+        [Newtonsoft.Json.JsonProperty("certificato", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Certificato { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("subject")]
+        [Newtonsoft.Json.JsonProperty("subject", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Subject { get; set; }
 
     }
@@ -1935,19 +1938,19 @@ namespace GKit.RENTRI.Stubs.VidimazioneFormulari
         /// <summary>
         /// Nome del file
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("nome_file")]
+        [Newtonsoft.Json.JsonProperty("nome_file", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Nome_file { get; set; }
 
         /// <summary>
         /// Tipo MIME del file
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("mime")]
+        [Newtonsoft.Json.JsonProperty("mime", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Mime { get; set; }
 
         /// <summary>
         /// Contenuto del file
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("content")]
+        [Newtonsoft.Json.JsonProperty("content", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public byte[] Content { get; set; }
 
     }
@@ -1959,44 +1962,44 @@ namespace GKit.RENTRI.Stubs.VidimazioneFormulari
         /// <summary>
         /// Codice fiscale dell'utente che ha richiesto la vidimazione del FIR
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("utente_richiesta")]
+        [Newtonsoft.Json.JsonProperty("utente_richiesta", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Utente_richiesta { get; set; }
 
         /// <summary>
         /// Denominazione dell'utente che ha richiesto la vidimazione del FIR
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("denominazione_utente_richiesta")]
+        [Newtonsoft.Json.JsonProperty("denominazione_utente_richiesta", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Denominazione_utente_richiesta { get; set; }
 
         /// <summary>
         /// Autore dell'eventuale annullamento del FIR
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("utente_annullamento")]
+        [Newtonsoft.Json.JsonProperty("utente_annullamento", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Utente_annullamento { get; set; }
 
         /// <summary>
         /// Indica se il FIR sia stato generato attraverso il sistema di interoperabilità (API) o attraverso il portale
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("origine")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<Origine>))]
+        [Newtonsoft.Json.JsonProperty("origine", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public Origine? Origine { get; set; }
 
         /// <summary>
         /// Xml firmato del FIR in fase di vidimazione. Il dato è eventualmente restituito dalla richiesta dei dati di vidimazione FIR.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("xml")]
+        [Newtonsoft.Json.JsonProperty("xml", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Xml { get; set; }
 
         /// <summary>
         /// Numero progressivo del FIR all'interno del blocco di appartenenza
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("progressivo")]
+        [Newtonsoft.Json.JsonProperty("progressivo", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public int Progressivo { get; set; }
 
         /// <summary>
         /// Codice seriale del FIR contenente la concatenazione del codice di blocco, il progressivo ed il checksum
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("numero_fir")]
+        [Newtonsoft.Json.JsonProperty("numero_fir", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Numero_fir { get; set; }
 
         /// <summary>
@@ -2004,61 +2007,61 @@ namespace GKit.RENTRI.Stubs.VidimazioneFormulari
         /// <br/>L'array di byte viene restituito codificato in Base64 dall'endpoint in una proprietà JSON di tipo stringa.
         /// <br/>Il formato del contenuto del QR Code è conforme allo standard CBOR Object Signing and Encryption (COSE), RFC 8152.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("qr_code_bytes")]
+        [Newtonsoft.Json.JsonProperty("qr_code_bytes", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public byte[] Qr_code_bytes { get; set; }
 
         /// <summary>
         /// Caratteri alfanumerici utilizzati come codice univoco associato in sede di vidimazione al numero FIR
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("check_sum")]
+        [Newtonsoft.Json.JsonProperty("check_sum", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Check_sum { get; set; }
 
         /// <summary>
         /// Data e ora in cui è stata effettuata la richiesta di vidimazione del FIR (formato ISO 8601 UTC)
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("data_richiesta")]
+        [Newtonsoft.Json.JsonProperty("data_richiesta", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset Data_richiesta { get; set; }
 
         /// <summary>
         /// Ragione sociale del soggetto per conto del quale è stato vidimato il FIR
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("denominazione_soggetto")]
+        [Newtonsoft.Json.JsonProperty("denominazione_soggetto", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Denominazione_soggetto { get; set; }
 
         /// <summary>
         /// Codice fiscale del soggetto per conto del quale è stato vidimato il FIR
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("codice_fiscale_soggetto")]
+        [Newtonsoft.Json.JsonProperty("codice_fiscale_soggetto", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Codice_fiscale_soggetto { get; set; }
 
         /// <summary>
         /// Numero di iscrizione dell'unità locale del soggetto per conto del quale è stato vidimato il FIR
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("num_iscr_sito")]
+        [Newtonsoft.Json.JsonProperty("num_iscr_sito", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Num_iscr_sito { get; set; }
 
         /// <summary>
         /// Codice del blocco a cui appartiene il FIR
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("codice_blocco")]
+        [Newtonsoft.Json.JsonProperty("codice_blocco", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Codice_blocco { get; set; }
 
         /// <summary>
         /// Nome della CCIAA di competenza del FIR
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("cciaa_nome")]
+        [Newtonsoft.Json.JsonProperty("cciaa_nome", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Cciaa_nome { get; set; }
 
         /// <summary>
         /// Stato di annullamento del FIR
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("is_annullato")]
+        [Newtonsoft.Json.JsonProperty("is_annullato", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public bool? Is_annullato { get; set; }
 
         /// <summary>
         /// Data dell'eventuale annullamento del FIR (formato ISO 8601 UTC)
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("data_annullamento")]
+        [Newtonsoft.Json.JsonProperty("data_annullamento", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset? Data_annullamento { get; set; }
 
     }
@@ -2070,13 +2073,13 @@ namespace GKit.RENTRI.Stubs.VidimazioneFormulari
         /// <summary>
         /// Numero progressivo del FIR all'interno del blocco di appartenenza
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("progressivo")]
+        [Newtonsoft.Json.JsonProperty("progressivo", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public int Progressivo { get; set; }
 
         /// <summary>
         /// Codice seriale del FIR contenente la concatenazione del codice di blocco, il progressivo ed il checksum
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("numero_fir")]
+        [Newtonsoft.Json.JsonProperty("numero_fir", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Numero_fir { get; set; }
 
         /// <summary>
@@ -2084,61 +2087,61 @@ namespace GKit.RENTRI.Stubs.VidimazioneFormulari
         /// <br/>L'array di byte viene restituito codificato in Base64 dall'endpoint in una proprietà JSON di tipo stringa.
         /// <br/>Il formato del contenuto del QR Code è conforme allo standard CBOR Object Signing and Encryption (COSE), RFC 8152.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("qr_code_bytes")]
+        [Newtonsoft.Json.JsonProperty("qr_code_bytes", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public byte[] Qr_code_bytes { get; set; }
 
         /// <summary>
         /// Caratteri alfanumerici utilizzati come codice univoco associato in sede di vidimazione al numero FIR
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("check_sum")]
+        [Newtonsoft.Json.JsonProperty("check_sum", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Check_sum { get; set; }
 
         /// <summary>
         /// Data e ora in cui è stata effettuata la richiesta di vidimazione del FIR (formato ISO 8601 UTC)
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("data_richiesta")]
+        [Newtonsoft.Json.JsonProperty("data_richiesta", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset Data_richiesta { get; set; }
 
         /// <summary>
         /// Ragione sociale del soggetto per conto del quale è stato vidimato il FIR
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("denominazione_soggetto")]
+        [Newtonsoft.Json.JsonProperty("denominazione_soggetto", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Denominazione_soggetto { get; set; }
 
         /// <summary>
         /// Codice fiscale del soggetto per conto del quale è stato vidimato il FIR
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("codice_fiscale_soggetto")]
+        [Newtonsoft.Json.JsonProperty("codice_fiscale_soggetto", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Codice_fiscale_soggetto { get; set; }
 
         /// <summary>
         /// Numero di iscrizione dell'unità locale del soggetto per conto del quale è stato vidimato il FIR
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("num_iscr_sito")]
+        [Newtonsoft.Json.JsonProperty("num_iscr_sito", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Num_iscr_sito { get; set; }
 
         /// <summary>
         /// Codice del blocco a cui appartiene il FIR
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("codice_blocco")]
+        [Newtonsoft.Json.JsonProperty("codice_blocco", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Codice_blocco { get; set; }
 
         /// <summary>
         /// Nome della CCIAA di competenza del FIR
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("cciaa_nome")]
+        [Newtonsoft.Json.JsonProperty("cciaa_nome", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Cciaa_nome { get; set; }
 
         /// <summary>
         /// Stato di annullamento del FIR
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("is_annullato")]
+        [Newtonsoft.Json.JsonProperty("is_annullato", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public bool? Is_annullato { get; set; }
 
         /// <summary>
         /// Data dell'eventuale annullamento del FIR (formato ISO 8601 UTC)
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("data_annullamento")]
+        [Newtonsoft.Json.JsonProperty("data_annullamento", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset? Data_annullamento { get; set; }
 
     }
@@ -2153,32 +2156,32 @@ namespace GKit.RENTRI.Stubs.VidimazioneFormulari
         /// <summary>
         /// Indice dell'elemento di input relativo al messaggio di validazione
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("indice")]
+        [Newtonsoft.Json.JsonProperty("indice", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public int? Indice { get; set; }
 
         /// <summary>
         /// Campo dell'elemento di input relativo al messaggio di validazione
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("campo")]
+        [Newtonsoft.Json.JsonProperty("campo", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Campo { get; set; }
 
         /// <summary>
         /// Tipo del messaggio (avvertimento o errore)
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("tipo")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<EsitoMessaggioTipo>))]
+        [Newtonsoft.Json.JsonProperty("tipo", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public EsitoMessaggioTipo Tipo { get; set; }
 
         /// <summary>
         /// Codice del messaggio
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("codice_messaggio")]
+        [Newtonsoft.Json.JsonProperty("codice_messaggio", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Codice_messaggio { get; set; }
 
         /// <summary>
         /// Parametri del messaggio
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("parametri")]
+        [Newtonsoft.Json.JsonProperty("parametri", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<object> Parametri { get; set; }
 
     }
@@ -2202,31 +2205,31 @@ namespace GKit.RENTRI.Stubs.VidimazioneFormulari
         /// <summary>
         /// Esito
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("esito")]
+        [Newtonsoft.Json.JsonProperty("esito", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public EfirPublicModel Esito { get; set; }
 
         /// <summary>
         /// Tipo di esito
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("tipo")]
+        [Newtonsoft.Json.JsonProperty("tipo", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Tipo { get; set; }
 
         /// <summary>
         /// Identificativo della transazione asincrona
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("transazione_id")]
+        [Newtonsoft.Json.JsonProperty("transazione_id", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Guid Transazione_id { get; set; }
 
         /// <summary>
         /// Messaggi di validazione
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("validazione")]
+        [Newtonsoft.Json.JsonProperty("validazione", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<EsitoMessaggioModel> Validazione { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("errore")]
+        [Newtonsoft.Json.JsonProperty("errore", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public bool Errore { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("tempo_elaborazione")]
+        [Newtonsoft.Json.JsonProperty("tempo_elaborazione", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Tempo_elaborazione { get; set; }
 
     }
@@ -2247,24 +2250,24 @@ namespace GKit.RENTRI.Stubs.VidimazioneFormulari
     public partial class ProblemDetails
     {
 
-        [System.Text.Json.Serialization.JsonPropertyName("type")]
+        [Newtonsoft.Json.JsonProperty("type", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Type { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("title")]
+        [Newtonsoft.Json.JsonProperty("title", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Title { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("status")]
+        [Newtonsoft.Json.JsonProperty("status", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public int? Status { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("detail")]
+        [Newtonsoft.Json.JsonProperty("detail", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Detail { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("instance")]
+        [Newtonsoft.Json.JsonProperty("instance", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Instance { get; set; }
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
 
-        [System.Text.Json.Serialization.JsonExtensionData]
+        [Newtonsoft.Json.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
@@ -2283,14 +2286,14 @@ namespace GKit.RENTRI.Stubs.VidimazioneFormulari
         /// <summary>
         /// Stato dell'API&lt;p&gt;Valori ammessi:&lt;ul style="margin:0"&gt;&lt;li&gt;&lt;i&gt;Ok&lt;/i&gt; - API regolarmente funzionante&lt;/li&gt;&lt;li&gt;&lt;i&gt;Warning&lt;/i&gt; - API funzionante, ma con probabili disservizi come indicato nei warning&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("status")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<StatusResponseEnum>))]
+        [Newtonsoft.Json.JsonProperty("status", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public StatusResponseEnum Status { get; set; }
 
         /// <summary>
         /// Eventuali messaggi di warning relativi allo stato dell'API
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("warnings")]
+        [Newtonsoft.Json.JsonProperty("warnings", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<string> Warnings { get; set; }
 
     }
@@ -2314,7 +2317,7 @@ namespace GKit.RENTRI.Stubs.VidimazioneFormulari
     public partial class TransazioneModel
     {
 
-        [System.Text.Json.Serialization.JsonPropertyName("transazione_id")]
+        [Newtonsoft.Json.JsonProperty("transazione_id", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Guid Transazione_id { get; set; }
 
     }

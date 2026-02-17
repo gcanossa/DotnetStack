@@ -22,7 +22,6 @@ do
     /classname:"${API_NAME}Stub" \
     /namespace:"GKit.RENTRI.Stubs.${API_NAME}" \
     /output:"Stubs/${API_NAME}Stub.cs" \
-    /jsonlibrary:SystemTextJson \
     /jsonpolymorphicserializationstyle:SystemTextJson \
     /clientbaseclass:BaseClient \
     /generateexceptionclasses:false

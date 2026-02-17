@@ -32,8 +32,8 @@ namespace GKit.RENTRI.Stubs.CaRentri
         #pragma warning restore 8618
 
         private System.Net.Http.HttpClient _httpClient;
-        private static System.Lazy<System.Text.Json.JsonSerializerOptions> _settings = new System.Lazy<System.Text.Json.JsonSerializerOptions>(CreateSerializerSettings, true);
-        private System.Text.Json.JsonSerializerOptions _instanceSettings;
+        private static System.Lazy<Newtonsoft.Json.JsonSerializerSettings> _settings = new System.Lazy<Newtonsoft.Json.JsonSerializerSettings>(CreateSerializerSettings, true);
+        private Newtonsoft.Json.JsonSerializerSettings _instanceSettings;
 
     #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         public CaRentriStub(System.Net.Http.HttpClient httpClient)
@@ -44,9 +44,9 @@ namespace GKit.RENTRI.Stubs.CaRentri
             Initialize();
         }
 
-        private static System.Text.Json.JsonSerializerOptions CreateSerializerSettings()
+        private static Newtonsoft.Json.JsonSerializerSettings CreateSerializerSettings()
         {
-            var settings = new System.Text.Json.JsonSerializerOptions();
+            var settings = new Newtonsoft.Json.JsonSerializerSettings();
             UpdateJsonSerializerSettings(settings);
             return settings;
         }
@@ -62,9 +62,9 @@ namespace GKit.RENTRI.Stubs.CaRentri
             }
         }
 
-        protected System.Text.Json.JsonSerializerOptions JsonSerializerSettings { get { return _instanceSettings ?? _settings.Value; } }
+        protected Newtonsoft.Json.JsonSerializerSettings JsonSerializerSettings { get { return _instanceSettings ?? _settings.Value; } }
 
-        static partial void UpdateJsonSerializerSettings(System.Text.Json.JsonSerializerOptions settings);
+        static partial void UpdateJsonSerializerSettings(Newtonsoft.Json.JsonSerializerSettings settings);
 
         partial void Initialize();
 
@@ -353,8 +353,8 @@ namespace GKit.RENTRI.Stubs.CaRentri
             {
                 using (var request_ = new System.Net.Http.HttpRequestMessage())
                 {
-                    var json_ = System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(body, JsonSerializerSettings);
-                    var content_ = new System.Net.Http.ByteArrayContent(json_);
+                    var json_ = Newtonsoft.Json.JsonConvert.SerializeObject(body, JsonSerializerSettings);
+                    var content_ = new System.Net.Http.StringContent(json_);
                     content_.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json");
                     request_.Content = content_;
                     request_.Method = new System.Net.Http.HttpMethod("POST");
@@ -748,8 +748,8 @@ namespace GKit.RENTRI.Stubs.CaRentri
             {
                 using (var request_ = new System.Net.Http.HttpRequestMessage())
                 {
-                    var json_ = System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(body, JsonSerializerSettings);
-                    var content_ = new System.Net.Http.ByteArrayContent(json_);
+                    var json_ = Newtonsoft.Json.JsonConvert.SerializeObject(body, JsonSerializerSettings);
+                    var content_ = new System.Net.Http.StringContent(json_);
                     content_.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json");
                     request_.Content = content_;
                     request_.Method = new System.Net.Http.HttpMethod("PUT");
@@ -881,8 +881,8 @@ namespace GKit.RENTRI.Stubs.CaRentri
             {
                 using (var request_ = new System.Net.Http.HttpRequestMessage())
                 {
-                    var json_ = System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(body, JsonSerializerSettings);
-                    var content_ = new System.Net.Http.ByteArrayContent(json_);
+                    var json_ = Newtonsoft.Json.JsonConvert.SerializeObject(body, JsonSerializerSettings);
+                    var content_ = new System.Net.Http.StringContent(json_);
                     content_.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json");
                     request_.Content = content_;
                     request_.Method = new System.Net.Http.HttpMethod("PUT");
@@ -1458,8 +1458,8 @@ namespace GKit.RENTRI.Stubs.CaRentri
             {
                 using (var request_ = new System.Net.Http.HttpRequestMessage())
                 {
-                    var json_ = System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(body, JsonSerializerSettings);
-                    var content_ = new System.Net.Http.ByteArrayContent(json_);
+                    var json_ = Newtonsoft.Json.JsonConvert.SerializeObject(body, JsonSerializerSettings);
+                    var content_ = new System.Net.Http.StringContent(json_);
                     content_.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json");
                     request_.Content = content_;
                     request_.Method = new System.Net.Http.HttpMethod("POST");
@@ -1750,8 +1750,8 @@ namespace GKit.RENTRI.Stubs.CaRentri
             {
                 using (var request_ = new System.Net.Http.HttpRequestMessage())
                 {
-                    var json_ = System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(body, JsonSerializerSettings);
-                    var content_ = new System.Net.Http.ByteArrayContent(json_);
+                    var json_ = Newtonsoft.Json.JsonConvert.SerializeObject(body, JsonSerializerSettings);
+                    var content_ = new System.Net.Http.StringContent(json_);
                     content_.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json");
                     request_.Content = content_;
                     request_.Method = new System.Net.Http.HttpMethod("PUT");
@@ -2677,8 +2677,8 @@ namespace GKit.RENTRI.Stubs.CaRentri
             {
                 using (var request_ = new System.Net.Http.HttpRequestMessage())
                 {
-                    var json_ = System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(body, JsonSerializerSettings);
-                    var content_ = new System.Net.Http.ByteArrayContent(json_);
+                    var json_ = Newtonsoft.Json.JsonConvert.SerializeObject(body, JsonSerializerSettings);
+                    var content_ = new System.Net.Http.StringContent(json_);
                     content_.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json");
                     request_.Content = content_;
                     request_.Method = new System.Net.Http.HttpMethod("PUT");
@@ -3090,8 +3090,8 @@ namespace GKit.RENTRI.Stubs.CaRentri
             {
                 using (var request_ = new System.Net.Http.HttpRequestMessage())
                 {
-                    var json_ = System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(body, JsonSerializerSettings);
-                    var content_ = new System.Net.Http.ByteArrayContent(json_);
+                    var json_ = Newtonsoft.Json.JsonConvert.SerializeObject(body, JsonSerializerSettings);
+                    var content_ = new System.Net.Http.StringContent(json_);
                     content_.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json");
                     request_.Content = content_;
                     request_.Method = new System.Net.Http.HttpMethod("POST");
@@ -3359,10 +3359,10 @@ namespace GKit.RENTRI.Stubs.CaRentri
                 var responseText = await ReadAsStringAsync(response.Content, cancellationToken).ConfigureAwait(false);
                 try
                 {
-                    var typedBody = System.Text.Json.JsonSerializer.Deserialize<T>(responseText, JsonSerializerSettings);
+                    var typedBody = Newtonsoft.Json.JsonConvert.DeserializeObject<T>(responseText, JsonSerializerSettings);
                     return new ObjectResponseResult<T>(typedBody, responseText);
                 }
-                catch (System.Text.Json.JsonException exception)
+                catch (Newtonsoft.Json.JsonException exception)
                 {
                     var message = "Could not deserialize the response body string as " + typeof(T).FullName + ".";
                     throw new ApiException(message, (int)response.StatusCode, responseText, headers, exception);
@@ -3373,12 +3373,15 @@ namespace GKit.RENTRI.Stubs.CaRentri
                 try
                 {
                     using (var responseStream = await ReadAsStreamAsync(response.Content, cancellationToken).ConfigureAwait(false))
+                    using (var streamReader = new System.IO.StreamReader(responseStream))
+                    using (var jsonTextReader = new Newtonsoft.Json.JsonTextReader(streamReader))
                     {
-                        var typedBody = await System.Text.Json.JsonSerializer.DeserializeAsync<T>(responseStream, JsonSerializerSettings, cancellationToken).ConfigureAwait(false);
+                        var serializer = Newtonsoft.Json.JsonSerializer.Create(JsonSerializerSettings);
+                        var typedBody = serializer.Deserialize<T>(jsonTextReader);
                         return new ObjectResponseResult<T>(typedBody, string.Empty);
                     }
                 }
-                catch (System.Text.Json.JsonException exception)
+                catch (Newtonsoft.Json.JsonException exception)
                 {
                     var message = "Could not deserialize the response body stream as " + typeof(T).FullName + ".";
                     throw new ApiException(message, (int)response.StatusCode, string.Empty, headers, exception);
@@ -3451,7 +3454,7 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// Nome dell'applicazione.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("name")]
+        [Newtonsoft.Json.JsonProperty("name", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         [System.ComponentModel.DataAnnotations.StringLength(50, MinimumLength = 1)]
         public string Name { get; set; }
@@ -3459,7 +3462,7 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// Nome del package o identificativo dell'applicazione.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("package_name")]
+        [Newtonsoft.Json.JsonProperty("package_name", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         [System.ComponentModel.DataAnnotations.StringLength(100, MinimumLength = 1)]
         public string Package_name { get; set; }
@@ -3467,7 +3470,7 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// Versione dell'applicazione.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("version")]
+        [Newtonsoft.Json.JsonProperty("version", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         [System.ComponentModel.DataAnnotations.StringLength(14, MinimumLength = 1)]
         public string Version { get; set; }
@@ -3475,7 +3478,7 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// Numero della build della versione dell'applicazione.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("build")]
+        [Newtonsoft.Json.JsonProperty("build", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         [System.ComponentModel.DataAnnotations.StringLength(14, MinimumLength = 1)]
         public string Build { get; set; }
@@ -3489,17 +3492,17 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// Modalità di autorizzazione.&lt;p&gt;Valori ammessi:&lt;ul style="margin:0"&gt;&lt;li&gt;&lt;i&gt;Implicit&lt;/i&gt; - Il processo autorizzativo è gestito dal servizio. I fattori autenticativi sono gestiti dal servizio interagendo direttamente con l'utente, e non con l'applicazione di firma.&lt;/li&gt;&lt;li&gt;&lt;i&gt;Explicit&lt;/i&gt; - Il processo autorizzativo è gestito dall'applicazione di firma, che gestisce i fattori di autenticazione come PIN o One-Time Password (OTP).&lt;/li&gt;&lt;li&gt;&lt;i&gt;Oauth2Code&lt;/i&gt; - Il processo autorizzativo è gestito da un servizio di autenticazione utilizzando OAuth 2.0.&lt;/li&gt;&lt;li&gt;&lt;i&gt;Oauth2Token&lt;/i&gt; - Il processo autorizzativo è gestito da un servizio di autenticazione utilizzando OAuth 2.0.&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("mode")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<AuthMode>))]
+        [Newtonsoft.Json.JsonProperty("mode", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public AuthMode? Mode { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("expression")]
+        [Newtonsoft.Json.JsonProperty("expression", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Expression { get; set; }
 
         /// <summary>
         /// Informazioni sui metodi di autenticazione disponibili.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("objects")]
+        [Newtonsoft.Json.JsonProperty("objects", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<AuthObjectInfo> Objects { get; set; }
 
     }
@@ -3529,14 +3532,14 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// Identificativo del metodo di autenticazione. Attualmente è supportato solo il valore "mobile".
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("id")]
+        [Newtonsoft.Json.JsonProperty("id", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.RegularExpression(@"(?i)^mobile$")]
         public string Id { get; set; }
 
         /// <summary>
         /// Utilizzato per indicare il valore del fattore di autenticazione. Inutilizzato per il metodo "mobile".
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("value")]
+        [Newtonsoft.Json.JsonProperty("value", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Value { get; set; }
 
     }
@@ -3545,22 +3548,22 @@ namespace GKit.RENTRI.Stubs.CaRentri
     public partial class AuthObjectInfo
     {
 
-        [System.Text.Json.Serialization.JsonPropertyName("type")]
+        [Newtonsoft.Json.JsonProperty("type", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Type { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("id")]
+        [Newtonsoft.Json.JsonProperty("id", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Id { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("format")]
+        [Newtonsoft.Json.JsonProperty("format", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Format { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("generator")]
+        [Newtonsoft.Json.JsonProperty("generator", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Generator { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("label")]
+        [Newtonsoft.Json.JsonProperty("label", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Label { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("description")]
+        [Newtonsoft.Json.JsonProperty("description", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Description { get; set; }
 
     }
@@ -3572,37 +3575,37 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// Identificativo del soggetto.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("identificativo_soggetto")]
+        [Newtonsoft.Json.JsonProperty("identificativo_soggetto", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Identificativo_soggetto { get; set; }
 
         /// <summary>
         /// Denominazione del soggetto.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("denominazione_soggetto")]
+        [Newtonsoft.Json.JsonProperty("denominazione_soggetto", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Denominazione_soggetto { get; set; }
 
         /// <summary>
         /// Numero di iscrizione dell'operatore.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("num_iscr_operatore")]
+        [Newtonsoft.Json.JsonProperty("num_iscr_operatore", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Num_iscr_operatore { get; set; }
 
         /// <summary>
         /// Numero di iscrizione del sito.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("num_iscr_sito")]
+        [Newtonsoft.Json.JsonProperty("num_iscr_sito", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Num_iscr_sito { get; set; }
 
         /// <summary>
         /// Nome del sito.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("nome_sito")]
+        [Newtonsoft.Json.JsonProperty("nome_sito", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Nome_sito { get; set; }
 
         /// <summary>
         /// Token di identificazione a autorizzazione della richiesta di boarding.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("token")]
+        [Newtonsoft.Json.JsonProperty("token", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Guid? Token { get; set; }
 
     }
@@ -3614,8 +3617,8 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// Stato del certificato.&lt;p&gt;Valori ammessi:&lt;ul style="margin:0"&gt;&lt;li&gt;&lt;i&gt;Valid&lt;/i&gt; - Valido.&lt;/li&gt;&lt;li&gt;&lt;i&gt;Expired&lt;/i&gt; - Scaduto.&lt;/li&gt;&lt;li&gt;&lt;i&gt;Revoked&lt;/i&gt; - Revocato.&lt;/li&gt;&lt;li&gt;&lt;i&gt;Suspended&lt;/i&gt; - Sospeso.&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("status")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<CertStatus>))]
+        [Newtonsoft.Json.JsonProperty("status", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public CertStatus Status { get; set; }
 
         /// <summary>
@@ -3624,37 +3627,37 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <br/>Se il parametro certificates è “single”, è presente solo il certificato dell'entità finale.
         /// <br/>Se il parametro certificates è "none", non è presente alcun certificato.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("certificates")]
+        [Newtonsoft.Json.JsonProperty("certificates", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<string> Certificates { get; set; }
 
         /// <summary>
         /// Emittente del certificato.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("issuer_dn")]
+        [Newtonsoft.Json.JsonProperty("issuer_dn", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Issuer_dn { get; set; }
 
         /// <summary>
         /// Serial number del certificato.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("serial_number")]
+        [Newtonsoft.Json.JsonProperty("serial_number", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Serial_number { get; set; }
 
         /// <summary>
         /// Soggetto del certificato.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("subject_dn")]
+        [Newtonsoft.Json.JsonProperty("subject_dn", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Subject_dn { get; set; }
 
         /// <summary>
         /// Data di inizio validità del certificato (formato ISO 8601 UTC).
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("valid_from")]
+        [Newtonsoft.Json.JsonProperty("valid_from", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset Valid_from { get; set; }
 
         /// <summary>
         /// Data di fine validità del certificato (formato ISO 8601 UTC).
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("valid_to")]
+        [Newtonsoft.Json.JsonProperty("valid_to", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset Valid_to { get; set; }
 
     }
@@ -3687,31 +3690,31 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// Numero seriale.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("serial_number")]
+        [Newtonsoft.Json.JsonProperty("serial_number", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public long? Serial_number { get; set; }
 
         /// <summary>
         /// Distinguished Name (DN) del soggetto intestatario del certificato.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("subject_dn")]
+        [Newtonsoft.Json.JsonProperty("subject_dn", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Subject_dn { get; set; }
 
         /// <summary>
         /// Data di rilascio (formato ISO 8601 UTC).
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("data_rilascio")]
+        [Newtonsoft.Json.JsonProperty("data_rilascio", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset? Data_rilascio { get; set; }
 
         /// <summary>
         /// Data di scadenza (formato ISO 8601 UTC).
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("data_scadenza")]
+        [Newtonsoft.Json.JsonProperty("data_scadenza", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset? Data_scadenza { get; set; }
 
         /// <summary>
         /// Data di revoca (formato ISO 8601 UTC).
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("data_revoca")]
+        [Newtonsoft.Json.JsonProperty("data_revoca", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset? Data_revoca { get; set; }
 
     }
@@ -3726,61 +3729,61 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// Informazioni di base delle credenziali di firma associate al dispositivo mobile.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("credentials_info")]
+        [Newtonsoft.Json.JsonProperty("credentials_info", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public CredentialsInfoModel Credentials_info { get; set; }
 
         /// <summary>
         /// Handle del SAD associato alla richiesta di autorizzazione alla firma, in caso di 2FA tramite dispositivo mobile.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("sad_handle")]
+        [Newtonsoft.Json.JsonProperty("sad_handle", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Guid? Sad_handle { get; set; }
 
         /// <summary>
         /// Nome e cognome dell'utente utilizzatore del dispositivo associato alle credenziali di firma, al momento dell'operazione.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("utente_nome_cognome")]
+        [Newtonsoft.Json.JsonProperty("utente_nome_cognome", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Utente_nome_cognome { get; set; }
 
         /// <summary>
         /// Identificativo alternativo o aggiuntivo dell'utente utilizzatore del dispositivo associato alle credenziali di firma, al momento dell'operazione.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("utente_identificativo_altro")]
+        [Newtonsoft.Json.JsonProperty("utente_identificativo_altro", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Utente_identificativo_altro { get; set; }
 
         /// <summary>
         /// Identificativo (Codice Fiscale) dell'utente utilizzatore del dispositivo associato alle credenziali di firma (da SPID, CIE, CNS), al momento dell'operazione.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("user_name")]
+        [Newtonsoft.Json.JsonProperty("user_name", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string User_name { get; set; }
 
         /// <summary>
         /// Descrizione dell'operazione associata alla richiesta di autorizzazione alla firma.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("description")]
+        [Newtonsoft.Json.JsonProperty("description", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Description { get; set; }
 
         /// <summary>
         /// Data del consenso alla firma (formato ISO 8601 UTC).
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("data_consenso")]
+        [Newtonsoft.Json.JsonProperty("data_consenso", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset? Data_consenso { get; set; }
 
         /// <summary>
         /// Data dichiarata di firma (formato ISO 8601 UTC).
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("data_firma")]
+        [Newtonsoft.Json.JsonProperty("data_firma", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset? Data_firma { get; set; }
 
         /// <summary>
         /// Indica se l'utente ha approvato o meno la richiesta di autorizzazione alla firma, in caso di 2FA tramite dispositivo mobile.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("consenso")]
+        [Newtonsoft.Json.JsonProperty("consenso", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public bool? Consenso { get; set; }
 
         /// <summary>
         /// Elenco dei codici hash associati alla richiesta di firma, codificati in base 64.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("hashes")]
+        [Newtonsoft.Json.JsonProperty("hashes", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<HashData> Hashes { get; set; }
 
     }
@@ -3795,13 +3798,13 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// Informazioni sul certificato.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("certificate_info")]
+        [Newtonsoft.Json.JsonProperty("certificate_info", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public CertificateInfoModel Certificate_info { get; set; }
 
         /// <summary>
         /// Lista delle operazioni di firma remota effettuate.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("operations")]
+        [Newtonsoft.Json.JsonProperty("operations", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<CertificateOperationInfoModel> Operations { get; set; }
 
     }
@@ -3813,7 +3816,7 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// PIN corrente.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("current_pin")]
+        [Newtonsoft.Json.JsonProperty("current_pin", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         [System.ComponentModel.DataAnnotations.StringLength(6, MinimumLength = 6)]
         public string Current_pin { get; set; }
@@ -3821,7 +3824,7 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// Nuovo PIN.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("new_pin")]
+        [Newtonsoft.Json.JsonProperty("new_pin", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         [System.ComponentModel.DataAnnotations.StringLength(6, MinimumLength = 6)]
         public string New_pin { get; set; }
@@ -3835,14 +3838,14 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// Codice Fiscale di un Operatore iscritto.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("identificativo_soggetto")]
+        [Newtonsoft.Json.JsonProperty("identificativo_soggetto", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         public string Identificativo_soggetto { get; set; }
 
         /// <summary>
         /// Numero iscrizione unità locale.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("num_iscr_sito")]
+        [Newtonsoft.Json.JsonProperty("num_iscr_sito", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         [System.ComponentModel.DataAnnotations.StringLength(22, MinimumLength = 22)]
         public string Num_iscr_sito { get; set; }
@@ -3852,7 +3855,7 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <br/>
         /// <br/>⚠️ Deprecato: utilizzare "utente_nome_cognome"
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("identificativo")]
+        [Newtonsoft.Json.JsonProperty("identificativo", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.StringLength(100)]
         [System.Obsolete]
         public string Identificativo { get; set; }
@@ -3860,7 +3863,7 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// Nome e cognome dell'utente utilizzatore del dispositivo associato alle credenziali di firma.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("utente_nome_cognome")]
+        [Newtonsoft.Json.JsonProperty("utente_nome_cognome", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         [System.ComponentModel.DataAnnotations.StringLength(100, MinimumLength = 1)]
         public string Utente_nome_cognome { get; set; }
@@ -3870,7 +3873,7 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <br/>
         /// <br/>⚠️ Deprecato: utilizzare "utente_identificativo_altro"
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("identificativo_altro")]
+        [Newtonsoft.Json.JsonProperty("identificativo_altro", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.StringLength(100)]
         [System.Obsolete]
         public string Identificativo_altro { get; set; }
@@ -3878,35 +3881,35 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// Identificativo alternativo o aggiuntivo dell'utente utilizzatore del dispositivo associato alle credenziali di firma.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("utente_identificativo_altro")]
+        [Newtonsoft.Json.JsonProperty("utente_identificativo_altro", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.StringLength(100)]
         public string Utente_identificativo_altro { get; set; }
 
         /// <summary>
         /// Identificativo (Codice Fiscale) dell'utente utilizzatore del dispositivo associato alle credenziali di firma (da SPID, CIE, CNS).
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("user_name")]
+        [Newtonsoft.Json.JsonProperty("user_name", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.StringLength(256)]
         public string User_name { get; set; }
 
         /// <summary>
         /// Informazioni sul dispositivo.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("device_info")]
+        [Newtonsoft.Json.JsonProperty("device_info", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         public DeviceInfo Device_info { get; set; } = new DeviceInfo();
 
         /// <summary>
         /// Informazioni sulla App.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("app_info")]
+        [Newtonsoft.Json.JsonProperty("app_info", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         public AppInfo App_info { get; set; } = new AppInfo();
 
         /// <summary>
         /// Token di identificazione e autorizzazione della richiesta di boarding.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("boarding_token")]
+        [Newtonsoft.Json.JsonProperty("boarding_token", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
         public System.Guid Boarding_token { get; set; }
 
@@ -3919,13 +3922,13 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// Identificativo delle credenziali di firma.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("credentials_id")]
+        [Newtonsoft.Json.JsonProperty("credentials_id", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Credentials_id { get; set; }
 
         /// <summary>
         /// PIN.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("pin")]
+        [Newtonsoft.Json.JsonProperty("pin", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Pin { get; set; }
 
     }
@@ -3937,7 +3940,7 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// Identificativo delle credenziali di firma.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("credentials_id")]
+        [Newtonsoft.Json.JsonProperty("credentials_id", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         [System.ComponentModel.DataAnnotations.StringLength(9, MinimumLength = 9)]
         public string Credentials_id { get; set; }
@@ -3945,14 +3948,14 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// Handle del SAD da autorizzare.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("handle")]
+        [Newtonsoft.Json.JsonProperty("handle", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
         public System.Guid Handle { get; set; }
 
         /// <summary>
         /// OTP ricevuto con la notifica.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("otp")]
+        [Newtonsoft.Json.JsonProperty("otp", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         [System.ComponentModel.DataAnnotations.StringLength(6, MinimumLength = 6)]
         public string Otp { get; set; }
@@ -3960,13 +3963,13 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// Consenso.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("allowed")]
+        [Newtonsoft.Json.JsonProperty("allowed", Required = Newtonsoft.Json.Required.Always)]
         public bool Allowed { get; set; }
 
         /// <summary>
         /// PIN delle credenziali di firma.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("pin")]
+        [Newtonsoft.Json.JsonProperty("pin", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         public string Pin { get; set; }
 
@@ -3979,18 +3982,18 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// Identificativo delle credenziali di firma.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("credentials_id")]
+        [Newtonsoft.Json.JsonProperty("credentials_id", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         [System.ComponentModel.DataAnnotations.StringLength(9, MinimumLength = 9)]
         public string Credentials_id { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("num_signatures")]
+        [Newtonsoft.Json.JsonProperty("num_signatures", Required = Newtonsoft.Json.Required.Always)]
         public int Num_signatures { get; set; }
 
         /// <summary>
         /// Elenco dei codici hash da firmare in formato base 64. Attualmente è consentito l'invio di un solo codice hash.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("hashes")]
+        [Newtonsoft.Json.JsonProperty("hashes", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         [System.ComponentModel.DataAnnotations.MinLength(1)]
         [System.ComponentModel.DataAnnotations.MaxLength(1)]
@@ -3999,7 +4002,7 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// OID dell'algoritmo utilizzato per calcolare l'hash fisso a 2.16.840.1.101.3.4.2.1 (SHA256)
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("hash_algo")]
+        [Newtonsoft.Json.JsonProperty("hash_algo", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         [System.ComponentModel.DataAnnotations.RegularExpression(@"^2\.16\.840\.1\.101\.3\.4\.2\.1$")]
         public string Hash_algo { get; set; }
@@ -4007,7 +4010,7 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// Descrizione dell'operazione associata alla richiesta di autorizzazione.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("description")]
+        [Newtonsoft.Json.JsonProperty("description", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         [System.ComponentModel.DataAnnotations.StringLength(1000, MinimumLength = 1)]
         [System.ComponentModel.DataAnnotations.RegularExpression(@"^[A-Za-zÀ-ÖØ-öø-ÿ0-9\s\.,;:!?\-\(\)/€%&@]*$")]
@@ -4016,7 +4019,7 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// Metodo di autenticazione abbinato alle credenziali.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("auth_data")]
+        [Newtonsoft.Json.JsonProperty("auth_data", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.MinLength(1)]
         [System.ComponentModel.DataAnnotations.MaxLength(1)]
         public System.Collections.Generic.ICollection<AuthObjectData> Auth_data { get; set; }
@@ -4024,7 +4027,7 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// Dati arbitrari dell'applicazione di firma.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("client_data")]
+        [Newtonsoft.Json.JsonProperty("client_data", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Client_data { get; set; }
 
     }
@@ -4036,19 +4039,19 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// SAD (Signature Activation Data), solo nel caso in cui la richiesta di autorizzazione abbia avuto successo.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("sad")]
+        [Newtonsoft.Json.JsonProperty("sad", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Sad { get; set; }
 
         /// <summary>
         /// La durata del SAD espressa in secondi (default 60), solo nel caso in cui l'autorizzazione sia stata concessa.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("expires_in")]
+        [Newtonsoft.Json.JsonProperty("expires_in", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public int? Expires_in { get; set; }
 
         /// <summary>
         /// Handle del SAD per verificare lo stato di autorizzazione della richiesta.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("handle")]
+        [Newtonsoft.Json.JsonProperty("handle", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Handle { get; set; }
 
     }
@@ -4075,38 +4078,38 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// Identificativo delle credenziali di firma.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("credentials_id")]
+        [Newtonsoft.Json.JsonProperty("credentials_id", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Credentials_id { get; set; }
 
         /// <summary>
         /// Descrizione delle credenziali di firma.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("description")]
+        [Newtonsoft.Json.JsonProperty("description", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Description { get; set; }
 
         /// <summary>
         /// Identificativo che qualifica il tipo di firma per cui sono adatte le credenziali.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("signature_qualifier")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<SignatureQualifier>))]
+        [Newtonsoft.Json.JsonProperty("signature_qualifier", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public SignatureQualifier? Signature_qualifier { get; set; }
 
         /// <summary>
         /// Informazioni sulla chiave di firma.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("key")]
+        [Newtonsoft.Json.JsonProperty("key", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public KeyData Key { get; set; }
 
         /// <summary>
         /// Informazioni sul certificato.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("cert")]
+        [Newtonsoft.Json.JsonProperty("cert", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public CertData Cert { get; set; }
 
         /// <summary>
         /// Informazioni sulla modalità di autorizzazione.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("auth")]
+        [Newtonsoft.Json.JsonProperty("auth", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public AuthData Auth { get; set; }
 
         /// <summary>
@@ -4114,19 +4117,19 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <br/>1 - non collegato (default)
         /// <br/>2 - collegato
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("scal")]
+        [Newtonsoft.Json.JsonProperty("scal", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Scal { get; set; }
 
         /// <summary>
         /// Numero massimo di firme che possono essere create con queste credenziali con una singola richiesta.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("multisign")]
+        [Newtonsoft.Json.JsonProperty("multisign", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public int? Multisign { get; set; }
 
         /// <summary>
         /// Lingua prescelta per la risposta, specificata secondo RFC 5646.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("lang")]
+        [Newtonsoft.Json.JsonProperty("lang", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Lang { get; set; }
 
     }
@@ -4141,7 +4144,7 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// Identificativo delle credenziali di firma.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("identifier")]
+        [Newtonsoft.Json.JsonProperty("identifier", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Identifier { get; set; }
 
         /// <summary>
@@ -4149,14 +4152,14 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <br/>
         /// <br/>⚠️ Deprecato: utilizzare "utente_nome_cognome"
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("identificativo")]
+        [Newtonsoft.Json.JsonProperty("identificativo", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.Obsolete]
         public string Identificativo { get; set; }
 
         /// <summary>
         /// Nome e cognome dell'utente utilizzatore del dispositivo associato alle credenziali di firma.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("utente_nome_cognome")]
+        [Newtonsoft.Json.JsonProperty("utente_nome_cognome", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Utente_nome_cognome { get; set; }
 
         /// <summary>
@@ -4164,20 +4167,20 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <br/>
         /// <br/>⚠️ Deprecato: utilizzare "utente_identificativo_altro"
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("identificativo_altro")]
+        [Newtonsoft.Json.JsonProperty("identificativo_altro", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.Obsolete]
         public string Identificativo_altro { get; set; }
 
         /// <summary>
         /// Identificativo alternativo o aggiuntivo dell'utente utilizzatore del dispositivo associato alle credenziali di firma.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("utente_identificativo_altro")]
+        [Newtonsoft.Json.JsonProperty("utente_identificativo_altro", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Utente_identificativo_altro { get; set; }
 
         /// <summary>
         /// Identificativo (Codice Fiscale) dell'utente utilizzatore del dispositivo associato alle credenziali di firma (da SPID, CIE, CNS).
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("user_name")]
+        [Newtonsoft.Json.JsonProperty("user_name", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string User_name { get; set; }
 
     }
@@ -4189,32 +4192,32 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// Descrizione delle credenziali di firma.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("description")]
+        [Newtonsoft.Json.JsonProperty("description", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Description { get; set; }
 
         /// <summary>
         /// Identificativo che qualifica il tipo di firma per cui sono adatte le credenziali.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("signature_qualifier")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<SignatureQualifier>))]
+        [Newtonsoft.Json.JsonProperty("signature_qualifier", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public SignatureQualifier? Signature_qualifier { get; set; }
 
         /// <summary>
         /// Informazioni sulla chiave di firma.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("key")]
+        [Newtonsoft.Json.JsonProperty("key", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public KeyData Key { get; set; }
 
         /// <summary>
         /// Informazioni sul certificato.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("cert")]
+        [Newtonsoft.Json.JsonProperty("cert", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public CertData Cert { get; set; }
 
         /// <summary>
         /// Informazioni sulla modalità di autorizzazione.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("auth")]
+        [Newtonsoft.Json.JsonProperty("auth", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public AuthData Auth { get; set; }
 
         /// <summary>
@@ -4222,19 +4225,19 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <br/>1 - non collegato (default)
         /// <br/>2 - collegato
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("scal")]
+        [Newtonsoft.Json.JsonProperty("scal", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Scal { get; set; }
 
         /// <summary>
         /// Numero massimo di firme che possono essere create con queste credenziali con una singola richiesta.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("multisign")]
+        [Newtonsoft.Json.JsonProperty("multisign", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public int? Multisign { get; set; }
 
         /// <summary>
         /// Lingua prescelta per la risposta, specificata secondo RFC 5646.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("lang")]
+        [Newtonsoft.Json.JsonProperty("lang", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Lang { get; set; }
 
     }
@@ -4246,19 +4249,19 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// Uno o più identificativi delle credenziali di firma associate al dispositivo.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("credentials_ids")]
+        [Newtonsoft.Json.JsonProperty("credentials_ids", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<string> Credentials_ids { get; set; }
 
         /// <summary>
         /// Specifiche relative a ciascun identificativo delle credenziali di firma.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("credentials_infos")]
+        [Newtonsoft.Json.JsonProperty("credentials_infos", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<CredentialsInfo> Credentials_infos { get; set; }
 
         /// <summary>
         /// Indica se sono state incluse nella risposta solo credenziali di firma utilizzabili per creare una firma valida.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("only_valid")]
+        [Newtonsoft.Json.JsonProperty("only_valid", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public bool? Only_valid { get; set; }
 
     }
@@ -4273,50 +4276,50 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// Data dell'ultimo accesso effettuato (formato ISO 8601 UTC).
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("ultimo_accesso")]
+        [Newtonsoft.Json.JsonProperty("ultimo_accesso", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset? Ultimo_accesso { get; set; }
 
         /// <summary>
         /// Data di eliminazione (formato ISO 8601 UTC).
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("data_eliminazione")]
+        [Newtonsoft.Json.JsonProperty("data_eliminazione", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset? Data_eliminazione { get; set; }
 
         /// <summary>
         /// Data di scadenza della richiesta di reset del PIN (formato ISO 8601 UTC).
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("data_scadenza_richiesta_pin_reset")]
+        [Newtonsoft.Json.JsonProperty("data_scadenza_richiesta_pin_reset", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset? Data_scadenza_richiesta_pin_reset { get; set; }
 
         /// <summary>
         /// Stato.&lt;p&gt;Valori ammessi:&lt;ul style="margin:0"&gt;&lt;li&gt;&lt;i&gt;Attivo&lt;/i&gt; - Utilizzato per: Certificati, Dispositivi e Credenziali.&lt;/li&gt;&lt;li&gt;&lt;i&gt;Eliminato&lt;/i&gt; - Utilizzato per Certificati e Dispositivi.&lt;/li&gt;&lt;li&gt;&lt;i&gt;Nuovo&lt;/i&gt; - Utilizzato per Certificati.&lt;/li&gt;&lt;li&gt;&lt;i&gt;Revocato&lt;/i&gt; - Utilizzato per Certificati e Credenziali (eliminate).&lt;/li&gt;&lt;li&gt;&lt;i&gt;Scaduto&lt;/i&gt; - Utilizzato per Certificati.&lt;/li&gt;&lt;li&gt;&lt;i&gt;Inattivo&lt;/i&gt; - Utilizzato per Credenziali (stato assegnato a seguito del blocco del corrispondente dispositivo).&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("stato")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<Stato>))]
+        [Newtonsoft.Json.JsonProperty("stato", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public Stato? Stato { get; set; }
 
         /// <summary>
         /// Elenco delle unità locali sulle quali è possibile operare.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("siti")]
+        [Newtonsoft.Json.JsonProperty("siti", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<string> Siti { get; set; }
 
         /// <summary>
         /// Identificativo del dispositivo.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("device_identifier")]
+        [Newtonsoft.Json.JsonProperty("device_identifier", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Device_identifier { get; set; }
 
         /// <summary>
         /// Indica se il device è stato bloccato.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("device_is_banned")]
+        [Newtonsoft.Json.JsonProperty("device_is_banned", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public bool? Device_is_banned { get; set; }
 
         /// <summary>
         /// Identificativo delle credenziali di firma.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("identifier")]
+        [Newtonsoft.Json.JsonProperty("identifier", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Identifier { get; set; }
 
         /// <summary>
@@ -4324,14 +4327,14 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <br/>
         /// <br/>⚠️ Deprecato: utilizzare "utente_nome_cognome"
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("identificativo")]
+        [Newtonsoft.Json.JsonProperty("identificativo", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.Obsolete]
         public string Identificativo { get; set; }
 
         /// <summary>
         /// Nome e cognome dell'utente utilizzatore del dispositivo associato alle credenziali di firma.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("utente_nome_cognome")]
+        [Newtonsoft.Json.JsonProperty("utente_nome_cognome", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Utente_nome_cognome { get; set; }
 
         /// <summary>
@@ -4339,20 +4342,20 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <br/>
         /// <br/>⚠️ Deprecato: utilizzare "utente_identificativo_altro"
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("identificativo_altro")]
+        [Newtonsoft.Json.JsonProperty("identificativo_altro", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.Obsolete]
         public string Identificativo_altro { get; set; }
 
         /// <summary>
         /// Identificativo alternativo o aggiuntivo dell'utente utilizzatore del dispositivo associato alle credenziali di firma.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("utente_identificativo_altro")]
+        [Newtonsoft.Json.JsonProperty("utente_identificativo_altro", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Utente_identificativo_altro { get; set; }
 
         /// <summary>
         /// Identificativo (Codice Fiscale) dell'utente utilizzatore del dispositivo associato alle credenziali di firma (da SPID, CIE, CNS).
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("user_name")]
+        [Newtonsoft.Json.JsonProperty("user_name", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string User_name { get; set; }
 
     }
@@ -4367,61 +4370,61 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// Informazioni sul certificato.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("certificate_info")]
+        [Newtonsoft.Json.JsonProperty("certificate_info", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public CertificateInfoModel Certificate_info { get; set; }
 
         /// <summary>
         /// Handle del SAD associato alla richiesta di autorizzazione alla firma, in caso di 2FA tramite dispositivo mobile.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("sad_handle")]
+        [Newtonsoft.Json.JsonProperty("sad_handle", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Guid? Sad_handle { get; set; }
 
         /// <summary>
         /// Nome e cognome dell'utente utilizzatore del dispositivo associato alle credenziali di firma, al momento dell'operazione.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("utente_nome_cognome")]
+        [Newtonsoft.Json.JsonProperty("utente_nome_cognome", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Utente_nome_cognome { get; set; }
 
         /// <summary>
         /// Identificativo alternativo o aggiuntivo dell'utente utilizzatore del dispositivo associato alle credenziali di firma, al momento dell'operazione.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("utente_identificativo_altro")]
+        [Newtonsoft.Json.JsonProperty("utente_identificativo_altro", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Utente_identificativo_altro { get; set; }
 
         /// <summary>
         /// Identificativo (Codice Fiscale) dell'utente utilizzatore del dispositivo associato alle credenziali di firma (da SPID, CIE, CNS), al momento dell'operazione.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("user_name")]
+        [Newtonsoft.Json.JsonProperty("user_name", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string User_name { get; set; }
 
         /// <summary>
         /// Descrizione dell'operazione associata alla richiesta di autorizzazione alla firma.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("description")]
+        [Newtonsoft.Json.JsonProperty("description", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Description { get; set; }
 
         /// <summary>
         /// Data del consenso alla firma (formato ISO 8601 UTC).
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("data_consenso")]
+        [Newtonsoft.Json.JsonProperty("data_consenso", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset? Data_consenso { get; set; }
 
         /// <summary>
         /// Data dichiarata di firma (formato ISO 8601 UTC).
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("data_firma")]
+        [Newtonsoft.Json.JsonProperty("data_firma", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset? Data_firma { get; set; }
 
         /// <summary>
         /// Indica se l'utente ha approvato o meno la richiesta di autorizzazione alla firma, in caso di 2FA tramite dispositivo mobile.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("consenso")]
+        [Newtonsoft.Json.JsonProperty("consenso", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public bool? Consenso { get; set; }
 
         /// <summary>
         /// Elenco dei codici hash associati alla richiesta di firma, codificati in base 64.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("hashes")]
+        [Newtonsoft.Json.JsonProperty("hashes", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<HashData> Hashes { get; set; }
 
     }
@@ -4436,13 +4439,13 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// Informazioni di base delle credenziali di firma.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("credentials_info")]
+        [Newtonsoft.Json.JsonProperty("credentials_info", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public CredentialsInfoModel Credentials_info { get; set; }
 
         /// <summary>
         /// Lista delle operazioni di firma remota effettuate.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("operations")]
+        [Newtonsoft.Json.JsonProperty("operations", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<CredentialsOperationInfoModel> Operations { get; set; }
 
     }
@@ -4451,22 +4454,22 @@ namespace GKit.RENTRI.Stubs.CaRentri
     public partial class CredentialsSito
     {
 
-        [System.Text.Json.Serialization.JsonPropertyName("num_iscr_sito")]
+        [Newtonsoft.Json.JsonProperty("num_iscr_sito", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Num_iscr_sito { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("nome")]
+        [Newtonsoft.Json.JsonProperty("nome", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Nome { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("indirizzo")]
+        [Newtonsoft.Json.JsonProperty("indirizzo", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Indirizzo { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("civico")]
+        [Newtonsoft.Json.JsonProperty("civico", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Civico { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("comune_id")]
+        [Newtonsoft.Json.JsonProperty("comune_id", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Comune_id { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("provincia_id")]
+        [Newtonsoft.Json.JsonProperty("provincia_id", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Provincia_id { get; set; }
 
     }
@@ -4478,7 +4481,7 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// Identificativo delle credenziali di firma.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("identifier")]
+        [Newtonsoft.Json.JsonProperty("identifier", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Identifier { get; set; }
 
         /// <summary>
@@ -4486,14 +4489,14 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <br/>
         /// <br/>⚠️ Deprecato: utilizzare "utente_nome_cognome"
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("identificativo")]
+        [Newtonsoft.Json.JsonProperty("identificativo", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.Obsolete]
         public string Identificativo { get; set; }
 
         /// <summary>
         /// Nome e cognome dell'utente utilizzatore del dispositivo associato alle credenziali di firma.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("utente_nome_cognome")]
+        [Newtonsoft.Json.JsonProperty("utente_nome_cognome", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Utente_nome_cognome { get; set; }
 
         /// <summary>
@@ -4501,39 +4504,39 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <br/>
         /// <br/>⚠️ Deprecato: utilizzare "utente_identificativo_altro"
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("identificativo_altro")]
+        [Newtonsoft.Json.JsonProperty("identificativo_altro", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.Obsolete]
         public string Identificativo_altro { get; set; }
 
         /// <summary>
         /// Identificativo alternativo o aggiuntivo dell'utente utilizzatore del dispositivo associato alle credenziali di firma.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("utente_identificativo_altro")]
+        [Newtonsoft.Json.JsonProperty("utente_identificativo_altro", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Utente_identificativo_altro { get; set; }
 
         /// <summary>
         /// Identificativo (Codice Fiscale) dell'utente utilizzatore del dispositivo associato alle credenziali di firma (da SPID, CIE, CNS).
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("user_name")]
+        [Newtonsoft.Json.JsonProperty("user_name", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string User_name { get; set; }
 
         /// <summary>
         /// Stato.&lt;p&gt;Valori ammessi:&lt;ul style="margin:0"&gt;&lt;li&gt;&lt;i&gt;Attivo&lt;/i&gt; - Utilizzato per: Certificati, Dispositivi e Credenziali.&lt;/li&gt;&lt;li&gt;&lt;i&gt;Eliminato&lt;/i&gt; - Utilizzato per Certificati e Dispositivi.&lt;/li&gt;&lt;li&gt;&lt;i&gt;Nuovo&lt;/i&gt; - Utilizzato per Certificati.&lt;/li&gt;&lt;li&gt;&lt;i&gt;Revocato&lt;/i&gt; - Utilizzato per Certificati e Credenziali (eliminate).&lt;/li&gt;&lt;li&gt;&lt;i&gt;Scaduto&lt;/i&gt; - Utilizzato per Certificati.&lt;/li&gt;&lt;li&gt;&lt;i&gt;Inattivo&lt;/i&gt; - Utilizzato per Credenziali (stato assegnato a seguito del blocco del corrispondente dispositivo).&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("stato")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<Stato>))]
+        [Newtonsoft.Json.JsonProperty("stato", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public Stato Stato { get; set; }
 
         /// <summary>
         /// Elenco delle unità locali sulle quali è possibile operare.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("siti")]
+        [Newtonsoft.Json.JsonProperty("siti", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<CredentialsSito> Siti { get; set; }
 
         /// <summary>
         /// Indica se le credenziali sono abbinate direttamente al soggetto.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("is_abbinato_solo_soggetto")]
+        [Newtonsoft.Json.JsonProperty("is_abbinato_solo_soggetto", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public bool Is_abbinato_solo_soggetto { get; set; }
 
     }
@@ -4548,7 +4551,7 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// Identificativo del dispositivo.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("identifier")]
+        [Newtonsoft.Json.JsonProperty("identifier", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         [System.ComponentModel.DataAnnotations.StringLength(50, MinimumLength = 1)]
         public string Identifier { get; set; }
@@ -4556,7 +4559,7 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// Modello del dispositivo.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("model")]
+        [Newtonsoft.Json.JsonProperty("model", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         [System.ComponentModel.DataAnnotations.StringLength(50, MinimumLength = 1)]
         public string Model { get; set; }
@@ -4564,7 +4567,7 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// Produttore del dispositivo.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("manufacturer")]
+        [Newtonsoft.Json.JsonProperty("manufacturer", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         [System.ComponentModel.DataAnnotations.StringLength(50, MinimumLength = 1)]
         public string Manufacturer { get; set; }
@@ -4572,7 +4575,7 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// Nome del dispositivo.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("name")]
+        [Newtonsoft.Json.JsonProperty("name", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         [System.ComponentModel.DataAnnotations.StringLength(150, MinimumLength = 1)]
         public string Name { get; set; }
@@ -4580,7 +4583,7 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// Versione del Sistema Operativo del dispositivo.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("os_version")]
+        [Newtonsoft.Json.JsonProperty("os_version", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         [System.ComponentModel.DataAnnotations.StringLength(14, MinimumLength = 1)]
         public string Os_version { get; set; }
@@ -4588,7 +4591,7 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// Stile del dispositivo.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("form_factor")]
+        [Newtonsoft.Json.JsonProperty("form_factor", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         [System.ComponentModel.DataAnnotations.StringLength(20, MinimumLength = 1)]
         public string Form_factor { get; set; }
@@ -4596,15 +4599,15 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// Tipo di dispositivo.&lt;p&gt;Valori ammessi:&lt;ul style="margin:0"&gt;&lt;li&gt;&lt;i&gt;Physical&lt;/i&gt; - Dispositivo fisico&lt;/li&gt;&lt;li&gt;&lt;i&gt;Virtual&lt;/i&gt; - Dispositivo virtuale&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("type")]
+        [Newtonsoft.Json.JsonProperty("type", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<DeviceType>))]
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public DeviceType Type { get; set; }
 
         /// <summary>
         /// Piattaforma del dispositivo.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("platform")]
+        [Newtonsoft.Json.JsonProperty("platform", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         [System.ComponentModel.DataAnnotations.StringLength(20, MinimumLength = 1)]
         public string Platform { get; set; }
@@ -4612,7 +4615,7 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// URI di callback alla quale verranno inviati in POST i dati delle notifiche RENTRI.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("notification_callback_uri")]
+        [Newtonsoft.Json.JsonProperty("notification_callback_uri", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         [System.ComponentModel.DataAnnotations.StringLength(2000, MinimumLength = 1)]
         public string Notification_callback_uri { get; set; }
@@ -4620,7 +4623,7 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// Dizionario di parametri custom che verranno inviati, tra i dati delle notifiche, all'URI di callback.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("notification_callback_parameters")]
+        [Newtonsoft.Json.JsonProperty("notification_callback_parameters", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         public System.Collections.Generic.IDictionary<string, string> Notification_callback_parameters { get; set; } = new System.Collections.Generic.Dictionary<string, string>();
 
@@ -4636,105 +4639,105 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// Identificativo del dispositivo.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("identifier")]
+        [Newtonsoft.Json.JsonProperty("identifier", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Identifier { get; set; }
 
         /// <summary>
         /// Nome.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("name")]
+        [Newtonsoft.Json.JsonProperty("name", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Name { get; set; }
 
         /// <summary>
         /// Modello.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("model")]
+        [Newtonsoft.Json.JsonProperty("model", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Model { get; set; }
 
         /// <summary>
         /// Produttore.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("manufacturer")]
+        [Newtonsoft.Json.JsonProperty("manufacturer", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Manufacturer { get; set; }
 
         /// <summary>
         /// Versione del Sistema Operativo.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("os_version")]
+        [Newtonsoft.Json.JsonProperty("os_version", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Os_version { get; set; }
 
         /// <summary>
         /// Formato.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("form_factor")]
+        [Newtonsoft.Json.JsonProperty("form_factor", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Form_factor { get; set; }
 
         /// <summary>
         /// Tipo di dispositivo (fisico, virtuale).&lt;p&gt;Valori ammessi:&lt;ul style="margin:0"&gt;&lt;li&gt;&lt;i&gt;Physical&lt;/i&gt; - Dispositivo fisico&lt;/li&gt;&lt;li&gt;&lt;i&gt;Virtual&lt;/i&gt; - Dispositivo virtuale&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("type")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<DeviceType>))]
+        [Newtonsoft.Json.JsonProperty("type", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public DeviceType? Type { get; set; }
 
         /// <summary>
         /// Piattaforma o Sistema Operativo (Android, iOS, Windows).
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("platform")]
+        [Newtonsoft.Json.JsonProperty("platform", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Platform { get; set; }
 
         /// <summary>
         /// Data di registrazione (formato ISO 8601 UTC).
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("data_registrazione")]
+        [Newtonsoft.Json.JsonProperty("data_registrazione", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset? Data_registrazione { get; set; }
 
         /// <summary>
         /// Indica se il dispositivo è stato bloccato.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("is_banned")]
+        [Newtonsoft.Json.JsonProperty("is_banned", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public bool? Is_banned { get; set; }
 
         /// <summary>
         /// Stato.&lt;p&gt;Valori ammessi:&lt;ul style="margin:0"&gt;&lt;li&gt;&lt;i&gt;Attivo&lt;/i&gt; - Utilizzato per: Certificati, Dispositivi e Credenziali.&lt;/li&gt;&lt;li&gt;&lt;i&gt;Eliminato&lt;/i&gt; - Utilizzato per Certificati e Dispositivi.&lt;/li&gt;&lt;li&gt;&lt;i&gt;Nuovo&lt;/i&gt; - Utilizzato per Certificati.&lt;/li&gt;&lt;li&gt;&lt;i&gt;Revocato&lt;/i&gt; - Utilizzato per Certificati e Credenziali (eliminate).&lt;/li&gt;&lt;li&gt;&lt;i&gt;Scaduto&lt;/i&gt; - Utilizzato per Certificati.&lt;/li&gt;&lt;li&gt;&lt;i&gt;Inattivo&lt;/i&gt; - Utilizzato per Credenziali (stato assegnato a seguito del blocco del corrispondente dispositivo).&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("stato")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<Stato>))]
+        [Newtonsoft.Json.JsonProperty("stato", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public Stato? Stato { get; set; }
 
         /// <summary>
         /// Nome dell'app installata.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("app_name")]
+        [Newtonsoft.Json.JsonProperty("app_name", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string App_name { get; set; }
 
         /// <summary>
         /// Nome del package dell'app installata.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("app_package_name")]
+        [Newtonsoft.Json.JsonProperty("app_package_name", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string App_package_name { get; set; }
 
         /// <summary>
         /// Versione dell'app installata.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("app_version")]
+        [Newtonsoft.Json.JsonProperty("app_version", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string App_version { get; set; }
 
         /// <summary>
         /// Numero di build dell'app installata.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("app_build")]
+        [Newtonsoft.Json.JsonProperty("app_build", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string App_build { get; set; }
 
         /// <summary>
         /// URI di callback alla quale verranno inviati in POST i dati delle notifiche RENTRI.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("notification_callback_uri")]
+        [Newtonsoft.Json.JsonProperty("notification_callback_uri", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Notification_callback_uri { get; set; }
 
         /// <summary>
         /// Dizionario di parametri custom che verranno inviati, tra i dati delle notifiche, all'URI di callback.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("notification_callback_parameters")]
+        [Newtonsoft.Json.JsonProperty("notification_callback_parameters", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.IDictionary<string, string> Notification_callback_parameters { get; set; }
 
     }
@@ -4770,26 +4773,26 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// Hash del documento, in formato base 64.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("hash")]
+        [Newtonsoft.Json.JsonProperty("hash", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Hash { get; set; }
 
         /// <summary>
         /// Riferimento al documento. Per i FIR, il numero del FIR.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("reference")]
+        [Newtonsoft.Json.JsonProperty("reference", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Reference { get; set; }
 
         /// <summary>
         /// Tipo di documento.&lt;p&gt;Valori ammessi:&lt;ul style="margin:0"&gt;&lt;li&gt;&lt;i&gt;Generic&lt;/i&gt; - Documento generico.&lt;/li&gt;&lt;li&gt;&lt;i&gt;FIR&lt;/i&gt; - Formulario digitale.&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("document_type")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<DocumentType>))]
+        [Newtonsoft.Json.JsonProperty("document_type", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public DocumentType? Document_type { get; set; }
 
         /// <summary>
         /// Informazioni aggiuntive relative al documento. Per i FIR, la fase del FIR.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("info")]
+        [Newtonsoft.Json.JsonProperty("info", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Info { get; set; }
 
     }
@@ -4801,73 +4804,73 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// Versione della specifica CSC implementata.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("specs")]
+        [Newtonsoft.Json.JsonProperty("specs", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Specs { get; set; }
 
         /// <summary>
         /// Nome commerciale del servizio.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("name")]
+        [Newtonsoft.Json.JsonProperty("name", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Name { get; set; }
 
         /// <summary>
         /// L'URI del file immagine del logo del servizio.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("logo")]
+        [Newtonsoft.Json.JsonProperty("logo", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Logo { get; set; }
 
         /// <summary>
         /// Codice ISO 3166-1 del paese in cui il fornitore di servizi è stabilito.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("region")]
+        [Newtonsoft.Json.JsonProperty("region", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Region { get; set; }
 
         /// <summary>
         /// Lingua utilizzata per la risposta, specificata secondo RFC 5646.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("lang")]
+        [Newtonsoft.Json.JsonProperty("lang", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Lang { get; set; }
 
         /// <summary>
         /// Descrizione del servizio.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("description")]
+        [Newtonsoft.Json.JsonProperty("description", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Description { get; set; }
 
         /// <summary>
         /// Metodi di autenticazione supportati dal servizio.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("auth_type")]
+        [Newtonsoft.Json.JsonProperty("auth_type", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<string> Auth_type { get; set; }
 
         /// <summary>
         /// URI di base del server di autorizzazione OAuth 2.0.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("oauth2")]
+        [Newtonsoft.Json.JsonProperty("oauth2", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Oauth2 { get; set; }
 
         /// <summary>
         /// Elenco dei nomi di tutti i metodi API implementati dal servizio.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("methods")]
+        [Newtonsoft.Json.JsonProperty("methods", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<string> Methods { get; set; }
 
         /// <summary>
         /// Algoritmi di firma supportati dal servizio.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("sign_algorithms")]
+        [Newtonsoft.Json.JsonProperty("sign_algorithms", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public SignAlgorithms Sign_algorithms { get; set; }
 
         /// <summary>
         /// Formati di firma supportati dal servizio.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("signature_formats")]
+        [Newtonsoft.Json.JsonProperty("signature_formats", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public SignatureFormats Signature_formats { get; set; }
 
         /// <summary>
         /// Elenco dei livelli di conformità della firma supportati dal servizio.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("conformance_levels")]
+        [Newtonsoft.Json.JsonProperty("conformance_levels", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<string> Conformance_levels { get; set; }
 
     }
@@ -4879,26 +4882,26 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// Stato della chiave di firma.&lt;p&gt;Valori ammessi:&lt;ul style="margin:0"&gt;&lt;li&gt;&lt;i&gt;Enabled&lt;/i&gt; - Chiave abilitata ed utilizzabile per la firma.&lt;/li&gt;&lt;li&gt;&lt;i&gt;Disabled&lt;/i&gt; - Chiave disabilitata e non utilizzabile per la firma.&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("status")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<KeyStatus>))]
+        [Newtonsoft.Json.JsonProperty("status", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public KeyStatus Status { get; set; }
 
         /// <summary>
         /// Elenco degli OID degli algoritmi chiave supportati.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("algo")]
+        [Newtonsoft.Json.JsonProperty("algo", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<string> Algo { get; set; }
 
         /// <summary>
         /// Lunghezza della chiave crittografica in bit.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("len")]
+        [Newtonsoft.Json.JsonProperty("len", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public int? Len { get; set; }
 
         /// <summary>
         /// OID della curva ECDSA.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("curve")]
+        [Newtonsoft.Json.JsonProperty("curve", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Curve { get; set; }
 
     }
@@ -4919,24 +4922,24 @@ namespace GKit.RENTRI.Stubs.CaRentri
     public partial class ProblemDetails
     {
 
-        [System.Text.Json.Serialization.JsonPropertyName("type")]
+        [Newtonsoft.Json.JsonProperty("type", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Type { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("title")]
+        [Newtonsoft.Json.JsonProperty("title", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Title { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("status")]
+        [Newtonsoft.Json.JsonProperty("status", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public int? Status { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("detail")]
+        [Newtonsoft.Json.JsonProperty("detail", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Detail { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("instance")]
+        [Newtonsoft.Json.JsonProperty("instance", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Instance { get; set; }
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
 
-        [System.Text.Json.Serialization.JsonExtensionData]
+        [Newtonsoft.Json.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
@@ -4949,18 +4952,18 @@ namespace GKit.RENTRI.Stubs.CaRentri
     public partial class PushNotification
     {
 
-        [System.Text.Json.Serialization.JsonPropertyName("type")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<PushNotificationType>))]
+        [Newtonsoft.Json.JsonProperty("type", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public PushNotificationType Type { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("credentials_id")]
+        [Newtonsoft.Json.JsonProperty("credentials_id", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Credentials_id { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("device")]
+        [Newtonsoft.Json.JsonProperty("device", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         public PushNotificationDevice Device { get; set; } = new PushNotificationDevice();
 
-        [System.Text.Json.Serialization.JsonPropertyName("rentri_push_notification")]
+        [Newtonsoft.Json.JsonProperty("rentri_push_notification", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         public RentriPushNotification Rentri_push_notification { get; set; } = new RentriPushNotification();
 
@@ -4970,15 +4973,15 @@ namespace GKit.RENTRI.Stubs.CaRentri
     public partial class PushNotificationDevice
     {
 
-        [System.Text.Json.Serialization.JsonPropertyName("identifier")]
+        [Newtonsoft.Json.JsonProperty("identifier", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         public string Identifier { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("notification_callback_uri")]
+        [Newtonsoft.Json.JsonProperty("notification_callback_uri", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         public string Notification_callback_uri { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("notification_callback_parameters")]
+        [Newtonsoft.Json.JsonProperty("notification_callback_parameters", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         public System.Collections.Generic.IDictionary<string, string> Notification_callback_parameters { get; set; } = new System.Collections.Generic.Dictionary<string, string>();
 
@@ -4988,25 +4991,25 @@ namespace GKit.RENTRI.Stubs.CaRentri
     public partial class PushNotificationDeviceInfo
     {
 
-        [System.Text.Json.Serialization.JsonPropertyName("type")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<PushNotificationType>))]
+        [Newtonsoft.Json.JsonProperty("type", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public PushNotificationType Type { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("is_credentials_deletion")]
+        [Newtonsoft.Json.JsonProperty("is_credentials_deletion", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public bool Is_credentials_deletion { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("credentials_id")]
+        [Newtonsoft.Json.JsonProperty("credentials_id", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Credentials_id { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("device")]
+        [Newtonsoft.Json.JsonProperty("device", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         public PushNotificationDevice Device { get; set; } = new PushNotificationDevice();
 
-        [System.Text.Json.Serialization.JsonPropertyName("identificativo_soggetto")]
+        [Newtonsoft.Json.JsonProperty("identificativo_soggetto", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         public string Identificativo_soggetto { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("user_name")]
+        [Newtonsoft.Json.JsonProperty("user_name", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string User_name { get; set; }
 
     }
@@ -5015,11 +5018,11 @@ namespace GKit.RENTRI.Stubs.CaRentri
     public partial class PushNotificationDeviceSync
     {
 
-        [System.Text.Json.Serialization.JsonPropertyName("type")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<PushNotificationType>))]
+        [Newtonsoft.Json.JsonProperty("type", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public PushNotificationType Type { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("device")]
+        [Newtonsoft.Json.JsonProperty("device", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         public PushNotificationDevice Device { get; set; } = new PushNotificationDevice();
 
@@ -5044,25 +5047,25 @@ namespace GKit.RENTRI.Stubs.CaRentri
     public partial class RentriPushNotification
     {
 
-        [System.Text.Json.Serialization.JsonPropertyName("action")]
+        [Newtonsoft.Json.JsonProperty("action", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Action { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("handle")]
+        [Newtonsoft.Json.JsonProperty("handle", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Handle { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("otp")]
+        [Newtonsoft.Json.JsonProperty("otp", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Otp { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("expires_in")]
+        [Newtonsoft.Json.JsonProperty("expires_in", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public int? Expires_in { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("credentials_id")]
+        [Newtonsoft.Json.JsonProperty("credentials_id", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Credentials_id { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("title")]
+        [Newtonsoft.Json.JsonProperty("title", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Title { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("body")]
+        [Newtonsoft.Json.JsonProperty("body", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Body { get; set; }
 
     }
@@ -5074,21 +5077,21 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// Token della richiesta di reset.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("token")]
+        [Newtonsoft.Json.JsonProperty("token", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
         public System.Guid Token { get; set; }
 
         /// <summary>
         /// Nuovo PIN.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("new_pin")]
+        [Newtonsoft.Json.JsonProperty("new_pin", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.StringLength(6, MinimumLength = 6)]
         public string New_pin { get; set; }
 
         /// <summary>
         /// Annullamento della procedura.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("abort")]
+        [Newtonsoft.Json.JsonProperty("abort", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public bool Abort { get; set; }
 
     }
@@ -5100,13 +5103,13 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// Elenco degli algoritmi di firma supportati dal servizio.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("algos")]
+        [Newtonsoft.Json.JsonProperty("algos", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<string> Algos { get; set; }
 
         /// <summary>
         /// Elenco degli eventuali parametri di firma.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("algo_params")]
+        [Newtonsoft.Json.JsonProperty("algo_params", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<string> Algo_params { get; set; }
 
     }
@@ -5118,13 +5121,13 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// Elenco dei formati di firma supportati dal servizio.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("formats")]
+        [Newtonsoft.Json.JsonProperty("formats", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<string> Formats { get; set; }
 
         /// <summary>
         /// Elenco delle proprietà riguardanti la busta firmata.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("envelope_properties")]
+        [Newtonsoft.Json.JsonProperty("envelope_properties", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<System.Collections.Generic.ICollection<string>> Envelope_properties { get; set; }
 
     }
@@ -5166,7 +5169,7 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// Identificativo delle credenziali di firma.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("credentials_id")]
+        [Newtonsoft.Json.JsonProperty("credentials_id", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         [System.ComponentModel.DataAnnotations.StringLength(9, MinimumLength = 9)]
         public string Credentials_id { get; set; }
@@ -5174,14 +5177,14 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// SAD (Signature Activation Data).
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("sad")]
+        [Newtonsoft.Json.JsonProperty("sad", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         public string Sad { get; set; }
 
         /// <summary>
         /// Elenco dei codici hash da firmare in formato base 64. Attualmente è consentito l'invio di un solo codice hash.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("hashes")]
+        [Newtonsoft.Json.JsonProperty("hashes", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         [System.ComponentModel.DataAnnotations.MinLength(1)]
         [System.ComponentModel.DataAnnotations.MaxLength(1)]
@@ -5190,14 +5193,14 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// OID dell'algoritmo utilizzato per calcolare l'hash. Questo parametro deve essere omesso o ignorato se l'algoritmo hash è implicitamente specificato dal parametro SignAlgo.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("hash_algo")]
+        [Newtonsoft.Json.JsonProperty("hash_algo", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.RegularExpression(@"^2\.16\.840\.1\.101\.3\.4\.2\.1$")]
         public string Hash_algo { get; set; }
 
         /// <summary>
         /// OID dell'algoritmo da utilizzare per la firma. Deve essere uno dei valori consentiti dalle credenziali.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("sign_algo")]
+        [Newtonsoft.Json.JsonProperty("sign_algo", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         [System.ComponentModel.DataAnnotations.RegularExpression(@"^1\.2\.840\.10045\.4\.3\.2$")]
         public string Sign_algo { get; set; }
@@ -5205,13 +5208,13 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// I parametri per l'algoritmo di firma, se richiesti dall'algoritmo di firma.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("sign_algo_params")]
+        [Newtonsoft.Json.JsonProperty("sign_algo_params", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Sign_algo_params { get; set; }
 
         /// <summary>
         /// Dati arbitrari dell'applicazione di firma.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("client_data")]
+        [Newtonsoft.Json.JsonProperty("client_data", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Client_data { get; set; }
 
     }
@@ -5223,7 +5226,7 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// Lista delle firme applicate.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("signatures")]
+        [Newtonsoft.Json.JsonProperty("signatures", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<string> Signatures { get; set; }
 
     }
@@ -5262,14 +5265,14 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// Stato dell'API&lt;p&gt;Valori ammessi:&lt;ul style="margin:0"&gt;&lt;li&gt;&lt;i&gt;Ok&lt;/i&gt; - API regolarmente funzionante&lt;/li&gt;&lt;li&gt;&lt;i&gt;Warning&lt;/i&gt; - API funzionante, ma con probabili disservizi come indicato nei warning&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("status")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<StatusResponseEnum>))]
+        [Newtonsoft.Json.JsonProperty("status", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public StatusResponseEnum Status { get; set; }
 
         /// <summary>
         /// Eventuali messaggi di warning relativi allo stato dell'API
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("warnings")]
+        [Newtonsoft.Json.JsonProperty("warnings", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<string> Warnings { get; set; }
 
     }
@@ -5296,14 +5299,14 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// Codice Fiscale di un Operatore iscritto.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("identificativo_soggetto")]
+        [Newtonsoft.Json.JsonProperty("identificativo_soggetto", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         public string Identificativo_soggetto { get; set; }
 
         /// <summary>
         /// Identificativo del dispositivo.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("identifier")]
+        [Newtonsoft.Json.JsonProperty("identifier", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         [System.ComponentModel.DataAnnotations.StringLength(50, MinimumLength = 1)]
         public string Identifier { get; set; }
@@ -5311,7 +5314,7 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// Nome.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("name")]
+        [Newtonsoft.Json.JsonProperty("name", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         [System.ComponentModel.DataAnnotations.StringLength(150, MinimumLength = 1)]
         public string Name { get; set; }
@@ -5319,7 +5322,7 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// Versione del Sistema Operativo.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("os_version")]
+        [Newtonsoft.Json.JsonProperty("os_version", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         [System.ComponentModel.DataAnnotations.StringLength(14, MinimumLength = 1)]
         public string Os_version { get; set; }
@@ -5327,7 +5330,7 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// URI di callback alla quale verranno inviati in POST i dati delle notifiche RENTRI.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("notification_callback_uri")]
+        [Newtonsoft.Json.JsonProperty("notification_callback_uri", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         [System.ComponentModel.DataAnnotations.StringLength(2000, MinimumLength = 1)]
         public string Notification_callback_uri { get; set; }
@@ -5335,14 +5338,14 @@ namespace GKit.RENTRI.Stubs.CaRentri
         /// <summary>
         /// Dizionario di parametri custom che verranno inviati, tra i dati delle notifiche, all'URI di callback.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("notification_callback_parameters")]
+        [Newtonsoft.Json.JsonProperty("notification_callback_parameters", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         public System.Collections.Generic.IDictionary<string, string> Notification_callback_parameters { get; set; } = new System.Collections.Generic.Dictionary<string, string>();
 
         /// <summary>
         /// Informazioni sulla App installata.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("app_info")]
+        [Newtonsoft.Json.JsonProperty("app_info", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         public AppInfo App_info { get; set; } = new AppInfo();
 

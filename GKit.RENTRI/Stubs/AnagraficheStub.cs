@@ -32,8 +32,8 @@ namespace GKit.RENTRI.Stubs.Anagrafiche
         #pragma warning restore 8618
 
         private System.Net.Http.HttpClient _httpClient;
-        private static System.Lazy<System.Text.Json.JsonSerializerOptions> _settings = new System.Lazy<System.Text.Json.JsonSerializerOptions>(CreateSerializerSettings, true);
-        private System.Text.Json.JsonSerializerOptions _instanceSettings;
+        private static System.Lazy<Newtonsoft.Json.JsonSerializerSettings> _settings = new System.Lazy<Newtonsoft.Json.JsonSerializerSettings>(CreateSerializerSettings, true);
+        private Newtonsoft.Json.JsonSerializerSettings _instanceSettings;
 
     #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         public AnagraficheStub(System.Net.Http.HttpClient httpClient)
@@ -44,9 +44,9 @@ namespace GKit.RENTRI.Stubs.Anagrafiche
             Initialize();
         }
 
-        private static System.Text.Json.JsonSerializerOptions CreateSerializerSettings()
+        private static Newtonsoft.Json.JsonSerializerSettings CreateSerializerSettings()
         {
-            var settings = new System.Text.Json.JsonSerializerOptions();
+            var settings = new Newtonsoft.Json.JsonSerializerSettings();
             UpdateJsonSerializerSettings(settings);
             return settings;
         }
@@ -62,9 +62,9 @@ namespace GKit.RENTRI.Stubs.Anagrafiche
             }
         }
 
-        protected System.Text.Json.JsonSerializerOptions JsonSerializerSettings { get { return _instanceSettings ?? _settings.Value; } }
+        protected Newtonsoft.Json.JsonSerializerSettings JsonSerializerSettings { get { return _instanceSettings ?? _settings.Value; } }
 
-        static partial void UpdateJsonSerializerSettings(System.Text.Json.JsonSerializerOptions settings);
+        static partial void UpdateJsonSerializerSettings(Newtonsoft.Json.JsonSerializerSettings settings);
 
         partial void Initialize();
 
@@ -1381,8 +1381,8 @@ namespace GKit.RENTRI.Stubs.Anagrafiche
             {
                 using (var request_ = new System.Net.Http.HttpRequestMessage())
                 {
-                    var json_ = System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(body, JsonSerializerSettings);
-                    var content_ = new System.Net.Http.ByteArrayContent(json_);
+                    var json_ = Newtonsoft.Json.JsonConvert.SerializeObject(body, JsonSerializerSettings);
+                    var content_ = new System.Net.Http.StringContent(json_);
                     content_.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json");
                     request_.Content = content_;
                     request_.Method = new System.Net.Http.HttpMethod("POST");
@@ -1656,8 +1656,8 @@ namespace GKit.RENTRI.Stubs.Anagrafiche
             {
                 using (var request_ = new System.Net.Http.HttpRequestMessage())
                 {
-                    var json_ = System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(body, JsonSerializerSettings);
-                    var content_ = new System.Net.Http.ByteArrayContent(json_);
+                    var json_ = Newtonsoft.Json.JsonConvert.SerializeObject(body, JsonSerializerSettings);
+                    var content_ = new System.Net.Http.StringContent(json_);
                     content_.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json");
                     request_.Content = content_;
                     request_.Method = new System.Net.Http.HttpMethod("PUT");
@@ -2701,8 +2701,8 @@ namespace GKit.RENTRI.Stubs.Anagrafiche
             {
                 using (var request_ = new System.Net.Http.HttpRequestMessage())
                 {
-                    var json_ = System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(body, JsonSerializerSettings);
-                    var content_ = new System.Net.Http.ByteArrayContent(json_);
+                    var json_ = Newtonsoft.Json.JsonConvert.SerializeObject(body, JsonSerializerSettings);
+                    var content_ = new System.Net.Http.StringContent(json_);
                     content_.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json");
                     request_.Content = content_;
                     request_.Method = new System.Net.Http.HttpMethod("POST");
@@ -2976,8 +2976,8 @@ namespace GKit.RENTRI.Stubs.Anagrafiche
             {
                 using (var request_ = new System.Net.Http.HttpRequestMessage())
                 {
-                    var json_ = System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(body, JsonSerializerSettings);
-                    var content_ = new System.Net.Http.ByteArrayContent(json_);
+                    var json_ = Newtonsoft.Json.JsonConvert.SerializeObject(body, JsonSerializerSettings);
+                    var content_ = new System.Net.Http.StringContent(json_);
                     content_.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json");
                     request_.Content = content_;
                     request_.Method = new System.Net.Http.HttpMethod("PUT");
@@ -3537,10 +3537,10 @@ namespace GKit.RENTRI.Stubs.Anagrafiche
                 var responseText = await ReadAsStringAsync(response.Content, cancellationToken).ConfigureAwait(false);
                 try
                 {
-                    var typedBody = System.Text.Json.JsonSerializer.Deserialize<T>(responseText, JsonSerializerSettings);
+                    var typedBody = Newtonsoft.Json.JsonConvert.DeserializeObject<T>(responseText, JsonSerializerSettings);
                     return new ObjectResponseResult<T>(typedBody, responseText);
                 }
-                catch (System.Text.Json.JsonException exception)
+                catch (Newtonsoft.Json.JsonException exception)
                 {
                     var message = "Could not deserialize the response body string as " + typeof(T).FullName + ".";
                     throw new ApiException(message, (int)response.StatusCode, responseText, headers, exception);
@@ -3551,12 +3551,15 @@ namespace GKit.RENTRI.Stubs.Anagrafiche
                 try
                 {
                     using (var responseStream = await ReadAsStreamAsync(response.Content, cancellationToken).ConfigureAwait(false))
+                    using (var streamReader = new System.IO.StreamReader(responseStream))
+                    using (var jsonTextReader = new Newtonsoft.Json.JsonTextReader(streamReader))
                     {
-                        var typedBody = await System.Text.Json.JsonSerializer.DeserializeAsync<T>(responseStream, JsonSerializerSettings, cancellationToken).ConfigureAwait(false);
+                        var serializer = Newtonsoft.Json.JsonSerializer.Create(JsonSerializerSettings);
+                        var typedBody = serializer.Deserialize<T>(jsonTextReader);
                         return new ObjectResponseResult<T>(typedBody, string.Empty);
                     }
                 }
-                catch (System.Text.Json.JsonException exception)
+                catch (Newtonsoft.Json.JsonException exception)
                 {
                     var message = "Could not deserialize the response body stream as " + typeof(T).FullName + ".";
                     throw new ApiException(message, (int)response.StatusCode, string.Empty, headers, exception);
@@ -3647,14 +3650,14 @@ namespace GKit.RENTRI.Stubs.Anagrafiche
     public partial class AutAlboCategoriaModel
     {
 
-        [System.Text.Json.Serialization.JsonPropertyName("categoria")]
+        [Newtonsoft.Json.JsonProperty("categoria", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Categoria { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("classe")]
+        [Newtonsoft.Json.JsonProperty("classe", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Classe { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("stato")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<StatiCatAlbo>))]
+        [Newtonsoft.Json.JsonProperty("stato", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public StatiCatAlbo Stato { get; set; }
 
     }
@@ -3663,19 +3666,19 @@ namespace GKit.RENTRI.Stubs.Anagrafiche
     public partial class AutAlboModel
     {
 
-        [System.Text.Json.Serialization.JsonPropertyName("sezione")]
+        [Newtonsoft.Json.JsonProperty("sezione", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Sezione { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("numero_iscrizione")]
+        [Newtonsoft.Json.JsonProperty("numero_iscrizione", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public int Numero_iscrizione { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("attiva")]
+        [Newtonsoft.Json.JsonProperty("attiva", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public bool Attiva { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("data_iscrizione")]
+        [Newtonsoft.Json.JsonProperty("data_iscrizione", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset? Data_iscrizione { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("categorie")]
+        [Newtonsoft.Json.JsonProperty("categorie", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<AutAlboCategoriaModel> Categorie { get; set; }
 
     }
@@ -3687,24 +3690,23 @@ namespace GKit.RENTRI.Stubs.Anagrafiche
         /// <summary>
         /// &lt;p&gt;Valori ammessi:&lt;ul style="margin:0"&gt;&lt;li&gt;&lt;i&gt;RecSmalArt208&lt;/i&gt; - Autorizzazione unica per i nuovi impianti di recupero/smaltimento - art. 208 decreto legislativo 3 aprile 2006, n. 152.&lt;/li&gt;&lt;li&gt;&lt;i&gt;RecSmalImpMobiliArt208&lt;/i&gt; - Autorizzazione all'esercizio di operazioni di recupero e/o smaltimento dei rifiuti con impianti mobili - art.208, comma 15 del decreto legislativo 3 aprile 2006, n. 152.&lt;/li&gt;&lt;li&gt;&lt;i&gt;RicercaSperimentazione&lt;/i&gt; - Autorizzazione alla realizzazione di impianti di ricerca e sperimentazione - art. 211 del decreto legislativo 3 aprile 2006, n. 152.&lt;/li&gt;&lt;li&gt;&lt;i&gt;AIA&lt;/i&gt; - Autorizzazione Integrata Ambientale - artt. 29-ter e 213 del decreto legislativo 3 aprile 2006, n. 152.&lt;/li&gt;&lt;li&gt;&lt;i&gt;RecProcSemplificata&lt;/i&gt; - Operazioni di recupero mediante Comunicazione in "Procedura Semplificata" - artt.214 e 216 del decreto legislativo 3 aprile 2006, n. 152e autorizzazione unica ambientale (AUA) - Decreto Presidente Repubblica n. 59 del 13 marzo 2013.&lt;/li&gt;&lt;li&gt;&lt;i&gt;OpBonifica&lt;/i&gt; - Provvedimenti che autorizzano le operazioni di bonifica, ai sensi del comma 7 dell’art. 242 del decreto legislativo 3 aprile 2006, n. 152.&lt;/li&gt;&lt;li&gt;&lt;i&gt;Straordinario&lt;/i&gt; - Autorizzazioni “straordinarie” art. 191 del decreto legislativo 3 aprile 2006, n. 152 (attività svolte in regime di ordinanza contingibile e urgente)&lt;/li&gt;&lt;li&gt;&lt;i&gt;ComTrattamentoAcqueReflue&lt;/i&gt; - Comunicazione al trattamento di rifiuti e materiali in impianti di trattamento di acque reflue urbane - art. 110 c.3 del D.Lgs. 152/2006&lt;/li&gt;&lt;li&gt;&lt;i&gt;AutTrattamentoAcqueReflue&lt;/i&gt; - Autorizzazione  al trattamento di rifiuti liquidi in impianti di trattamento di acque reflue urbane - artt. 110 c.2 con provvedimento secondo artt. 208 oppure 29-ter e 213 del D.Lgs. 152/2006&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("tipo_autorizzazione")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<TipiAutorizzazione>))]
+        [Newtonsoft.Json.JsonProperty("tipo_autorizzazione", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public TipiAutorizzazione? Tipo_autorizzazione { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("autorizzazione_rif")]
+        [Newtonsoft.Json.JsonProperty("autorizzazione_rif", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Autorizzazione_rif { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("data_rilascio")]
+        [Newtonsoft.Json.JsonProperty("data_rilascio", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset? Data_rilascio { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("data_scadenza")]
+        [Newtonsoft.Json.JsonProperty("data_scadenza", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset? Data_scadenza { get; set; }
 
         /// <summary>
         /// &lt;p&gt;Valori ammessi:&lt;ul style="margin:0"&gt;&lt;li&gt;&lt;i&gt;R1&lt;/i&gt; - Utilizzazione principale come combustibile o come altro mezzo per produrre energia&lt;/li&gt;&lt;li&gt;&lt;i&gt;R2&lt;/i&gt; - Rigenerazione/recupero di solventi&lt;/li&gt;&lt;li&gt;&lt;i&gt;R3&lt;/i&gt; - Riciclo/recupero delle sostanze organiche non utilizzate come solventi&lt;/li&gt;&lt;li&gt;&lt;i&gt;R4&lt;/i&gt; - Riciclo/recupero dei metalli e dei composti metallici&lt;/li&gt;&lt;li&gt;&lt;i&gt;R5&lt;/i&gt; - Riciclo/recupero di altre sostanze inorganiche&lt;/li&gt;&lt;li&gt;&lt;i&gt;R6&lt;/i&gt; - Rigenerazione degli acidi o delle basi&lt;/li&gt;&lt;li&gt;&lt;i&gt;R7&lt;/i&gt; - Recupero dei prodotti che servono a captare gli inquinanti&lt;/li&gt;&lt;li&gt;&lt;i&gt;R8&lt;/i&gt; - Recupero dei prodotti provenienti dai catalizzatori&lt;/li&gt;&lt;li&gt;&lt;i&gt;R9&lt;/i&gt; - Rigenerazione o altri reimpieghi degli oli&lt;/li&gt;&lt;li&gt;&lt;i&gt;R10&lt;/i&gt; - Spandimento sul suolo a beneficio dell'agricoltura o dell'ecologia&lt;/li&gt;&lt;li&gt;&lt;i&gt;R11&lt;/i&gt; - Utilizzazione di rifiuti ottenuti da una delle operazioni indicate da R1 a R10&lt;/li&gt;&lt;li&gt;&lt;i&gt;R12&lt;/i&gt; - Scambio di rifiuti per sottoporli a una delle operazioni indicate da R1 a R11&lt;/li&gt;&lt;li&gt;&lt;i&gt;R13&lt;/i&gt; - Messa in riserva di rifiuti per sottoporli a una delle operazioni indicate nei punti da R1 a R12&lt;/li&gt;&lt;li&gt;&lt;i&gt;D1&lt;/i&gt; - Deposito sul o nel suolo&lt;/li&gt;&lt;li&gt;&lt;i&gt;D2&lt;/i&gt; - Trattamento in ambiente terrestre&lt;/li&gt;&lt;li&gt;&lt;i&gt;D3&lt;/i&gt; - Iniezioni in profondità&lt;/li&gt;&lt;li&gt;&lt;i&gt;D4&lt;/i&gt; - Lagunaggio&lt;/li&gt;&lt;li&gt;&lt;i&gt;D5&lt;/i&gt; - Messa in discarica specialmente allestita&lt;/li&gt;&lt;li&gt;&lt;i&gt;D6&lt;/i&gt; - Scarico dei rifiuti solidi nell'ambiente idrico eccetto l'immersione&lt;/li&gt;&lt;li&gt;&lt;i&gt;D7&lt;/i&gt; - Immersione, compreso il seppellimento nel sottosuolo marino&lt;/li&gt;&lt;li&gt;&lt;i&gt;D8&lt;/i&gt; - Trattamento biologico non specificato altrove nel presente allegato&lt;/li&gt;&lt;li&gt;&lt;i&gt;D9&lt;/i&gt; - Trattamento fisico-chimico non specificato altrove nel presente allegato&lt;/li&gt;&lt;li&gt;&lt;i&gt;D10&lt;/i&gt; - Incenerimento a terra&lt;/li&gt;&lt;li&gt;&lt;i&gt;D11&lt;/i&gt; - Incenerimento in mare&lt;/li&gt;&lt;li&gt;&lt;i&gt;D12&lt;/i&gt; - Deposito permanente&lt;/li&gt;&lt;li&gt;&lt;i&gt;D13&lt;/i&gt; - Raggruppamento preliminare prima di una delle operazioni di cui ai punti da D1 a D12&lt;/li&gt;&lt;li&gt;&lt;i&gt;D14&lt;/i&gt; - Ricondizionamento preliminare prima di una delle operazioni di cui ai punti da D1 a D13&lt;/li&gt;&lt;li&gt;&lt;i&gt;D15&lt;/i&gt; - Deposito preliminare prima di una delle operazioni di cui ai punti da D1 a D14&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("attivita_recupero_smaltimento")]
-        // TODO(system.text.json): Add ItemConverterType with enum converter when supported
+        [Newtonsoft.Json.JsonProperty("attivita_recupero_smaltimento", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore, ItemConverterType = typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public System.Collections.Generic.ICollection<OperazioniRecuperoSmaltimento> Attivita_recupero_smaltimento { get; set; }
 
     }
@@ -3718,7 +3720,7 @@ namespace GKit.RENTRI.Stubs.Anagrafiche
         /// <br/>
         /// <br/>Per recuperare i numeri di iscrizione attribuiti alle unità locali è possibile utilizzare /anagrafiche/v1.0/operatore/{num_iscr}/siti.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("num_iscr_sito")]
+        [Newtonsoft.Json.JsonProperty("num_iscr_sito", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         public string Num_iscr_sito { get; set; }
 
@@ -3727,8 +3729,7 @@ namespace GKit.RENTRI.Stubs.Anagrafiche
         /// <br/>
         /// <br/>Deve contenere almeno un'attività coerente con quelle previste dall'unità locale indicata in num_iscr_sito, secondo quanto dichiarato in fase di iscrizione o a seguito dell'ultima variazione.&lt;p&gt;Valori ammessi:&lt;ul style="margin:0"&gt;&lt;li&gt;&lt;i&gt;CentroRaccolta&lt;/i&gt; - Centro di raccolta&lt;/li&gt;&lt;li&gt;&lt;i&gt;Produzione&lt;/i&gt; - Produzione di rifiuti&lt;/li&gt;&lt;li&gt;&lt;i&gt;Recupero&lt;/i&gt; - Recupero di rifiuti&lt;/li&gt;&lt;li&gt;&lt;i&gt;Smaltimento&lt;/i&gt; - Smaltimento di rifiuti&lt;/li&gt;&lt;li&gt;&lt;i&gt;Trasporto&lt;/i&gt; - Trasporto di rifiuti&lt;/li&gt;&lt;li&gt;&lt;i&gt;IntermediazioneSenzaDetenzione&lt;/i&gt; - Intermediazione e commercio di rifiuti senza detenzione&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("attivita")]
-        // TODO(system.text.json): Add ItemConverterType with enum converter when supported
+        [Newtonsoft.Json.JsonProperty("attivita", Required = Newtonsoft.Json.Required.Always, ItemConverterType = typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         [System.ComponentModel.DataAnnotations.Required]
         [System.ComponentModel.DataAnnotations.MinLength(1)]
         public System.Collections.Generic.ICollection<Attivita> Attivita { get; set; } = new System.Collections.ObjectModel.Collection<Attivita>();
@@ -3736,7 +3737,7 @@ namespace GKit.RENTRI.Stubs.Anagrafiche
         /// <summary>
         /// Descrizione del registro
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("descrizione")]
+        [Newtonsoft.Json.JsonProperty("descrizione", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.StringLength(250)]
         public string Descrizione { get; set; }
 
@@ -3746,8 +3747,7 @@ namespace GKit.RENTRI.Stubs.Anagrafiche
         /// <br/>Richiesto solamente se attivita contiene "Recupero" e/o "Smaltimento". In tal caso deve contenere i codici di recupero/smaltimento 
         /// <br/>che sono stati dichiarati per l'unità locale in fase di iscrizione o a seguito dell'ultima variazione.&lt;p&gt;Valori ammessi:&lt;ul style="margin:0"&gt;&lt;li&gt;&lt;i&gt;R1&lt;/i&gt; - Utilizzazione principale come combustibile o come altro mezzo per produrre energia&lt;/li&gt;&lt;li&gt;&lt;i&gt;R2&lt;/i&gt; - Rigenerazione/recupero di solventi&lt;/li&gt;&lt;li&gt;&lt;i&gt;R3&lt;/i&gt; - Riciclo/recupero delle sostanze organiche non utilizzate come solventi&lt;/li&gt;&lt;li&gt;&lt;i&gt;R4&lt;/i&gt; - Riciclo/recupero dei metalli e dei composti metallici&lt;/li&gt;&lt;li&gt;&lt;i&gt;R5&lt;/i&gt; - Riciclo/recupero di altre sostanze inorganiche&lt;/li&gt;&lt;li&gt;&lt;i&gt;R6&lt;/i&gt; - Rigenerazione degli acidi o delle basi&lt;/li&gt;&lt;li&gt;&lt;i&gt;R7&lt;/i&gt; - Recupero dei prodotti che servono a captare gli inquinanti&lt;/li&gt;&lt;li&gt;&lt;i&gt;R8&lt;/i&gt; - Recupero dei prodotti provenienti dai catalizzatori&lt;/li&gt;&lt;li&gt;&lt;i&gt;R9&lt;/i&gt; - Rigenerazione o altri reimpieghi degli oli&lt;/li&gt;&lt;li&gt;&lt;i&gt;R10&lt;/i&gt; - Spandimento sul suolo a beneficio dell'agricoltura o dell'ecologia&lt;/li&gt;&lt;li&gt;&lt;i&gt;R11&lt;/i&gt; - Utilizzazione di rifiuti ottenuti da una delle operazioni indicate da R1 a R10&lt;/li&gt;&lt;li&gt;&lt;i&gt;R12&lt;/i&gt; - Scambio di rifiuti per sottoporli a una delle operazioni indicate da R1 a R11&lt;/li&gt;&lt;li&gt;&lt;i&gt;R13&lt;/i&gt; - Messa in riserva di rifiuti per sottoporli a una delle operazioni indicate nei punti da R1 a R12&lt;/li&gt;&lt;li&gt;&lt;i&gt;D1&lt;/i&gt; - Deposito sul o nel suolo&lt;/li&gt;&lt;li&gt;&lt;i&gt;D2&lt;/i&gt; - Trattamento in ambiente terrestre&lt;/li&gt;&lt;li&gt;&lt;i&gt;D3&lt;/i&gt; - Iniezioni in profondità&lt;/li&gt;&lt;li&gt;&lt;i&gt;D4&lt;/i&gt; - Lagunaggio&lt;/li&gt;&lt;li&gt;&lt;i&gt;D5&lt;/i&gt; - Messa in discarica specialmente allestita&lt;/li&gt;&lt;li&gt;&lt;i&gt;D6&lt;/i&gt; - Scarico dei rifiuti solidi nell'ambiente idrico eccetto l'immersione&lt;/li&gt;&lt;li&gt;&lt;i&gt;D7&lt;/i&gt; - Immersione, compreso il seppellimento nel sottosuolo marino&lt;/li&gt;&lt;li&gt;&lt;i&gt;D8&lt;/i&gt; - Trattamento biologico non specificato altrove nel presente allegato&lt;/li&gt;&lt;li&gt;&lt;i&gt;D9&lt;/i&gt; - Trattamento fisico-chimico non specificato altrove nel presente allegato&lt;/li&gt;&lt;li&gt;&lt;i&gt;D10&lt;/i&gt; - Incenerimento a terra&lt;/li&gt;&lt;li&gt;&lt;i&gt;D11&lt;/i&gt; - Incenerimento in mare&lt;/li&gt;&lt;li&gt;&lt;i&gt;D12&lt;/i&gt; - Deposito permanente&lt;/li&gt;&lt;li&gt;&lt;i&gt;D13&lt;/i&gt; - Raggruppamento preliminare prima di una delle operazioni di cui ai punti da D1 a D12&lt;/li&gt;&lt;li&gt;&lt;i&gt;D14&lt;/i&gt; - Ricondizionamento preliminare prima di una delle operazioni di cui ai punti da D1 a D13&lt;/li&gt;&lt;li&gt;&lt;i&gt;D15&lt;/i&gt; - Deposito preliminare prima di una delle operazioni di cui ai punti da D1 a D14&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("attivita_rec_smalt")]
-        // TODO(system.text.json): Add ItemConverterType with enum converter when supported
+        [Newtonsoft.Json.JsonProperty("attivita_rec_smalt", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore, ItemConverterType = typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public System.Collections.Generic.ICollection<OperazioniRecuperoSmaltimento> Attivita_rec_smalt { get; set; }
 
     }
@@ -3756,7 +3756,7 @@ namespace GKit.RENTRI.Stubs.Anagrafiche
     public partial class CreateRegistroResponse
     {
 
-        [System.Text.Json.Serialization.JsonPropertyName("identificativo")]
+        [Newtonsoft.Json.JsonProperty("identificativo", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Identificativo { get; set; }
 
     }
@@ -3770,7 +3770,7 @@ namespace GKit.RENTRI.Stubs.Anagrafiche
         /// <br/>
         /// <br/>Per recuperare i numeri di iscrizione attribuiti alle unità locali è possibile utilizzare /anagrafiche/v1.0/soggetto-delegato/{num_iscr_ass}/siti.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("num_iscr_sito")]
+        [Newtonsoft.Json.JsonProperty("num_iscr_sito", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         public string Num_iscr_sito { get; set; }
 
@@ -3779,14 +3779,14 @@ namespace GKit.RENTRI.Stubs.Anagrafiche
         /// <br/>
         /// <br/>Per recuperare il numero iscrizione soggetto delegato è possibile utilizzare h/anagrafiche/v1.0/soggetto-delegato.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("num_iscr_ass")]
+        [Newtonsoft.Json.JsonProperty("num_iscr_ass", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         public string Num_iscr_ass { get; set; }
 
         /// <summary>
         /// Descrizione del registro
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("descrizione")]
+        [Newtonsoft.Json.JsonProperty("descrizione", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         [System.ComponentModel.DataAnnotations.StringLength(250, MinimumLength = 1)]
         public string Descrizione { get; set; }
@@ -3800,19 +3800,19 @@ namespace GKit.RENTRI.Stubs.Anagrafiche
         /// <summary>
         /// Nome del file
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("nome_file")]
+        [Newtonsoft.Json.JsonProperty("nome_file", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Nome_file { get; set; }
 
         /// <summary>
         /// Tipo MIME del file
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("mime")]
+        [Newtonsoft.Json.JsonProperty("mime", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Mime { get; set; }
 
         /// <summary>
         /// Contenuto del file
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("content")]
+        [Newtonsoft.Json.JsonProperty("content", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public byte[] Content { get; set; }
 
     }
@@ -3824,93 +3824,93 @@ namespace GKit.RENTRI.Stubs.Anagrafiche
     public partial class OperatoreModel
     {
 
-        [System.Text.Json.Serialization.JsonPropertyName("num_iscr")]
+        [Newtonsoft.Json.JsonProperty("num_iscr", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Num_iscr { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("profilo_soggetto")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<ProfiliSoggetto>))]
+        [Newtonsoft.Json.JsonProperty("profilo_soggetto", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public ProfiliSoggetto Profilo_soggetto { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("data_iscrizione")]
+        [Newtonsoft.Json.JsonProperty("data_iscrizione", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset? Data_iscrizione { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("identificativo")]
+        [Newtonsoft.Json.JsonProperty("identificativo", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Identificativo { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("ipa")]
+        [Newtonsoft.Json.JsonProperty("ipa", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Ipa { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("denominazione")]
+        [Newtonsoft.Json.JsonProperty("denominazione", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Denominazione { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("forma_giuridica_id")]
+        [Newtonsoft.Json.JsonProperty("forma_giuridica_id", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Forma_giuridica_id { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("piva")]
+        [Newtonsoft.Json.JsonProperty("piva", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Piva { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("cciaarea")]
+        [Newtonsoft.Json.JsonProperty("cciaarea", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Cciaarea { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("nrea")]
+        [Newtonsoft.Json.JsonProperty("nrea", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Nrea { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("data_iscrizione_ri")]
+        [Newtonsoft.Json.JsonProperty("data_iscrizione_ri", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset? Data_iscrizione_ri { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("stato_impresa_ri")]
+        [Newtonsoft.Json.JsonProperty("stato_impresa_ri", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Stato_impresa_ri { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("dipendenti_ri")]
+        [Newtonsoft.Json.JsonProperty("dipendenti_ri", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public int? Dipendenti_ri { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("data_rilevazione_dipendenti_ri")]
+        [Newtonsoft.Json.JsonProperty("data_rilevazione_dipendenti_ri", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset? Data_rilevazione_dipendenti_ri { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("nazione_slid")]
+        [Newtonsoft.Json.JsonProperty("nazione_slid", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Nazione_slid { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("provincia_slid")]
+        [Newtonsoft.Json.JsonProperty("provincia_slid", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Provincia_slid { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("comune_slid")]
+        [Newtonsoft.Json.JsonProperty("comune_slid", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Comune_slid { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("citta_sl")]
+        [Newtonsoft.Json.JsonProperty("citta_sl", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Citta_sl { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("indirizzo_sl")]
+        [Newtonsoft.Json.JsonProperty("indirizzo_sl", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Indirizzo_sl { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("civico_sl")]
+        [Newtonsoft.Json.JsonProperty("civico_sl", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Civico_sl { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("capsl")]
+        [Newtonsoft.Json.JsonProperty("capsl", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Capsl { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("pec")]
+        [Newtonsoft.Json.JsonProperty("pec", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Pec { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("cod_fisc_lr")]
+        [Newtonsoft.Json.JsonProperty("cod_fisc_lr", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Cod_fisc_lr { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("cognome_lr")]
+        [Newtonsoft.Json.JsonProperty("cognome_lr", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Cognome_lr { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("nome_lr")]
+        [Newtonsoft.Json.JsonProperty("nome_lr", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Nome_lr { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("dipendenti")]
+        [Newtonsoft.Json.JsonProperty("dipendenti", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public int? Dipendenti { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("data_ultima_visura")]
+        [Newtonsoft.Json.JsonProperty("data_ultima_visura", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset? Data_ultima_visura { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("flag_esonerato_iscr_albo")]
+        [Newtonsoft.Json.JsonProperty("flag_esonerato_iscr_albo", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public int? Flag_esonerato_iscr_albo { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("stato")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<Stati>))]
+        [Newtonsoft.Json.JsonProperty("stato", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public Stati Stato { get; set; }
 
     }
@@ -4009,24 +4009,24 @@ namespace GKit.RENTRI.Stubs.Anagrafiche
     public partial class ProblemDetails
     {
 
-        [System.Text.Json.Serialization.JsonPropertyName("type")]
+        [Newtonsoft.Json.JsonProperty("type", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Type { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("title")]
+        [Newtonsoft.Json.JsonProperty("title", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Title { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("status")]
+        [Newtonsoft.Json.JsonProperty("status", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public int? Status { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("detail")]
+        [Newtonsoft.Json.JsonProperty("detail", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Detail { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("instance")]
+        [Newtonsoft.Json.JsonProperty("instance", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Instance { get; set; }
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
 
-        [System.Text.Json.Serialization.JsonExtensionData]
+        [Newtonsoft.Json.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
@@ -4063,67 +4063,65 @@ namespace GKit.RENTRI.Stubs.Anagrafiche
     public partial class RegistroModel
     {
 
-        [System.Text.Json.Serialization.JsonPropertyName("identificativo")]
+        [Newtonsoft.Json.JsonProperty("identificativo", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Identificativo { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("descrizione")]
+        [Newtonsoft.Json.JsonProperty("descrizione", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Descrizione { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("data_creazione")]
+        [Newtonsoft.Json.JsonProperty("data_creazione", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset Data_creazione { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("data_chiusura")]
+        [Newtonsoft.Json.JsonProperty("data_chiusura", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset? Data_chiusura { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("data_modifica")]
+        [Newtonsoft.Json.JsonProperty("data_modifica", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset? Data_modifica { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("num_iscr_associazione")]
+        [Newtonsoft.Json.JsonProperty("num_iscr_associazione", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Num_iscr_associazione { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("identificativo_associazione")]
+        [Newtonsoft.Json.JsonProperty("identificativo_associazione", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Identificativo_associazione { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("num_iscr_sito")]
+        [Newtonsoft.Json.JsonProperty("num_iscr_sito", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Num_iscr_sito { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("identificativo_operatore_sito")]
+        [Newtonsoft.Json.JsonProperty("identificativo_operatore_sito", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Identificativo_operatore_sito { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("operatore_sito")]
+        [Newtonsoft.Json.JsonProperty("operatore_sito", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Operatore_sito { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("ipa_operatore_sito")]
+        [Newtonsoft.Json.JsonProperty("ipa_operatore_sito", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Ipa_operatore_sito { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("cu_aoo_sito")]
+        [Newtonsoft.Json.JsonProperty("cu_aoo_sito", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Cu_aoo_sito { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("cuu_sito")]
+        [Newtonsoft.Json.JsonProperty("cuu_sito", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Cuu_sito { get; set; }
 
         /// <summary>
         /// &lt;p&gt;Valori ammessi:&lt;ul style="margin:0"&gt;&lt;li&gt;&lt;i&gt;CentroRaccolta&lt;/i&gt; - Centro di raccolta&lt;/li&gt;&lt;li&gt;&lt;i&gt;Produzione&lt;/i&gt; - Produzione di rifiuti&lt;/li&gt;&lt;li&gt;&lt;i&gt;Recupero&lt;/i&gt; - Recupero di rifiuti&lt;/li&gt;&lt;li&gt;&lt;i&gt;Smaltimento&lt;/i&gt; - Smaltimento di rifiuti&lt;/li&gt;&lt;li&gt;&lt;i&gt;Trasporto&lt;/i&gt; - Trasporto di rifiuti&lt;/li&gt;&lt;li&gt;&lt;i&gt;IntermediazioneSenzaDetenzione&lt;/i&gt; - Intermediazione e commercio di rifiuti senza detenzione&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("attivita")]
-        // TODO(system.text.json): Add ItemConverterType with enum converter when supported
+        [Newtonsoft.Json.JsonProperty("attivita", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore, ItemConverterType = typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public System.Collections.Generic.ICollection<Attivita> Attivita { get; set; }
 
         /// <summary>
         /// &lt;p&gt;Valori ammessi:&lt;ul style="margin:0"&gt;&lt;li&gt;&lt;i&gt;R1&lt;/i&gt; - Utilizzazione principale come combustibile o come altro mezzo per produrre energia&lt;/li&gt;&lt;li&gt;&lt;i&gt;R2&lt;/i&gt; - Rigenerazione/recupero di solventi&lt;/li&gt;&lt;li&gt;&lt;i&gt;R3&lt;/i&gt; - Riciclo/recupero delle sostanze organiche non utilizzate come solventi&lt;/li&gt;&lt;li&gt;&lt;i&gt;R4&lt;/i&gt; - Riciclo/recupero dei metalli e dei composti metallici&lt;/li&gt;&lt;li&gt;&lt;i&gt;R5&lt;/i&gt; - Riciclo/recupero di altre sostanze inorganiche&lt;/li&gt;&lt;li&gt;&lt;i&gt;R6&lt;/i&gt; - Rigenerazione degli acidi o delle basi&lt;/li&gt;&lt;li&gt;&lt;i&gt;R7&lt;/i&gt; - Recupero dei prodotti che servono a captare gli inquinanti&lt;/li&gt;&lt;li&gt;&lt;i&gt;R8&lt;/i&gt; - Recupero dei prodotti provenienti dai catalizzatori&lt;/li&gt;&lt;li&gt;&lt;i&gt;R9&lt;/i&gt; - Rigenerazione o altri reimpieghi degli oli&lt;/li&gt;&lt;li&gt;&lt;i&gt;R10&lt;/i&gt; - Spandimento sul suolo a beneficio dell'agricoltura o dell'ecologia&lt;/li&gt;&lt;li&gt;&lt;i&gt;R11&lt;/i&gt; - Utilizzazione di rifiuti ottenuti da una delle operazioni indicate da R1 a R10&lt;/li&gt;&lt;li&gt;&lt;i&gt;R12&lt;/i&gt; - Scambio di rifiuti per sottoporli a una delle operazioni indicate da R1 a R11&lt;/li&gt;&lt;li&gt;&lt;i&gt;R13&lt;/i&gt; - Messa in riserva di rifiuti per sottoporli a una delle operazioni indicate nei punti da R1 a R12&lt;/li&gt;&lt;li&gt;&lt;i&gt;D1&lt;/i&gt; - Deposito sul o nel suolo&lt;/li&gt;&lt;li&gt;&lt;i&gt;D2&lt;/i&gt; - Trattamento in ambiente terrestre&lt;/li&gt;&lt;li&gt;&lt;i&gt;D3&lt;/i&gt; - Iniezioni in profondità&lt;/li&gt;&lt;li&gt;&lt;i&gt;D4&lt;/i&gt; - Lagunaggio&lt;/li&gt;&lt;li&gt;&lt;i&gt;D5&lt;/i&gt; - Messa in discarica specialmente allestita&lt;/li&gt;&lt;li&gt;&lt;i&gt;D6&lt;/i&gt; - Scarico dei rifiuti solidi nell'ambiente idrico eccetto l'immersione&lt;/li&gt;&lt;li&gt;&lt;i&gt;D7&lt;/i&gt; - Immersione, compreso il seppellimento nel sottosuolo marino&lt;/li&gt;&lt;li&gt;&lt;i&gt;D8&lt;/i&gt; - Trattamento biologico non specificato altrove nel presente allegato&lt;/li&gt;&lt;li&gt;&lt;i&gt;D9&lt;/i&gt; - Trattamento fisico-chimico non specificato altrove nel presente allegato&lt;/li&gt;&lt;li&gt;&lt;i&gt;D10&lt;/i&gt; - Incenerimento a terra&lt;/li&gt;&lt;li&gt;&lt;i&gt;D11&lt;/i&gt; - Incenerimento in mare&lt;/li&gt;&lt;li&gt;&lt;i&gt;D12&lt;/i&gt; - Deposito permanente&lt;/li&gt;&lt;li&gt;&lt;i&gt;D13&lt;/i&gt; - Raggruppamento preliminare prima di una delle operazioni di cui ai punti da D1 a D12&lt;/li&gt;&lt;li&gt;&lt;i&gt;D14&lt;/i&gt; - Ricondizionamento preliminare prima di una delle operazioni di cui ai punti da D1 a D13&lt;/li&gt;&lt;li&gt;&lt;i&gt;D15&lt;/i&gt; - Deposito preliminare prima di una delle operazioni di cui ai punti da D1 a D14&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("attivita_rec_smalt")]
-        // TODO(system.text.json): Add ItemConverterType with enum converter when supported
+        [Newtonsoft.Json.JsonProperty("attivita_rec_smalt", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore, ItemConverterType = typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public System.Collections.Generic.ICollection<OperazioniRecuperoSmaltimento> Attivita_rec_smalt { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("stato")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<Stati>))]
+        [Newtonsoft.Json.JsonProperty("stato", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public Stati Stato { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("uso_locale")]
+        [Newtonsoft.Json.JsonProperty("uso_locale", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public bool? Uso_locale { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("progressivo_inziale_locale")]
+        [Newtonsoft.Json.JsonProperty("progressivo_inziale_locale", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public int? Progressivo_inziale_locale { get; set; }
 
     }
@@ -4135,20 +4133,20 @@ namespace GKit.RENTRI.Stubs.Anagrafiche
     public partial class SitoDelegaAssModel
     {
 
-        [System.Text.Json.Serialization.JsonPropertyName("num_iscr_associazione")]
+        [Newtonsoft.Json.JsonProperty("num_iscr_associazione", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Num_iscr_associazione { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("stato_delega_ass")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<Stati>))]
+        [Newtonsoft.Json.JsonProperty("stato_delega_ass", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public Stati Stato_delega_ass { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("data_conferma")]
+        [Newtonsoft.Json.JsonProperty("data_conferma", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset? Data_conferma { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("data_revoca")]
+        [Newtonsoft.Json.JsonProperty("data_revoca", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset? Data_revoca { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("da_associazione")]
+        [Newtonsoft.Json.JsonProperty("da_associazione", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public bool? Da_associazione { get; set; }
 
     }
@@ -4160,69 +4158,68 @@ namespace GKit.RENTRI.Stubs.Anagrafiche
     public partial class SitoModel
     {
 
-        [System.Text.Json.Serialization.JsonPropertyName("num_iscr_sito")]
+        [Newtonsoft.Json.JsonProperty("num_iscr_sito", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Num_iscr_sito { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("num_iscr_operatore")]
+        [Newtonsoft.Json.JsonProperty("num_iscr_operatore", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Num_iscr_operatore { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("denominazione_operatore")]
+        [Newtonsoft.Json.JsonProperty("denominazione_operatore", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Denominazione_operatore { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("identificativo_operatore")]
+        [Newtonsoft.Json.JsonProperty("identificativo_operatore", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Identificativo_operatore { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("ipa_operatore")]
+        [Newtonsoft.Json.JsonProperty("ipa_operatore", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Ipa_operatore { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("nome")]
+        [Newtonsoft.Json.JsonProperty("nome", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Nome { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("is_sede_legale")]
+        [Newtonsoft.Json.JsonProperty("is_sede_legale", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public bool Is_sede_legale { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("comune_id")]
+        [Newtonsoft.Json.JsonProperty("comune_id", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Comune_id { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("provincia_id")]
+        [Newtonsoft.Json.JsonProperty("provincia_id", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Provincia_id { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("indirizzo")]
+        [Newtonsoft.Json.JsonProperty("indirizzo", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Indirizzo { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("civico")]
+        [Newtonsoft.Json.JsonProperty("civico", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Civico { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("cciaari")]
+        [Newtonsoft.Json.JsonProperty("cciaari", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Cciaari { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("progressivo_ri")]
+        [Newtonsoft.Json.JsonProperty("progressivo_ri", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public int? Progressivo_ri { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("cu_aoo")]
+        [Newtonsoft.Json.JsonProperty("cu_aoo", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Cu_aoo { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("cuu")]
+        [Newtonsoft.Json.JsonProperty("cuu", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Cuu { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("deleghe_ass")]
+        [Newtonsoft.Json.JsonProperty("deleghe_ass", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<SitoDelegaAssModel> Deleghe_ass { get; set; }
 
         /// <summary>
         /// &lt;p&gt;Valori ammessi:&lt;ul style="margin:0"&gt;&lt;li&gt;&lt;i&gt;CentroRaccolta&lt;/i&gt; - Centro di raccolta&lt;/li&gt;&lt;li&gt;&lt;i&gt;Produzione&lt;/i&gt; - Produzione di rifiuti&lt;/li&gt;&lt;li&gt;&lt;i&gt;Recupero&lt;/i&gt; - Recupero di rifiuti&lt;/li&gt;&lt;li&gt;&lt;i&gt;Smaltimento&lt;/i&gt; - Smaltimento di rifiuti&lt;/li&gt;&lt;li&gt;&lt;i&gt;Trasporto&lt;/i&gt; - Trasporto di rifiuti&lt;/li&gt;&lt;li&gt;&lt;i&gt;IntermediazioneSenzaDetenzione&lt;/i&gt; - Intermediazione e commercio di rifiuti senza detenzione&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("attivita")]
-        // TODO(system.text.json): Add ItemConverterType with enum converter when supported
+        [Newtonsoft.Json.JsonProperty("attivita", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore, ItemConverterType = typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public System.Collections.Generic.ICollection<Attivita> Attivita { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("data_iscrizione")]
+        [Newtonsoft.Json.JsonProperty("data_iscrizione", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset Data_iscrizione { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("data_cancellazione")]
+        [Newtonsoft.Json.JsonProperty("data_cancellazione", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset? Data_cancellazione { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("stato")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<Stati>))]
+        [Newtonsoft.Json.JsonProperty("stato", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public Stati Stato { get; set; }
 
     }
@@ -4273,14 +4270,14 @@ namespace GKit.RENTRI.Stubs.Anagrafiche
         /// <summary>
         /// Stato dell'API&lt;p&gt;Valori ammessi:&lt;ul style="margin:0"&gt;&lt;li&gt;&lt;i&gt;Ok&lt;/i&gt; - API regolarmente funzionante&lt;/li&gt;&lt;li&gt;&lt;i&gt;Warning&lt;/i&gt; - API funzionante, ma con probabili disservizi come indicato nei warning&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("status")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<StatusResponseEnum>))]
+        [Newtonsoft.Json.JsonProperty("status", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public StatusResponseEnum Status { get; set; }
 
         /// <summary>
         /// Eventuali messaggi di warning relativi allo stato dell'API
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("warnings")]
+        [Newtonsoft.Json.JsonProperty("warnings", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<string> Warnings { get; set; }
 
     }
@@ -4343,20 +4340,19 @@ namespace GKit.RENTRI.Stubs.Anagrafiche
         /// <br/>Richiesto solamente se attivita contiene "Recupero" e/o "Smaltimento". In tal caso deve contenere i codici di recupero/smaltimento 
         /// <br/>che sono stati dichiarati per l'unità locale in fase di iscrizione o a seguito dell'ultima variazione.&lt;p&gt;Valori ammessi:&lt;ul style="margin:0"&gt;&lt;li&gt;&lt;i&gt;R1&lt;/i&gt; - Utilizzazione principale come combustibile o come altro mezzo per produrre energia&lt;/li&gt;&lt;li&gt;&lt;i&gt;R2&lt;/i&gt; - Rigenerazione/recupero di solventi&lt;/li&gt;&lt;li&gt;&lt;i&gt;R3&lt;/i&gt; - Riciclo/recupero delle sostanze organiche non utilizzate come solventi&lt;/li&gt;&lt;li&gt;&lt;i&gt;R4&lt;/i&gt; - Riciclo/recupero dei metalli e dei composti metallici&lt;/li&gt;&lt;li&gt;&lt;i&gt;R5&lt;/i&gt; - Riciclo/recupero di altre sostanze inorganiche&lt;/li&gt;&lt;li&gt;&lt;i&gt;R6&lt;/i&gt; - Rigenerazione degli acidi o delle basi&lt;/li&gt;&lt;li&gt;&lt;i&gt;R7&lt;/i&gt; - Recupero dei prodotti che servono a captare gli inquinanti&lt;/li&gt;&lt;li&gt;&lt;i&gt;R8&lt;/i&gt; - Recupero dei prodotti provenienti dai catalizzatori&lt;/li&gt;&lt;li&gt;&lt;i&gt;R9&lt;/i&gt; - Rigenerazione o altri reimpieghi degli oli&lt;/li&gt;&lt;li&gt;&lt;i&gt;R10&lt;/i&gt; - Spandimento sul suolo a beneficio dell'agricoltura o dell'ecologia&lt;/li&gt;&lt;li&gt;&lt;i&gt;R11&lt;/i&gt; - Utilizzazione di rifiuti ottenuti da una delle operazioni indicate da R1 a R10&lt;/li&gt;&lt;li&gt;&lt;i&gt;R12&lt;/i&gt; - Scambio di rifiuti per sottoporli a una delle operazioni indicate da R1 a R11&lt;/li&gt;&lt;li&gt;&lt;i&gt;R13&lt;/i&gt; - Messa in riserva di rifiuti per sottoporli a una delle operazioni indicate nei punti da R1 a R12&lt;/li&gt;&lt;li&gt;&lt;i&gt;D1&lt;/i&gt; - Deposito sul o nel suolo&lt;/li&gt;&lt;li&gt;&lt;i&gt;D2&lt;/i&gt; - Trattamento in ambiente terrestre&lt;/li&gt;&lt;li&gt;&lt;i&gt;D3&lt;/i&gt; - Iniezioni in profondità&lt;/li&gt;&lt;li&gt;&lt;i&gt;D4&lt;/i&gt; - Lagunaggio&lt;/li&gt;&lt;li&gt;&lt;i&gt;D5&lt;/i&gt; - Messa in discarica specialmente allestita&lt;/li&gt;&lt;li&gt;&lt;i&gt;D6&lt;/i&gt; - Scarico dei rifiuti solidi nell'ambiente idrico eccetto l'immersione&lt;/li&gt;&lt;li&gt;&lt;i&gt;D7&lt;/i&gt; - Immersione, compreso il seppellimento nel sottosuolo marino&lt;/li&gt;&lt;li&gt;&lt;i&gt;D8&lt;/i&gt; - Trattamento biologico non specificato altrove nel presente allegato&lt;/li&gt;&lt;li&gt;&lt;i&gt;D9&lt;/i&gt; - Trattamento fisico-chimico non specificato altrove nel presente allegato&lt;/li&gt;&lt;li&gt;&lt;i&gt;D10&lt;/i&gt; - Incenerimento a terra&lt;/li&gt;&lt;li&gt;&lt;i&gt;D11&lt;/i&gt; - Incenerimento in mare&lt;/li&gt;&lt;li&gt;&lt;i&gt;D12&lt;/i&gt; - Deposito permanente&lt;/li&gt;&lt;li&gt;&lt;i&gt;D13&lt;/i&gt; - Raggruppamento preliminare prima di una delle operazioni di cui ai punti da D1 a D12&lt;/li&gt;&lt;li&gt;&lt;i&gt;D14&lt;/i&gt; - Ricondizionamento preliminare prima di una delle operazioni di cui ai punti da D1 a D13&lt;/li&gt;&lt;li&gt;&lt;i&gt;D15&lt;/i&gt; - Deposito preliminare prima di una delle operazioni di cui ai punti da D1 a D14&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("attivita_rec_smalt")]
-        // TODO(system.text.json): Add ItemConverterType with enum converter when supported
+        [Newtonsoft.Json.JsonProperty("attivita_rec_smalt", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore, ItemConverterType = typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public System.Collections.Generic.ICollection<OperazioniRecuperoSmaltimento> Attivita_rec_smalt { get; set; }
 
         /// <summary>
         /// Evita i controlli delle attività di recupero/smaltimento sulle autorizzazioni comunicate in fase di iscrizione dell'unità locale o a seguito dell'ultima variazione
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("forza_salvataggio_attivita_rec_smalt")]
+        [Newtonsoft.Json.JsonProperty("forza_salvataggio_attivita_rec_smalt", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public bool? Forza_salvataggio_attivita_rec_smalt { get; set; }
 
         /// <summary>
         /// Descrizione del registro
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("descrizione")]
+        [Newtonsoft.Json.JsonProperty("descrizione", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.StringLength(250)]
         public string Descrizione { get; set; }
 
@@ -4369,7 +4365,7 @@ namespace GKit.RENTRI.Stubs.Anagrafiche
         /// <summary>
         /// Descrizione del registro
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("descrizione")]
+        [Newtonsoft.Json.JsonProperty("descrizione", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.StringLength(250)]
         public string Descrizione { get; set; }
 
@@ -4379,7 +4375,7 @@ namespace GKit.RENTRI.Stubs.Anagrafiche
     public partial class UpdateRegistroResponse
     {
 
-        [System.Text.Json.Serialization.JsonPropertyName("identificativo")]
+        [Newtonsoft.Json.JsonProperty("identificativo", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Identificativo { get; set; }
 
     }

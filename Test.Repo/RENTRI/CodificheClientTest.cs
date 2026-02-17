@@ -1,6 +1,7 @@
 using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
 using GKit.RENTRI;
+using GKit.RENTRI.Stubs.Anagrafiche;
 using Xunit.Abstractions;
 
 namespace Test.Repo.RENTRI;
@@ -38,5 +39,21 @@ public class CodificheClientTest
         var resp = await client.ComuniAsync("it");
 
         _output.WriteLine("{0}", resp.FirstOrDefault());
+    }
+
+    [Fact]
+    public async Task GetUnitaLocali()
+    {
+        var client = new AnagraficheClient(new HttpClient(), _options);
+        var operatori = await client.OperatoreAsync(null);
+
+        var siti = new List<SitoModel>();
+        foreach (var operatore in operatori ?? [])
+        {
+            siti.AddRange(await client.SitiAllAsync(
+                operatore.Num_iscr, null, null, null, null, null,null, null, null, null, null) ?? []);
+        }
+
+        _output.WriteLine("{0}", siti.FirstOrDefault());
     }
 }

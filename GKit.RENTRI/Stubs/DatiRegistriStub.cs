@@ -32,8 +32,8 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         #pragma warning restore 8618
 
         private System.Net.Http.HttpClient _httpClient;
-        private static System.Lazy<System.Text.Json.JsonSerializerOptions> _settings = new System.Lazy<System.Text.Json.JsonSerializerOptions>(CreateSerializerSettings, true);
-        private System.Text.Json.JsonSerializerOptions _instanceSettings;
+        private static System.Lazy<Newtonsoft.Json.JsonSerializerSettings> _settings = new System.Lazy<Newtonsoft.Json.JsonSerializerSettings>(CreateSerializerSettings, true);
+        private Newtonsoft.Json.JsonSerializerSettings _instanceSettings;
 
     #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         public DatiRegistriStub(System.Net.Http.HttpClient httpClient)
@@ -44,9 +44,9 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
             Initialize();
         }
 
-        private static System.Text.Json.JsonSerializerOptions CreateSerializerSettings()
+        private static Newtonsoft.Json.JsonSerializerSettings CreateSerializerSettings()
         {
-            var settings = new System.Text.Json.JsonSerializerOptions();
+            var settings = new Newtonsoft.Json.JsonSerializerSettings();
             UpdateJsonSerializerSettings(settings);
             return settings;
         }
@@ -62,9 +62,9 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
             }
         }
 
-        protected System.Text.Json.JsonSerializerOptions JsonSerializerSettings { get { return _instanceSettings ?? _settings.Value; } }
+        protected Newtonsoft.Json.JsonSerializerSettings JsonSerializerSettings { get { return _instanceSettings ?? _settings.Value; } }
 
-        static partial void UpdateJsonSerializerSettings(System.Text.Json.JsonSerializerOptions settings);
+        static partial void UpdateJsonSerializerSettings(Newtonsoft.Json.JsonSerializerSettings settings);
 
         partial void Initialize();
 
@@ -782,8 +782,8 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
 
                     if (x_ReplyTo != null)
                         request_.Headers.TryAddWithoutValidation("X-ReplyTo", ConvertToString(x_ReplyTo, System.Globalization.CultureInfo.InvariantCulture));
-                    var json_ = System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(body, JsonSerializerSettings);
-                    var content_ = new System.Net.Http.ByteArrayContent(json_);
+                    var json_ = Newtonsoft.Json.JsonConvert.SerializeObject(body, JsonSerializerSettings);
+                    var content_ = new System.Net.Http.StringContent(json_);
                     content_.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json");
                     request_.Content = content_;
                     request_.Method = new System.Net.Http.HttpMethod("POST");
@@ -1547,8 +1547,8 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
 
                     if (x_ReplyTo != null)
                         request_.Headers.TryAddWithoutValidation("X-ReplyTo", ConvertToString(x_ReplyTo, System.Globalization.CultureInfo.InvariantCulture));
-                    var json_ = System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(body, JsonSerializerSettings);
-                    var content_ = new System.Net.Http.ByteArrayContent(json_);
+                    var json_ = Newtonsoft.Json.JsonConvert.SerializeObject(body, JsonSerializerSettings);
+                    var content_ = new System.Net.Http.StringContent(json_);
                     content_.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json");
                     request_.Content = content_;
                     request_.Method = new System.Net.Http.HttpMethod("POST");
@@ -2408,8 +2408,8 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
 
                     if (x_ReplyTo != null)
                         request_.Headers.TryAddWithoutValidation("X-ReplyTo", ConvertToString(x_ReplyTo, System.Globalization.CultureInfo.InvariantCulture));
-                    var json_ = System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(body, JsonSerializerSettings);
-                    var content_ = new System.Net.Http.ByteArrayContent(json_);
+                    var json_ = Newtonsoft.Json.JsonConvert.SerializeObject(body, JsonSerializerSettings);
+                    var content_ = new System.Net.Http.StringContent(json_);
                     content_.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json");
                     request_.Content = content_;
                     request_.Method = new System.Net.Http.HttpMethod("POST");
@@ -3173,8 +3173,8 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
 
                     if (x_ReplyTo != null)
                         request_.Headers.TryAddWithoutValidation("X-ReplyTo", ConvertToString(x_ReplyTo, System.Globalization.CultureInfo.InvariantCulture));
-                    var json_ = System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(body, JsonSerializerSettings);
-                    var content_ = new System.Net.Http.ByteArrayContent(json_);
+                    var json_ = Newtonsoft.Json.JsonConvert.SerializeObject(body, JsonSerializerSettings);
+                    var content_ = new System.Net.Http.StringContent(json_);
                     content_.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json");
                     request_.Content = content_;
                     request_.Method = new System.Net.Http.HttpMethod("POST");
@@ -3920,10 +3920,10 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
                 var responseText = await ReadAsStringAsync(response.Content, cancellationToken).ConfigureAwait(false);
                 try
                 {
-                    var typedBody = System.Text.Json.JsonSerializer.Deserialize<T>(responseText, JsonSerializerSettings);
+                    var typedBody = Newtonsoft.Json.JsonConvert.DeserializeObject<T>(responseText, JsonSerializerSettings);
                     return new ObjectResponseResult<T>(typedBody, responseText);
                 }
-                catch (System.Text.Json.JsonException exception)
+                catch (Newtonsoft.Json.JsonException exception)
                 {
                     var message = "Could not deserialize the response body string as " + typeof(T).FullName + ".";
                     throw new ApiException(message, (int)response.StatusCode, responseText, headers, exception);
@@ -3934,12 +3934,15 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
                 try
                 {
                     using (var responseStream = await ReadAsStreamAsync(response.Content, cancellationToken).ConfigureAwait(false))
+                    using (var streamReader = new System.IO.StreamReader(responseStream))
+                    using (var jsonTextReader = new Newtonsoft.Json.JsonTextReader(streamReader))
                     {
-                        var typedBody = await System.Text.Json.JsonSerializer.DeserializeAsync<T>(responseStream, JsonSerializerSettings, cancellationToken).ConfigureAwait(false);
+                        var serializer = Newtonsoft.Json.JsonSerializer.Create(JsonSerializerSettings);
+                        var typedBody = serializer.Deserialize<T>(jsonTextReader);
                         return new ObjectResponseResult<T>(typedBody, string.Empty);
                     }
                 }
-                catch (System.Text.Json.JsonException exception)
+                catch (Newtonsoft.Json.JsonException exception)
                 {
                     var message = "Could not deserialize the response body stream as " + typeof(T).FullName + ".";
                     throw new ApiException(message, (int)response.StatusCode, string.Empty, headers, exception);
@@ -4012,14 +4015,14 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <summary>
         /// Anno di riferimento della registrazione
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("anno")]
+        [Newtonsoft.Json.JsonProperty("anno", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Range(1980, 2050)]
         public int Anno { get; set; }
 
         /// <summary>
         /// Progressivo della registrazione
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("progressivo")]
+        [Newtonsoft.Json.JsonProperty("progressivo", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Range(1, 2147483647)]
         public int Progressivo { get; set; }
 
@@ -4035,7 +4038,7 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <summary>
         /// Numero registrazione della rettifica di annullamento tramite anno di riferimento e progressivo
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("numero_registrazione")]
+        [Newtonsoft.Json.JsonProperty("numero_registrazione", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         public AnnoProgressivoMovimentoModel Numero_registrazione { get; set; } = new AnnoProgressivoMovimentoModel();
 
@@ -4045,21 +4048,21 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <br/>
         /// <br/>&lt;b&gt;Esempi:&lt;/b&gt; solo data = "2024-01-01", data con ora = "2024-01-01T12:00:00Z"
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("data_ora_registrazione")]
+        [Newtonsoft.Json.JsonProperty("data_ora_registrazione", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
         public System.DateTimeOffset Data_ora_registrazione { get; set; }
 
         /// <summary>
         /// Numero registrazione della registrazione da annullare
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("numero_registrazione_annullata")]
+        [Newtonsoft.Json.JsonProperty("numero_registrazione_annullata", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         public AnnoProgressivoMovimentoModel Numero_registrazione_annullata { get; set; }
 
         /// <summary>
         /// Annotazioni contenenti il motivo dell'annullamento
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("annotazioni")]
+        [Newtonsoft.Json.JsonProperty("annotazioni", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         [System.ComponentModel.DataAnnotations.StringLength(500, MinimumLength = 1)]
         public string Annotazioni { get; set; }
@@ -4240,7 +4243,7 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
 
-        [System.Text.Json.Serialization.JsonExtensionData]
+        [Newtonsoft.Json.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
@@ -4263,7 +4266,7 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <br/>
         /// <br/>Vedi API di codifica: &lt;i&gt;GET /codifiche/v1.0/nazioni&lt;/i&gt;
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("nazione_id")]
+        [Newtonsoft.Json.JsonProperty("nazione_id", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         [System.ComponentModel.DataAnnotations.StringLength(2, MinimumLength = 1)]
         [System.ComponentModel.DataAnnotations.RegularExpression(@"^(?!.*(?i)it).*$")]
@@ -4272,7 +4275,7 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <summary>
         /// Città estera
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("nome_citta")]
+        [Newtonsoft.Json.JsonProperty("nome_citta", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         [System.ComponentModel.DataAnnotations.StringLength(100, MinimumLength = 1)]
         public string Nome_citta { get; set; }
@@ -4293,7 +4296,7 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <br/>
         /// <br/>Vedi API di codifica: &lt;i&gt;GET /codifiche/v1.0/comuni&lt;/i&gt;
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("comune_id")]
+        [Newtonsoft.Json.JsonProperty("comune_id", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         [System.ComponentModel.DataAnnotations.StringLength(6, MinimumLength = 1)]
         public string Comune_id { get; set; }
@@ -4310,7 +4313,7 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <summary>
         /// Denominazione del soggetto
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("denominazione")]
+        [Newtonsoft.Json.JsonProperty("denominazione", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         [System.ComponentModel.DataAnnotations.StringLength(255, MinimumLength = 1)]
         public string Denominazione { get; set; }
@@ -4318,7 +4321,7 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <summary>
         /// Codice fiscale
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("codice_fiscale")]
+        [Newtonsoft.Json.JsonProperty("codice_fiscale", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         [System.ComponentModel.DataAnnotations.StringLength(20, MinimumLength = 5)]
         public string Codice_fiscale { get; set; }
@@ -4332,14 +4335,14 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <br/>
         /// <br/>&lt;i&gt;Questo campo viene utilizzato esclusivamente per validare i dati di input in base alla nazione di appartenenza (non viene memorizzato e quindi restituito in output).&lt;/i&gt;
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("nazione_id")]
+        [Newtonsoft.Json.JsonProperty("nazione_id", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Nazione_id { get; set; }
 
         /// <summary>
         /// Numero autorizzazione.
         /// <br/>Non obbligatorio nel caso di destinatario estero, richiesto in caso contrario
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("num_autorizzazione")]
+        [Newtonsoft.Json.JsonProperty("num_autorizzazione", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.StringLength(50)]
         public string Num_autorizzazione { get; set; }
 
@@ -4355,19 +4358,19 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <summary>
         /// Data di fine trasporto (formato ISO 8601 UTC)
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("data_fine_trasporto")]
+        [Newtonsoft.Json.JsonProperty("data_fine_trasporto", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset? Data_fine_trasporto { get; set; }
 
         /// <summary>
         /// Peso verificato a destino (parte intera: 10, parte decimale: 4) compreso tra 0.0000 e 9999999999.9999.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("peso_verificato_destino")]
+        [Newtonsoft.Json.JsonProperty("peso_verificato_destino", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public double? Peso_verificato_destino { get; set; }
 
         /// <summary>
         /// Dati sul respingimento
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("respingimento")]
+        [Newtonsoft.Json.JsonProperty("respingimento", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public DatiRespingimentoModel Respingimento { get; set; }
 
     }
@@ -4382,14 +4385,14 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <summary>
         /// Numero del FIR, oppure in caso di trasporto transfrontaliero, il numero di notifica e numero di serie della spedizione, ove previsto.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("numero_fir")]
+        [Newtonsoft.Json.JsonProperty("numero_fir", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.StringLength(20)]
         public string Numero_fir { get; set; }
 
         /// <summary>
         /// Trasporto transfrontaliero
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("trasporto_transfrontaliero")]
+        [Newtonsoft.Json.JsonProperty("trasporto_transfrontaliero", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public bool? Trasporto_transfrontaliero { get; set; }
 
         /// <summary>
@@ -4398,14 +4401,14 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <br/>Richiesto solamente se trasporto_transfrontaliero è uguale a true.
         /// <br/>Vedi API di codifica: &lt;i&gt;GET /codifiche/v1.0/tipi-trasporto-transfrontaliero&lt;/i&gt;&lt;p&gt;Valori ammessi:&lt;ul style="margin:0"&gt;&lt;li&gt;&lt;i&gt;DM&lt;/i&gt; - Documento di movimento (Allegato I-B - al Regolamento 1013/06)&lt;/li&gt;&lt;li&gt;&lt;i&gt;DA&lt;/i&gt; - Documento di accompagnamento (Allegato VII - al Regolamento 1013/06)&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("tipo_trasporto_transfrontaliero")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<TipiTrasportoTransfrontaliero>))]
+        [Newtonsoft.Json.JsonProperty("tipo_trasporto_transfrontaliero", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public TipiTrasportoTransfrontaliero? Tipo_trasporto_transfrontaliero { get; set; }
 
         /// <summary>
         /// Data inizio trasporto (formato ISO 8601 UTC)
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("data_inizio_trasporto")]
+        [Newtonsoft.Json.JsonProperty("data_inizio_trasporto", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset? Data_inizio_trasporto { get; set; }
 
     }
@@ -4420,7 +4423,7 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <summary>
         /// Denominazione del soggetto
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("denominazione")]
+        [Newtonsoft.Json.JsonProperty("denominazione", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         [System.ComponentModel.DataAnnotations.StringLength(255, MinimumLength = 1)]
         public string Denominazione { get; set; }
@@ -4428,7 +4431,7 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <summary>
         /// Codice fiscale
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("codice_fiscale")]
+        [Newtonsoft.Json.JsonProperty("codice_fiscale", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         [System.ComponentModel.DataAnnotations.StringLength(20, MinimumLength = 5)]
         public string Codice_fiscale { get; set; }
@@ -4442,14 +4445,14 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <br/>
         /// <br/>&lt;i&gt;Questo campo viene utilizzato esclusivamente per validare i dati di input in base alla nazione di appartenenza (non viene memorizzato e quindi restituito in output).&lt;/i&gt;
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("nazione_id")]
+        [Newtonsoft.Json.JsonProperty("nazione_id", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.Obsolete]
         public string Nazione_id { get; set; }
 
         /// <summary>
         /// Numero di iscrizione all'Albo Nazionale Gestori Ambientali
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("num_iscrizione_albo")]
+        [Newtonsoft.Json.JsonProperty("num_iscrizione_albo", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.RegularExpression(@"^([A-Za-z]{2})/([0-9]{6})$")]
         public string Num_iscrizione_albo { get; set; }
 
@@ -4467,22 +4470,22 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <br/>
         /// <br/>Vedi API di codifica: &lt;i&gt;GET /codifiche/v1.0/materiali&lt;/i&gt;&lt;p&gt;Valori ammessi:&lt;ul style="margin:0"&gt;&lt;li&gt;&lt;i&gt;ACV&lt;/i&gt; - 1 - Ammendante compostato verde&lt;/li&gt;&lt;li&gt;&lt;i&gt;ACM&lt;/i&gt; - 2 - Ammendante compostato misto&lt;/li&gt;&lt;li&gt;&lt;i&gt;AA&lt;/i&gt; - 3 - Altri Ammendanti&lt;/li&gt;&lt;li&gt;&lt;i&gt;DIG&lt;/i&gt; - 4 - Digestato&lt;/li&gt;&lt;li&gt;&lt;i&gt;AGG&lt;/i&gt; - 5 - Aggregati riciclati&lt;/li&gt;&lt;li&gt;&lt;i&gt;RA&lt;/i&gt; - 6 - Rottami di alluminio&lt;/li&gt;&lt;li&gt;&lt;i&gt;RV&lt;/i&gt; - 7 - Rottami di vetro&lt;/li&gt;&lt;li&gt;&lt;i&gt;RFA&lt;/i&gt; - 8 - Rottami di ferro e acciaio&lt;/li&gt;&lt;li&gt;&lt;i&gt;RR&lt;/i&gt; - 9 - Rottami di rame&lt;/li&gt;&lt;li&gt;&lt;i&gt;CC&lt;/i&gt; - 10 - Carta e cartone&lt;/li&gt;&lt;li&gt;&lt;i&gt;PLA&lt;/i&gt; - 11 - Plastica&lt;/li&gt;&lt;li&gt;&lt;i&gt;LS&lt;/i&gt; - 12 - Legno e sughero&lt;/li&gt;&lt;li&gt;&lt;i&gt;CSS&lt;/i&gt; - 13 - CSS – combustibile&lt;/li&gt;&lt;li&gt;&lt;i&gt;TE&lt;/i&gt; - 14 - Tessili&lt;/li&gt;&lt;li&gt;&lt;i&gt;GOM&lt;/i&gt; - 15	- Gomma&lt;/li&gt;&lt;li&gt;&lt;i&gt;CU&lt;/i&gt; - 16 - Cuoio&lt;/li&gt;&lt;li&gt;&lt;i&gt;MC&lt;/i&gt; - 17 - Materiali ceramici&lt;/li&gt;&lt;li&gt;&lt;i&gt;CF&lt;/i&gt; - 18 - Correttivi da Fanghi&lt;/li&gt;&lt;li&gt;&lt;i&gt;AF&lt;/i&gt; - 19 - Altri Fertilizzanti&lt;/li&gt;&lt;li&gt;&lt;i&gt;GCB&lt;/i&gt; - 20 - Granulato di Conglomerato bituminoso&lt;/li&gt;&lt;li&gt;&lt;i&gt;ASS&lt;/i&gt; - 21 - Materiali secondari derivanti dal recupero di prodotti assorbenti per la persona&lt;/li&gt;&lt;li&gt;&lt;i&gt;GMV&lt;/i&gt; - 22 - Gomma vulcanizzata da PFU&lt;/li&gt;&lt;li&gt;&lt;i&gt;A&lt;/i&gt; - 23 - Altro&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("materiale")]
+        [Newtonsoft.Json.JsonProperty("materiale", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<Materiali>))]
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public Materiali Materiale { get; set; }
 
         /// <summary>
         /// Descrizione materiale
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("descrizione_materiale")]
+        [Newtonsoft.Json.JsonProperty("descrizione_materiale", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.StringLength(50)]
         public string Descrizione_materiale { get; set; }
 
         /// <summary>
         /// Quantità
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("quantita")]
+        [Newtonsoft.Json.JsonProperty("quantita", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public UnitaMisuraPesoQuantitaModel Quantita { get; set; }
 
     }
@@ -4497,7 +4500,7 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <summary>
         /// Riferimenti operazione
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("riferimenti")]
+        [Newtonsoft.Json.JsonProperty("riferimenti", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public DatiRiferimentiCompletoModel Riferimenti { get; set; }
 
         /// <summary>
@@ -4505,7 +4508,7 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <br/>
         /// <br/>Richiesto solamente se causale_operazione è diversa da "M".
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("rifiuto")]
+        [Newtonsoft.Json.JsonProperty("rifiuto", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public DatiRifiutoModel Rifiuto { get; set; }
 
         /// <summary>
@@ -4513,7 +4516,7 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <br/>
         /// <br/>Richiesto solamente se causale_operazione è uguale a "M".
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("materiali")]
+        [Newtonsoft.Json.JsonProperty("materiali", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public DatiMaterialiModel Materiali { get; set; }
 
         /// <summary>
@@ -4521,7 +4524,7 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <br/>
         /// <br/>Non deve essere indicato se causale_operazione è diversa da "aT", "TR", "T*", "T*AT".
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("integrazione_fir")]
+        [Newtonsoft.Json.JsonProperty("integrazione_fir", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public DatiIntegrazioneFirModel Integrazione_fir { get; set; }
 
         /// <summary>
@@ -4529,25 +4532,25 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <br/>
         /// <br/>Non deve essere indicato se causale_operazione è diversa da "aT", "T*AT".
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("esito")]
+        [Newtonsoft.Json.JsonProperty("esito", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public DatiEsitoModel Esito { get; set; }
 
         /// <summary>
         /// Produttore del rifiuto
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("produttore")]
+        [Newtonsoft.Json.JsonProperty("produttore", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public DatiProduttoreModel Produttore { get; set; }
 
         /// <summary>
         /// Trasportatore
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("trasportatore")]
+        [Newtonsoft.Json.JsonProperty("trasportatore", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public DatiTrasportatoreModel Trasportatore { get; set; }
 
         /// <summary>
         /// Destinatario
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("destinatario")]
+        [Newtonsoft.Json.JsonProperty("destinatario", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public DatiDestinatarioModel Destinatario { get; set; }
 
         /// <summary>
@@ -4555,44 +4558,44 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <br/> 
         /// <br/>⚠️ Deprecato: utilizzare "intermediari"
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("intermediario")]
+        [Newtonsoft.Json.JsonProperty("intermediario", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.Obsolete]
         public DatiIntermediarioModel Intermediario { get; set; }
 
         /// <summary>
         /// Intermediari
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("intermediari")]
+        [Newtonsoft.Json.JsonProperty("intermediari", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<DatiIntermediarioModel> Intermediari { get; set; }
 
         /// <summary>
         /// Annotazioni generiche
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("annotazioni")]
+        [Newtonsoft.Json.JsonProperty("annotazioni", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.StringLength(500)]
         public string Annotazioni { get; set; }
 
         /// <summary>
         /// Indica se la registrazione è stata annullata
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("annullato")]
+        [Newtonsoft.Json.JsonProperty("annullato", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public bool Annullato { get; set; }
 
         /// <summary>
         /// Indica se la registrazione è stata rettificata
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("rettificato")]
+        [Newtonsoft.Json.JsonProperty("rettificato", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public bool Rettificato { get; set; }
 
         /// <summary>
         /// Indica se la registrazione è stata trasmessa da un soggetto delegato
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("trasmesso_da_soggetto_delegato")]
+        [Newtonsoft.Json.JsonProperty("trasmesso_da_soggetto_delegato", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public bool? Trasmesso_da_soggetto_delegato { get; set; }
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
 
-        [System.Text.Json.Serialization.JsonExtensionData]
+        [Newtonsoft.Json.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
@@ -4611,14 +4614,14 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <summary>
         /// Denominazione del soggetto
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("denominazione")]
+        [Newtonsoft.Json.JsonProperty("denominazione", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.StringLength(255)]
         public string Denominazione { get; set; }
 
         /// <summary>
         /// Codice fiscale
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("codice_fiscale")]
+        [Newtonsoft.Json.JsonProperty("codice_fiscale", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.StringLength(20, MinimumLength = 5)]
         public string Codice_fiscale { get; set; }
 
@@ -4631,14 +4634,14 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <br/>
         /// <br/>&lt;i&gt;Questo campo viene utilizzato esclusivamente per validare i dati di input in base alla nazione di appartenenza (non viene memorizzato e quindi restituito in output).&lt;/i&gt;
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("nazione_id")]
+        [Newtonsoft.Json.JsonProperty("nazione_id", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.Obsolete]
         public string Nazione_id { get; set; }
 
         /// <summary>
         /// Indirizzo
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("indirizzo")]
+        [Newtonsoft.Json.JsonProperty("indirizzo", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         public IndirizzoModel Indirizzo { get; set; } = new IndirizzoModel();
 
@@ -4656,15 +4659,15 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <br/>
         /// <br/>Vedi API di codifica: &lt;i&gt;GET /codifiche/v1.0/tipi-respingimento&lt;/i&gt;&lt;p&gt;Valori ammessi:&lt;ul style="margin:0"&gt;&lt;li&gt;&lt;i&gt;T&lt;/i&gt; - Totale&lt;/li&gt;&lt;li&gt;&lt;i&gt;P&lt;/i&gt; - Parziale&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("tipo")]
+        [Newtonsoft.Json.JsonProperty("tipo", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<TipiRespingimento>))]
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public TipiRespingimento Tipo { get; set; }
 
         /// <summary>
         /// Quantità respinta
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("quantita")]
+        [Newtonsoft.Json.JsonProperty("quantita", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public UnitaMisuraQuantitaModel Quantita { get; set; }
 
         /// <summary>
@@ -4672,8 +4675,8 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <br/>
         /// <br/>Vedi API di codifica: &lt;i&gt;GET /codifiche/v1.0/causali-respingimento&lt;/i&gt;&lt;p&gt;Valori ammessi:&lt;ul style="margin:0"&gt;&lt;li&gt;&lt;i&gt;NC&lt;/i&gt; - Non Conformità, a titolo esemplificativo e non esaustivo, si riporta: rifiuti diverso da quello descritto dal formulario o da quanto dichiarato ai fini della pratica di conferimento all'impianto, rifiuto confezionato in modo non conforme da quanto previsto per la specifica destinazione o dalle norme applicabili, di stato fisico diverso da quello previsto)&lt;/li&gt;&lt;li&gt;&lt;i&gt;IR&lt;/i&gt; - Irricevibile, (a titolo esemplificativo e non esaustivo, si riporta: rifiuto non previsto dall'autorizzazione / iscrizione dell'impianto di destino, mancanza dei requisiti per l'ammissibilità all'impianto quali caratterizzazione di base, analisi di classificazione o di ammissibilità…)&lt;/li&gt;&lt;li&gt;&lt;i&gt;A&lt;/i&gt; - Indicare motivazione. A titolo esemplificativo e non esaustivo, si riporta: esaurimento volumetria disponibile per conferimento rifiuto, chiusura impianto per manutenzione straordinaria, ecc.&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("causale")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<CausaliRespingimento>))]
+        [Newtonsoft.Json.JsonProperty("causale", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public CausaliRespingimento? Causale { get; set; }
 
         /// <summary>
@@ -4681,7 +4684,7 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <br/>
         /// <br/>Richiesto solamente se causale è uguale a "A".
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("causale_altro")]
+        [Newtonsoft.Json.JsonProperty("causale_altro", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.StringLength(50)]
         public string Causale_altro { get; set; }
 
@@ -4697,7 +4700,7 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <summary>
         /// Numero registrazione della registrazione tramite anno e progressivo e identificativo rilasciato dal RENTRI
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("numero_registrazione")]
+        [Newtonsoft.Json.JsonProperty("numero_registrazione", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public IdentificativoMovimentoCompletoModel Numero_registrazione { get; set; }
 
         /// <summary>
@@ -4708,27 +4711,27 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <br/>
         /// <br/>&lt;b&gt;Esempi:&lt;/b&gt; solo data = "2024-01-01", data con ora = "2024-01-01T12:00:00Z"
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("data_ora_registrazione")]
+        [Newtonsoft.Json.JsonProperty("data_ora_registrazione", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
         public System.DateTimeOffset Data_ora_registrazione { get; set; }
 
         /// <summary>
         /// Numero della registrazione della rettifica
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("numero_registrazione_di_rettifica")]
+        [Newtonsoft.Json.JsonProperty("numero_registrazione_di_rettifica", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public IdentificativoMovimentoCompletoModel Numero_registrazione_di_rettifica { get; set; }
 
         /// <summary>
         /// Numero della registrazione rettificata
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("numero_registrazione_rettifica")]
+        [Newtonsoft.Json.JsonProperty("numero_registrazione_rettifica", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public IdentificativoMovimentoCompletoModel Numero_registrazione_rettifica { get; set; }
 
         /// <summary>
         /// Causale dell'operazione Carico/Scarico&lt;p&gt;Valori ammessi:&lt;ul style="margin:0"&gt;&lt;li&gt;&lt;i&gt;Carico&lt;/i&gt; - Carico&lt;/li&gt;&lt;li&gt;&lt;i&gt;Scarico&lt;/i&gt; - Scarico&lt;/li&gt;&lt;li&gt;&lt;i&gt;CaricoScarico&lt;/i&gt; - Carico e scarico&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("causale_operazione_cs")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<CausaliOperazioneCs>))]
+        [Newtonsoft.Json.JsonProperty("causale_operazione_cs", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public CausaliOperazioneCs? Causale_operazione_cs { get; set; }
 
         /// <summary>
@@ -4738,14 +4741,14 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <br/>
         /// <br/>Vedi API di codifica: &lt;i&gt;GET /codifiche/v1.0/causali-operazione&lt;/i&gt;&lt;p&gt;Valori ammessi:&lt;ul style="margin:0"&gt;&lt;li&gt;&lt;i&gt;DT&lt;/i&gt; - Prodotto o detenuto nell'unità locale&lt;/li&gt;&lt;li&gt;&lt;i&gt;NP&lt;/i&gt; - Nuovo produttore&lt;/li&gt;&lt;li&gt;&lt;i&gt;T*&lt;/i&gt; - Ricevuto da terzi&lt;/li&gt;&lt;li&gt;&lt;i&gt;RE&lt;/i&gt; - Prodotto al di fuori dell’unità locale&lt;/li&gt;&lt;li&gt;&lt;i&gt;I&lt;/i&gt; - Scarico interno&lt;/li&gt;&lt;li&gt;&lt;i&gt;aT&lt;/i&gt; - Scarico a terzi&lt;/li&gt;&lt;li&gt;&lt;i&gt;M&lt;/i&gt; - Scarico per produzione di materiali&lt;/li&gt;&lt;li&gt;&lt;i&gt;TR&lt;/i&gt; - Intermediario&lt;/li&gt;&lt;li&gt;&lt;i&gt;T*aT&lt;/i&gt; - Carico e scarico&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("causale_operazione")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<CausaliOperazione>))]
+        [Newtonsoft.Json.JsonProperty("causale_operazione", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public CausaliOperazione? Causale_operazione { get; set; }
 
         /// <summary>
         /// Data dello stoccaggio istantaneo (formato ISO 8601 UTC) (o giacenza), se valorizzata possono essere compilati solamente i dati relativi al rifiuto e non al materiale.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("stoccaggio_istantaneo")]
+        [Newtonsoft.Json.JsonProperty("stoccaggio_istantaneo", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset? Stoccaggio_istantaneo { get; set; }
 
         /// <summary>
@@ -4753,50 +4756,50 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <br/> 
         /// <br/>⚠️ Deprecato: utilizzare "riferimento_operazione"
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("riferimenti_operazione")]
+        [Newtonsoft.Json.JsonProperty("riferimenti_operazione", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.Obsolete]
         public System.Collections.Generic.ICollection<MovimentoAssociatoModel> Riferimenti_operazione { get; set; }
 
         /// <summary>
         /// Registrazioni associate
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("riferimento_operazione")]
+        [Newtonsoft.Json.JsonProperty("riferimento_operazione", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<MovimentoAssociatoModel> Riferimento_operazione { get; set; }
 
         /// <summary>
         /// Identificativo del registro
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("identificativo_registro")]
+        [Newtonsoft.Json.JsonProperty("identificativo_registro", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Identificativo_registro { get; set; }
 
         /// <summary>
         /// Numero iscrizione unità locale rilasciato all'iscrizione
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("num_iscr_sito")]
+        [Newtonsoft.Json.JsonProperty("num_iscr_sito", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Num_iscr_sito { get; set; }
 
         /// <summary>
         /// Data di creazione della registrazione in RENTRI (formato ISO 8601 UTC)
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("data_creazione")]
+        [Newtonsoft.Json.JsonProperty("data_creazione", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset Data_creazione { get; set; }
 
         /// <summary>
         /// Data di trasmissione della registrazione a RENTRI (formato ISO 8601 UTC)
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("data_trasmissione")]
+        [Newtonsoft.Json.JsonProperty("data_trasmissione", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset Data_trasmissione { get; set; }
 
         /// <summary>
         /// Data di inizio validità della posizione (formato ISO 8601 UTC)
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("data_inizio_validita")]
+        [Newtonsoft.Json.JsonProperty("data_inizio_validita", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset Data_inizio_validita { get; set; }
 
         /// <summary>
         /// Data di fine validità della posizione (formato ISO 8601 UTC)
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("data_fine_validita")]
+        [Newtonsoft.Json.JsonProperty("data_fine_validita", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset Data_fine_validita { get; set; }
 
     }
@@ -4811,7 +4814,7 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <summary>
         /// Numero registrazione della registrazione tramite anno e progressivo
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("numero_registrazione")]
+        [Newtonsoft.Json.JsonProperty("numero_registrazione", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         public AnnoProgressivoMovimentoModel Numero_registrazione { get; set; } = new AnnoProgressivoMovimentoModel();
 
@@ -4823,7 +4826,7 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <br/>
         /// <br/>&lt;b&gt;Esempi:&lt;/b&gt; solo data = "2024-01-01", data con ora = "2024-01-01T12:00:00Z"
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("data_ora_registrazione")]
+        [Newtonsoft.Json.JsonProperty("data_ora_registrazione", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
         public System.DateTimeOffset Data_ora_registrazione { get; set; }
 
@@ -4834,20 +4837,20 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <br/>
         /// <br/>Vedi API di codifica: &lt;i&gt;GET /codifiche/v1.0/causali-operazione&lt;/i&gt;&lt;p&gt;Valori ammessi:&lt;ul style="margin:0"&gt;&lt;li&gt;&lt;i&gt;DT&lt;/i&gt; - Prodotto o detenuto nell'unità locale&lt;/li&gt;&lt;li&gt;&lt;i&gt;NP&lt;/i&gt; - Nuovo produttore&lt;/li&gt;&lt;li&gt;&lt;i&gt;T*&lt;/i&gt; - Ricevuto da terzi&lt;/li&gt;&lt;li&gt;&lt;i&gt;RE&lt;/i&gt; - Prodotto al di fuori dell’unità locale&lt;/li&gt;&lt;li&gt;&lt;i&gt;I&lt;/i&gt; - Scarico interno&lt;/li&gt;&lt;li&gt;&lt;i&gt;aT&lt;/i&gt; - Scarico a terzi&lt;/li&gt;&lt;li&gt;&lt;i&gt;M&lt;/i&gt; - Scarico per produzione di materiali&lt;/li&gt;&lt;li&gt;&lt;i&gt;TR&lt;/i&gt; - Intermediario&lt;/li&gt;&lt;li&gt;&lt;i&gt;T*aT&lt;/i&gt; - Carico e scarico&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("causale_operazione")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<CausaliOperazione>))]
+        [Newtonsoft.Json.JsonProperty("causale_operazione", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public CausaliOperazione? Causale_operazione { get; set; }
 
         /// <summary>
         /// Data dello stoccaggio istantaneo (formato ISO 8601 UTC) (o giacenza), se valorizzata possono essere compilati solamente i dati relativi al rifiuto e non al materiale.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("stoccaggio_istantaneo")]
+        [Newtonsoft.Json.JsonProperty("stoccaggio_istantaneo", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset? Stoccaggio_istantaneo { get; set; }
 
         /// <summary>
         /// Numero registrazione della registrazione rettificata
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("numero_registrazione_rettifica")]
+        [Newtonsoft.Json.JsonProperty("numero_registrazione_rettifica", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public AnnoProgressivoMovimentoModel Numero_registrazione_rettifica { get; set; }
 
         /// <summary>
@@ -4855,7 +4858,7 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <br/>
         /// <br/>Nel caso di registrazioni specificate tramite anno e progressivo, possono essere indicate anche registrazioni che non siano già state trasmesse al RENTRI.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("riferimento_operazione")]
+        [Newtonsoft.Json.JsonProperty("riferimento_operazione", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<AnnoProgressivoMovimentoModel> Riferimento_operazione { get; set; }
 
     }
@@ -4875,14 +4878,14 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <br/>
         /// <br/>Vedi API di codifica: &lt;i&gt;GET /codifiche/v1.0/codici-eer&lt;/i&gt;
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("codice_eer")]
+        [Newtonsoft.Json.JsonProperty("codice_eer", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         public string Codice_eer { get; set; }
 
         /// <summary>
         /// Descrizione del rifiuto, richiesta se il Codice EER specificato è di tipo .99
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("descrizione_eer")]
+        [Newtonsoft.Json.JsonProperty("descrizione_eer", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.StringLength(250)]
         public string Descrizione_eer { get; set; }
 
@@ -4891,8 +4894,8 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <br/>
         /// <br/>Vedi API di codifica: &lt;i&gt;GET /codifiche/v1.0/provenienza&lt;/i&gt;&lt;p&gt;Valori ammessi:&lt;ul style="margin:0"&gt;&lt;li&gt;&lt;i&gt;U&lt;/i&gt; - Urbano&lt;/li&gt;&lt;li&gt;&lt;i&gt;S&lt;/i&gt; - Speciale&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("provenienza")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<ProvenienzaRifiuto>))]
+        [Newtonsoft.Json.JsonProperty("provenienza", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public ProvenienzaRifiuto? Provenienza { get; set; }
 
         /// <summary>
@@ -4900,8 +4903,7 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <br/>
         /// <br/>Vedi API di codifica: &lt;i&gt;GET /codifiche/v1.0/caratteristiche-pericolo&lt;/i&gt;&lt;p&gt;Valori ammessi:&lt;ul style="margin:0"&gt;&lt;li&gt;&lt;i&gt;HP01&lt;/i&gt; - Esplosivo&lt;/li&gt;&lt;li&gt;&lt;i&gt;HP02&lt;/i&gt; - Comburente&lt;/li&gt;&lt;li&gt;&lt;i&gt;HP03&lt;/i&gt; - Infiammabile&lt;/li&gt;&lt;li&gt;&lt;i&gt;HP04&lt;/i&gt; - Irritante - Irritazione cutanea e lesioni oculari&lt;/li&gt;&lt;li&gt;&lt;i&gt;HP05&lt;/i&gt; - Tossicità specifica per organi bersaglio (STOT)/Tossicità in caso di respirazione&lt;/li&gt;&lt;li&gt;&lt;i&gt;HP06&lt;/i&gt; - Tossicità acuta&lt;/li&gt;&lt;li&gt;&lt;i&gt;HP07&lt;/i&gt; - Cancerogeno&lt;/li&gt;&lt;li&gt;&lt;i&gt;HP08&lt;/i&gt; - Corrosivo&lt;/li&gt;&lt;li&gt;&lt;i&gt;HP09&lt;/i&gt; - Infettivo&lt;/li&gt;&lt;li&gt;&lt;i&gt;HP10&lt;/i&gt; - Tossico per la riproduzione&lt;/li&gt;&lt;li&gt;&lt;i&gt;HP11&lt;/i&gt; - Mutageno&lt;/li&gt;&lt;li&gt;&lt;i&gt;HP12&lt;/i&gt; - Liberazione di gas a tossicità acuta&lt;/li&gt;&lt;li&gt;&lt;i&gt;HP13&lt;/i&gt; - Sensibilizzante&lt;/li&gt;&lt;li&gt;&lt;i&gt;HP14&lt;/i&gt; - Ecotossico&lt;/li&gt;&lt;li&gt;&lt;i&gt;HP15&lt;/i&gt; - Rifiuto che non possiede direttamente una delle caratteristiche di pericolo già menzionate, ma può manifestarla successivamente&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("caratteristiche_pericolo")]
-        // TODO(system.text.json): Add ItemConverterType with enum converter when supported
+        [Newtonsoft.Json.JsonProperty("caratteristiche_pericolo", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore, ItemConverterType = typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public System.Collections.Generic.ICollection<CaratteristichePericolo> Caratteristiche_pericolo { get; set; }
 
         /// <summary>
@@ -4909,15 +4911,15 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <br/>
         /// <br/>Vedi API di codifica: &lt;i&gt;GET /codifiche/v1.0/stati-fisici&lt;/i&gt;&lt;p&gt;Valori ammessi:&lt;ul style="margin:0"&gt;&lt;li&gt;&lt;i&gt;SP&lt;/i&gt; - In polvere o pulverulento&lt;/li&gt;&lt;li&gt;&lt;i&gt;S&lt;/i&gt; - Solido&lt;/li&gt;&lt;li&gt;&lt;i&gt;FP&lt;/i&gt; - Fangoso&lt;/li&gt;&lt;li&gt;&lt;i&gt;L&lt;/i&gt; - Liquido&lt;/li&gt;&lt;li&gt;&lt;i&gt;VS&lt;/i&gt; - Vischioso sciropposo&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("stato_fisico")]
+        [Newtonsoft.Json.JsonProperty("stato_fisico", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<StatiFisici>))]
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public StatiFisici Stato_fisico { get; set; }
 
         /// <summary>
         /// Quantità
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("quantita")]
+        [Newtonsoft.Json.JsonProperty("quantita", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         public UnitaMisuraQuantitaModel Quantita { get; set; } = new UnitaMisuraQuantitaModel();
 
@@ -4926,8 +4928,8 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <br/>
         /// <br/>Vedi API di codifica: &lt;i&gt;GET /codifiche/v1.0/attivita-rs&lt;/i&gt;&lt;p&gt;Valori ammessi:&lt;ul style="margin:0"&gt;&lt;li&gt;&lt;i&gt;R1&lt;/i&gt; - Utilizzazione principale come combustibile o come altro mezzo per produrre energia&lt;/li&gt;&lt;li&gt;&lt;i&gt;R2&lt;/i&gt; - Rigenerazione/recupero di solventi&lt;/li&gt;&lt;li&gt;&lt;i&gt;R3&lt;/i&gt; - Riciclo/recupero delle sostanze organiche non utilizzate come solventi&lt;/li&gt;&lt;li&gt;&lt;i&gt;R4&lt;/i&gt; - Riciclo/recupero dei metalli e dei composti metallici&lt;/li&gt;&lt;li&gt;&lt;i&gt;R5&lt;/i&gt; - Riciclo/recupero di altre sostanze inorganiche&lt;/li&gt;&lt;li&gt;&lt;i&gt;R6&lt;/i&gt; - Rigenerazione degli acidi o delle basi&lt;/li&gt;&lt;li&gt;&lt;i&gt;R7&lt;/i&gt; - Recupero dei prodotti che servono a captare gli inquinanti&lt;/li&gt;&lt;li&gt;&lt;i&gt;R8&lt;/i&gt; - Recupero dei prodotti provenienti dai catalizzatori&lt;/li&gt;&lt;li&gt;&lt;i&gt;R9&lt;/i&gt; - Rigenerazione o altri reimpieghi degli oli&lt;/li&gt;&lt;li&gt;&lt;i&gt;R10&lt;/i&gt; - Spandimento sul suolo a beneficio dell'agricoltura o dell'ecologia&lt;/li&gt;&lt;li&gt;&lt;i&gt;R11&lt;/i&gt; - Utilizzazione di rifiuti ottenuti da una delle operazioni indicate da R1 a R10&lt;/li&gt;&lt;li&gt;&lt;i&gt;R12&lt;/i&gt; - Scambio di rifiuti per sottoporli a una delle operazioni indicate da R1 a R11&lt;/li&gt;&lt;li&gt;&lt;i&gt;R13&lt;/i&gt; - Messa in riserva di rifiuti per sottoporli a una delle operazioni indicate nei punti da R1 a R12&lt;/li&gt;&lt;li&gt;&lt;i&gt;D1&lt;/i&gt; - Deposito sul o nel suolo&lt;/li&gt;&lt;li&gt;&lt;i&gt;D2&lt;/i&gt; - Trattamento in ambiente terrestre&lt;/li&gt;&lt;li&gt;&lt;i&gt;D3&lt;/i&gt; - Iniezioni in profondità&lt;/li&gt;&lt;li&gt;&lt;i&gt;D4&lt;/i&gt; - Lagunaggio&lt;/li&gt;&lt;li&gt;&lt;i&gt;D5&lt;/i&gt; - Messa in discarica specialmente allestita&lt;/li&gt;&lt;li&gt;&lt;i&gt;D6&lt;/i&gt; - Scarico dei rifiuti solidi nell'ambiente idrico eccetto l'immersione&lt;/li&gt;&lt;li&gt;&lt;i&gt;D7&lt;/i&gt; - Immersione, compreso il seppellimento nel sottosuolo marino&lt;/li&gt;&lt;li&gt;&lt;i&gt;D8&lt;/i&gt; - Trattamento biologico non specificato altrove nel presente allegato&lt;/li&gt;&lt;li&gt;&lt;i&gt;D9&lt;/i&gt; - Trattamento fisico-chimico non specificato altrove nel presente allegato&lt;/li&gt;&lt;li&gt;&lt;i&gt;D10&lt;/i&gt; - Incenerimento a terra&lt;/li&gt;&lt;li&gt;&lt;i&gt;D11&lt;/i&gt; - Incenerimento in mare&lt;/li&gt;&lt;li&gt;&lt;i&gt;D12&lt;/i&gt; - Deposito permanente&lt;/li&gt;&lt;li&gt;&lt;i&gt;D13&lt;/i&gt; - Raggruppamento preliminare prima di una delle operazioni di cui ai punti da D1 a D12&lt;/li&gt;&lt;li&gt;&lt;i&gt;D14&lt;/i&gt; - Ricondizionamento preliminare prima di una delle operazioni di cui ai punti da D1 a D13&lt;/li&gt;&lt;li&gt;&lt;i&gt;D15&lt;/i&gt; - Deposito preliminare prima di una delle operazioni di cui ai punti da D1 a D14&lt;/li&gt;&lt;li&gt;&lt;i&gt;CR&lt;/i&gt; - Centro di raccolta&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("destinato_attivita")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<DestinazioniRifiuto>))]
+        [Newtonsoft.Json.JsonProperty("destinato_attivita", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public DestinazioniRifiuto? Destinato_attivita { get; set; }
 
         /// <summary>
@@ -4935,14 +4937,13 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <br/>
         /// <br/>Vedi API di codifica: &lt;i&gt;GET /codifiche/v1.0/categorie-raee&lt;/i&gt;&lt;p&gt;Valori ammessi:&lt;ul style="margin:0"&gt;&lt;li&gt;&lt;i&gt;Cat1&lt;/i&gt; - Apparecchiature per lo scambio di temperatura.&lt;/li&gt;&lt;li&gt;&lt;i&gt;Cat2&lt;/i&gt; - Schermi, monitor ed apparecchiature dotate di schermi con una superficie superiore a 100 cm2.&lt;/li&gt;&lt;li&gt;&lt;i&gt;Cat3&lt;/i&gt; - Lampade.&lt;/li&gt;&lt;li&gt;&lt;i&gt;Cat4&lt;/i&gt; - Apparecchiature di grandi dimensioni (con almeno una dimensione esterna superiore a 50 cm). Questa categoria non include le apparecchiature appartenenti alle categorie 1, 2 e 3.&lt;/li&gt;&lt;li&gt;&lt;i&gt;Cat5&lt;/i&gt; - Apparecchiature di piccole dimensioni (con nessuna dimensione esterna superiore a 50 cm). Questa categoria non include le apparecchiature appartenenti alle categorie 1, 2, 3 e 6.&lt;/li&gt;&lt;li&gt;&lt;i&gt;Cat6&lt;/i&gt; - Piccole apparecchiature informatiche e per telecomunicazioni (con nessuna dimensione esterna superiore a 50 cm).&lt;/li&gt;&lt;li&gt;&lt;i&gt;PF&lt;/i&gt; - Pannelli fotovoltaici&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("categorie_aee")]
-        // TODO(system.text.json): Add ItemConverterType with enum converter when supported
+        [Newtonsoft.Json.JsonProperty("categorie_aee", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore, ItemConverterType = typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public System.Collections.Generic.ICollection<CategorieAee> Categorie_aee { get; set; }
 
         /// <summary>
         /// Veicoli fuori uso
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("veicolo_fuori_uso")]
+        [Newtonsoft.Json.JsonProperty("veicolo_fuori_uso", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public bool? Veicolo_fuori_uso { get; set; }
 
         /// <summary>
@@ -4950,7 +4951,7 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <br/>
         /// <br/>Richiesto solamente se veicolo_fuori_uso è uguale a true.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("veicolo_fuori_uso_reg_pubblica_sicurezza")]
+        [Newtonsoft.Json.JsonProperty("veicolo_fuori_uso_reg_pubblica_sicurezza", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public VeicoloFuoriUsoRegPubblicaSicurezzaModel Veicolo_fuori_uso_reg_pubblica_sicurezza { get; set; }
 
     }
@@ -4965,7 +4966,7 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <summary>
         /// Denominazione del soggetto
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("denominazione")]
+        [Newtonsoft.Json.JsonProperty("denominazione", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         [System.ComponentModel.DataAnnotations.StringLength(255, MinimumLength = 1)]
         public string Denominazione { get; set; }
@@ -4973,7 +4974,7 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <summary>
         /// Codice fiscale
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("codice_fiscale")]
+        [Newtonsoft.Json.JsonProperty("codice_fiscale", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         [System.ComponentModel.DataAnnotations.StringLength(20, MinimumLength = 5)]
         public string Codice_fiscale { get; set; }
@@ -4987,14 +4988,14 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <br/>
         /// <br/>&lt;i&gt;Questo campo viene utilizzato esclusivamente per validare i dati di input in base alla nazione di appartenenza (non viene memorizzato e quindi restituito in output).&lt;/i&gt;
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("nazione_id")]
+        [Newtonsoft.Json.JsonProperty("nazione_id", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.Obsolete]
         public string Nazione_id { get; set; }
 
         /// <summary>
         /// Numero di iscrizione all'Albo Nazionale Gestori Ambientali
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("num_iscrizione_albo")]
+        [Newtonsoft.Json.JsonProperty("num_iscrizione_albo", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.RegularExpression(@"^([A-Za-z]{2})/([0-9]{6})$")]
         public string Num_iscrizione_albo { get; set; }
 
@@ -5103,32 +5104,32 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <summary>
         /// Indice dell'elemento di input relativo al messaggio di validazione
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("indice")]
+        [Newtonsoft.Json.JsonProperty("indice", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public int? Indice { get; set; }
 
         /// <summary>
         /// Campo dell'elemento di input relativo al messaggio di validazione
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("campo")]
+        [Newtonsoft.Json.JsonProperty("campo", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Campo { get; set; }
 
         /// <summary>
         /// Tipo del messaggio (avvertimento o errore)
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("tipo")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<EsitoMessaggioTipo>))]
+        [Newtonsoft.Json.JsonProperty("tipo", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public EsitoMessaggioTipo Tipo { get; set; }
 
         /// <summary>
         /// Codice del messaggio
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("codice_messaggio")]
+        [Newtonsoft.Json.JsonProperty("codice_messaggio", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Codice_messaggio { get; set; }
 
         /// <summary>
         /// Parametri del messaggio
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("parametri")]
+        [Newtonsoft.Json.JsonProperty("parametri", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<object> Parametri { get; set; }
 
     }
@@ -5152,30 +5153,30 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <summary>
         /// Tipo di esito
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("tipo")]
+        [Newtonsoft.Json.JsonProperty("tipo", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Tipo { get; set; }
 
         /// <summary>
         /// Identificativo della transazione asincrona
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("transazione_id")]
+        [Newtonsoft.Json.JsonProperty("transazione_id", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Guid Transazione_id { get; set; }
 
         /// <summary>
         /// Messaggi di validazione
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("validazione")]
+        [Newtonsoft.Json.JsonProperty("validazione", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<EsitoMessaggioModel> Validazione { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("errore")]
+        [Newtonsoft.Json.JsonProperty("errore", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public bool Errore { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("tempo_elaborazione")]
+        [Newtonsoft.Json.JsonProperty("tempo_elaborazione", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Tempo_elaborazione { get; set; }
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
 
-        [System.Text.Json.Serialization.JsonExtensionData]
+        [Newtonsoft.Json.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
@@ -5191,13 +5192,13 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <summary>
         /// Identificativo del registro
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("identificativo_registro")]
+        [Newtonsoft.Json.JsonProperty("identificativo_registro", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Identificativo_registro { get; set; }
 
         /// <summary>
         /// Elenco degli identificativi delle registrazioni
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("numero_registrazioni")]
+        [Newtonsoft.Json.JsonProperty("numero_registrazioni", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<IdentificativoMovimentoCompletoModel> Numero_registrazioni { get; set; }
 
     }
@@ -5212,7 +5213,7 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <summary>
         /// Dati dell'esito della registrazione
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("esito")]
+        [Newtonsoft.Json.JsonProperty("esito", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public EsitoMovimentiDataModel Esito { get; set; }
 
     }
@@ -5224,133 +5225,133 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <summary>
         /// Identificativo del registro
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("identificativo_registro")]
+        [Newtonsoft.Json.JsonProperty("identificativo_registro", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Identificativo_registro { get; set; }
 
         /// <summary>
         /// Numero di iscrizione dell'operatore
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("num_iscr_operatore")]
+        [Newtonsoft.Json.JsonProperty("num_iscr_operatore", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Num_iscr_operatore { get; set; }
 
         /// <summary>
         /// Codice fiscale dell'operatore
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("codice_fiscale_operatore")]
+        [Newtonsoft.Json.JsonProperty("codice_fiscale_operatore", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Codice_fiscale_operatore { get; set; }
 
         /// <summary>
         /// Ragione sociale dell'operatore
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("denominazione_operatore")]
+        [Newtonsoft.Json.JsonProperty("denominazione_operatore", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Denominazione_operatore { get; set; }
 
         /// <summary>
         /// Numero di iscrizione del soggetto delegato
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("num_iscr_soggetto_delegato")]
+        [Newtonsoft.Json.JsonProperty("num_iscr_soggetto_delegato", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Num_iscr_soggetto_delegato { get; set; }
 
         /// <summary>
         /// Codice fiscale del soggetto delegato
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("codice_fiscale_soggetto_delegato")]
+        [Newtonsoft.Json.JsonProperty("codice_fiscale_soggetto_delegato", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Codice_fiscale_soggetto_delegato { get; set; }
 
         /// <summary>
         /// Ragione sociale del soggetto delegato
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("denominazione_soggetto_delegato")]
+        [Newtonsoft.Json.JsonProperty("denominazione_soggetto_delegato", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Denominazione_soggetto_delegato { get; set; }
 
         /// <summary>
         /// Numero di iscrizione dell'unità locale
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("num_iscr_sito")]
+        [Newtonsoft.Json.JsonProperty("num_iscr_sito", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Num_iscr_sito { get; set; }
 
         /// <summary>
         /// Indirizzo dell'unità locale
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("indirizzo_sito")]
+        [Newtonsoft.Json.JsonProperty("indirizzo_sito", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Indirizzo_sito { get; set; }
 
         /// <summary>
         /// Data di vidimazione del registro informatico
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("data_vidimazione")]
+        [Newtonsoft.Json.JsonProperty("data_vidimazione", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset? Data_vidimazione { get; set; }
 
         /// <summary>
         /// Camera di commercio di appartenenza del registro informatico
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("cciaa")]
+        [Newtonsoft.Json.JsonProperty("cciaa", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Cciaa { get; set; }
 
         /// <summary>
         /// Identificativo del soggetto che ha firmato il registro informatico
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("identificativo_firma")]
+        [Newtonsoft.Json.JsonProperty("identificativo_firma", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Identificativo_firma { get; set; }
 
         /// <summary>
         /// Denominazione del soggetto che ha firmato il registro informatico
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("denominazione_firma")]
+        [Newtonsoft.Json.JsonProperty("denominazione_firma", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Denominazione_firma { get; set; }
 
         /// <summary>
         /// CA della firma del soggetto che ha firmato il registro informatico
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("ca_firma")]
+        [Newtonsoft.Json.JsonProperty("ca_firma", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Ca_firma { get; set; }
 
         /// <summary>
         /// True se la firma non è XAdES
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("firma_non_etsi")]
+        [Newtonsoft.Json.JsonProperty("firma_non_etsi", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public bool? Firma_non_etsi { get; set; }
 
         /// <summary>
         /// Numero totale di esportazioni effettuate
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("numero_esportazioni_totali")]
+        [Newtonsoft.Json.JsonProperty("numero_esportazioni_totali", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public int? Numero_esportazioni_totali { get; set; }
 
         /// <summary>
         /// Numero di esportazioni presenti nel file
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("numero_esportazioni_file")]
+        [Newtonsoft.Json.JsonProperty("numero_esportazioni_file", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public int? Numero_esportazioni_file { get; set; }
 
         /// <summary>
         /// Numero di registrazioni presenti nel file
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("numero_registrazioni_file")]
+        [Newtonsoft.Json.JsonProperty("numero_registrazioni_file", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public int? Numero_registrazioni_file { get; set; }
 
         /// <summary>
         /// Numero di registrazioni presenti in RENTRI
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("numero_registrazioni_rentri")]
+        [Newtonsoft.Json.JsonProperty("numero_registrazioni_rentri", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public int? Numero_registrazioni_rentri { get; set; }
 
         /// <summary>
         /// Numero di registrazioni presenti nell'ultima esportazione
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("numero_registrazioni_ultima_esportazione")]
+        [Newtonsoft.Json.JsonProperty("numero_registrazioni_ultima_esportazione", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public int? Numero_registrazioni_ultima_esportazione { get; set; }
 
         /// <summary>
         /// Data dell'ultima esportazione effettuata
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("data_ultima_esportazione")]
+        [Newtonsoft.Json.JsonProperty("data_ultima_esportazione", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset? Data_ultima_esportazione { get; set; }
 
         /// <summary>
         /// Ultimo progressivo esportato
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("ultimo_anno_progressivo_esportato")]
+        [Newtonsoft.Json.JsonProperty("ultimo_anno_progressivo_esportato", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Ultimo_anno_progressivo_esportato { get; set; }
 
     }
@@ -5444,7 +5445,7 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <summary>
         /// Dati dell'esito validazione
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("esito")]
+        [Newtonsoft.Json.JsonProperty("esito", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public EsitoValidaRegistroDataModel Esito { get; set; }
 
     }
@@ -5458,7 +5459,7 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
 
-        [System.Text.Json.Serialization.JsonExtensionData]
+        [Newtonsoft.Json.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
@@ -5477,24 +5478,24 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <summary>
         /// Anno di riferimento della registrazione
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("anno")]
+        [Newtonsoft.Json.JsonProperty("anno", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public int? Anno { get; set; }
 
         /// <summary>
         /// Progressivo della registrazione
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("progressivo")]
+        [Newtonsoft.Json.JsonProperty("progressivo", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public int? Progressivo { get; set; }
 
         /// <summary>
         /// Identificativo RENTRI
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("identificativo")]
+        [Newtonsoft.Json.JsonProperty("identificativo", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Identificativo { get; set; }
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
 
-        [System.Text.Json.Serialization.JsonExtensionData]
+        [Newtonsoft.Json.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
@@ -5513,7 +5514,7 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <summary>
         /// Identificativo RENTRI
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("identificativo")]
+        [Newtonsoft.Json.JsonProperty("identificativo", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         [System.ComponentModel.DataAnnotations.RegularExpression(@"^M[0-9A-Z]{19}$")]
         public string Identificativo { get; set; }
@@ -5530,14 +5531,14 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <summary>
         /// Città estera o comune Italiano
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("citta")]
+        [Newtonsoft.Json.JsonProperty("citta", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         public ComuneModel Citta { get; set; }
 
         /// <summary>
         /// Indirizzo
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("indirizzo")]
+        [Newtonsoft.Json.JsonProperty("indirizzo", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         [System.ComponentModel.DataAnnotations.StringLength(100, MinimumLength = 1)]
         public string Indirizzo { get; set; }
@@ -5545,14 +5546,14 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <summary>
         /// Civico
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("civico")]
+        [Newtonsoft.Json.JsonProperty("civico", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.StringLength(20)]
         public string Civico { get; set; }
 
         /// <summary>
         /// CAP (se indirizzo italiano 5 cifre, altrimenti da 2 a 20 caratteri)
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("cap")]
+        [Newtonsoft.Json.JsonProperty("cap", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.StringLength(20)]
         public string Cap { get; set; }
 
@@ -5568,142 +5569,142 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <summary>
         /// Identificativo della transazione
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("identificativo")]
+        [Newtonsoft.Json.JsonProperty("identificativo", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Guid Identificativo { get; set; }
 
         /// <summary>
         /// Tipo della transazione&lt;p&gt;Valori ammessi:&lt;ul style="margin:0"&gt;&lt;li&gt;&lt;i&gt;Movimenti&lt;/i&gt; - Trasmissione delle registrazioni&lt;/li&gt;&lt;li&gt;&lt;i&gt;Formulari&lt;/i&gt; - Transazione relativa ai formulari&lt;/li&gt;&lt;li&gt;&lt;i&gt;ViViFir&lt;/i&gt; - Transazione relativa a ViViFir&lt;/li&gt;&lt;li&gt;&lt;i&gt;XmlCheck&lt;/i&gt; - Verifica del registro informatico locale&lt;/li&gt;&lt;li&gt;&lt;i&gt;XmlMovimentiLocali&lt;/i&gt; - Generazione del registro informatico locale&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("tipo")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<TipoTransazione>))]
+        [Newtonsoft.Json.JsonProperty("tipo", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public TipoTransazione Tipo { get; set; }
 
         /// <summary>
         /// Identificativo della transazione precedente
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("identificativo_precedente")]
+        [Newtonsoft.Json.JsonProperty("identificativo_precedente", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Guid? Identificativo_precedente { get; set; }
 
         /// <summary>
         /// Data di trasmissione
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("data_trasmissione")]
+        [Newtonsoft.Json.JsonProperty("data_trasmissione", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset? Data_trasmissione { get; set; }
 
         /// <summary>
         /// Identificativo dell'entità associata alla transazione (Registro)
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("identificativo_entita")]
+        [Newtonsoft.Json.JsonProperty("identificativo_entita", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Identificativo_entita { get; set; }
 
         /// <summary>
         /// Data di inizio dell'elaborazione
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("data_inizio_elaborazione")]
+        [Newtonsoft.Json.JsonProperty("data_inizio_elaborazione", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset? Data_inizio_elaborazione { get; set; }
 
         /// <summary>
         /// Data di fine dell'elaborazione
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("data_fine_elaborazione")]
+        [Newtonsoft.Json.JsonProperty("data_fine_elaborazione", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset? Data_fine_elaborazione { get; set; }
 
         /// <summary>
         /// Status code ricevuto nel caso in cui sia stato richiesto l'invio dell'esito tramite modalità push
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("status_code_push")]
+        [Newtonsoft.Json.JsonProperty("status_code_push", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public int? Status_code_push { get; set; }
 
         /// <summary>
         /// Data di invio dell'esito tramite modalità push
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("data_push")]
+        [Newtonsoft.Json.JsonProperty("data_push", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset? Data_push { get; set; }
 
         /// <summary>
         /// Data dell'ultima richiesta dell'esito effettuata in modalità pull
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("data_ultimo_pull")]
+        [Newtonsoft.Json.JsonProperty("data_ultimo_pull", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset? Data_ultimo_pull { get; set; }
 
         /// <summary>
         /// Stato della transazione&lt;p&gt;Valori ammessi:&lt;ul style="margin:0"&gt;&lt;li&gt;&lt;i&gt;Annullata&lt;/i&gt; - Annullata&lt;/li&gt;&lt;li&gt;&lt;i&gt;InErrore&lt;/i&gt; - Errore nei dati&lt;/li&gt;&lt;li&gt;&lt;i&gt;Nuova&lt;/i&gt; - Nuova (in coda)&lt;/li&gt;&lt;li&gt;&lt;i&gt;Conclusa&lt;/i&gt; - Conclusa&lt;/li&gt;&lt;li&gt;&lt;i&gt;InLavorazione&lt;/i&gt; - Elaborazione in corso&lt;/li&gt;&lt;li&gt;&lt;i&gt;ConclusaComunicata&lt;/i&gt; - Conclusa e esito comunicato&lt;/li&gt;&lt;li&gt;&lt;i&gt;ErroreDiSistema&lt;/i&gt; - Errore di sistema&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("stato")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<StatoTransazione>))]
+        [Newtonsoft.Json.JsonProperty("stato", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public StatoTransazione Stato { get; set; }
 
         /// <summary>
         /// Provenienza della transazione
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("sorgente")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<SorgenteTransazione>))]
+        [Newtonsoft.Json.JsonProperty("sorgente", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public SorgenteTransazione Sorgente { get; set; }
 
         /// <summary>
         /// Endpoint richiamato per l'invio dei dati
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("endpoint")]
+        [Newtonsoft.Json.JsonProperty("endpoint", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Endpoint { get; set; }
 
         /// <summary>
         /// Codice fiscale del firmatario
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("identificativo_firmatario")]
+        [Newtonsoft.Json.JsonProperty("identificativo_firmatario", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Identificativo_firmatario { get; set; }
 
         /// <summary>
         /// Numero iscrizione operatore rilasciato all'iscrizione. Per recuperare i numeri iscrizione attribuiti agli operatori è possibile utilizzare /anagrafiche/v1.0/operatore.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("num_iscr_operatore")]
+        [Newtonsoft.Json.JsonProperty("num_iscr_operatore", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Num_iscr_operatore { get; set; }
 
         /// <summary>
         /// Codice fiscale dell'operatore
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("identificativo_operatore")]
+        [Newtonsoft.Json.JsonProperty("identificativo_operatore", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Identificativo_operatore { get; set; }
 
         /// <summary>
         /// Denominazione dell'operatore
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("denominazione_operatore")]
+        [Newtonsoft.Json.JsonProperty("denominazione_operatore", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Denominazione_operatore { get; set; }
 
         /// <summary>
         /// Numero iscrizione unità locale rilasciato all'iscrizione. Per recuperare i numeri di iscrizione attribuiti alle unità locali è possibile utilizzare /anagrafiche/v1.0/operatore/{num_iscr}/siti.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("num_iscr_sito")]
+        [Newtonsoft.Json.JsonProperty("num_iscr_sito", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Num_iscr_sito { get; set; }
 
         /// <summary>
         /// Comune dell'unità locale
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("sito_comune_id")]
+        [Newtonsoft.Json.JsonProperty("sito_comune_id", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Sito_comune_id { get; set; }
 
         /// <summary>
         /// Provincia dell'unità locale
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("sito_provincia_id")]
+        [Newtonsoft.Json.JsonProperty("sito_provincia_id", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Sito_provincia_id { get; set; }
 
         /// <summary>
         /// Indirizzo dell'unità locale
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("sito_indirizzo")]
+        [Newtonsoft.Json.JsonProperty("sito_indirizzo", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Sito_indirizzo { get; set; }
 
         /// <summary>
         /// Numero civico dell'unità locale
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("sito_civico")]
+        [Newtonsoft.Json.JsonProperty("sito_civico", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Sito_civico { get; set; }
 
         /// <summary>
         /// Lista delle registrazioni inviate
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("movimenti_info")]
+        [Newtonsoft.Json.JsonProperty("movimenti_info", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<MovimentoInfoModel> Movimenti_info { get; set; }
 
     }
@@ -5718,136 +5719,136 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <summary>
         /// Identificativo della transazione
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("identificativo")]
+        [Newtonsoft.Json.JsonProperty("identificativo", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Guid Identificativo { get; set; }
 
         /// <summary>
         /// Tipo della transazione&lt;p&gt;Valori ammessi:&lt;ul style="margin:0"&gt;&lt;li&gt;&lt;i&gt;Movimenti&lt;/i&gt; - Trasmissione delle registrazioni&lt;/li&gt;&lt;li&gt;&lt;i&gt;Formulari&lt;/i&gt; - Transazione relativa ai formulari&lt;/li&gt;&lt;li&gt;&lt;i&gt;ViViFir&lt;/i&gt; - Transazione relativa a ViViFir&lt;/li&gt;&lt;li&gt;&lt;i&gt;XmlCheck&lt;/i&gt; - Verifica del registro informatico locale&lt;/li&gt;&lt;li&gt;&lt;i&gt;XmlMovimentiLocali&lt;/i&gt; - Generazione del registro informatico locale&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("tipo")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<TipoTransazione>))]
+        [Newtonsoft.Json.JsonProperty("tipo", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public TipoTransazione Tipo { get; set; }
 
         /// <summary>
         /// Identificativo della transazione precedente
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("identificativo_precedente")]
+        [Newtonsoft.Json.JsonProperty("identificativo_precedente", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Guid? Identificativo_precedente { get; set; }
 
         /// <summary>
         /// Data di trasmissione
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("data_trasmissione")]
+        [Newtonsoft.Json.JsonProperty("data_trasmissione", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset? Data_trasmissione { get; set; }
 
         /// <summary>
         /// Identificativo dell'entità associata alla transazione (Registro)
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("identificativo_entita")]
+        [Newtonsoft.Json.JsonProperty("identificativo_entita", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Identificativo_entita { get; set; }
 
         /// <summary>
         /// Data di inizio dell'elaborazione
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("data_inizio_elaborazione")]
+        [Newtonsoft.Json.JsonProperty("data_inizio_elaborazione", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset? Data_inizio_elaborazione { get; set; }
 
         /// <summary>
         /// Data di fine dell'elaborazione
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("data_fine_elaborazione")]
+        [Newtonsoft.Json.JsonProperty("data_fine_elaborazione", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset? Data_fine_elaborazione { get; set; }
 
         /// <summary>
         /// Status code ricevuto nel caso in cui sia stato richiesto l'invio dell'esito tramite modalità push
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("status_code_push")]
+        [Newtonsoft.Json.JsonProperty("status_code_push", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public int? Status_code_push { get; set; }
 
         /// <summary>
         /// Data di invio dell'esito tramite modalità push
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("data_push")]
+        [Newtonsoft.Json.JsonProperty("data_push", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset? Data_push { get; set; }
 
         /// <summary>
         /// Data dell'ultima richiesta dell'esito effettuata in modalità pull
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("data_ultimo_pull")]
+        [Newtonsoft.Json.JsonProperty("data_ultimo_pull", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset? Data_ultimo_pull { get; set; }
 
         /// <summary>
         /// Stato della transazione&lt;p&gt;Valori ammessi:&lt;ul style="margin:0"&gt;&lt;li&gt;&lt;i&gt;Annullata&lt;/i&gt; - Annullata&lt;/li&gt;&lt;li&gt;&lt;i&gt;InErrore&lt;/i&gt; - Errore nei dati&lt;/li&gt;&lt;li&gt;&lt;i&gt;Nuova&lt;/i&gt; - Nuova (in coda)&lt;/li&gt;&lt;li&gt;&lt;i&gt;Conclusa&lt;/i&gt; - Conclusa&lt;/li&gt;&lt;li&gt;&lt;i&gt;InLavorazione&lt;/i&gt; - Elaborazione in corso&lt;/li&gt;&lt;li&gt;&lt;i&gt;ConclusaComunicata&lt;/i&gt; - Conclusa e esito comunicato&lt;/li&gt;&lt;li&gt;&lt;i&gt;ErroreDiSistema&lt;/i&gt; - Errore di sistema&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("stato")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<StatoTransazione>))]
+        [Newtonsoft.Json.JsonProperty("stato", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public StatoTransazione Stato { get; set; }
 
         /// <summary>
         /// Provenienza della transazione
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("sorgente")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<SorgenteTransazione>))]
+        [Newtonsoft.Json.JsonProperty("sorgente", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public SorgenteTransazione Sorgente { get; set; }
 
         /// <summary>
         /// Endpoint richiamato per l'invio dei dati
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("endpoint")]
+        [Newtonsoft.Json.JsonProperty("endpoint", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Endpoint { get; set; }
 
         /// <summary>
         /// Codice fiscale del firmatario
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("identificativo_firmatario")]
+        [Newtonsoft.Json.JsonProperty("identificativo_firmatario", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Identificativo_firmatario { get; set; }
 
         /// <summary>
         /// Numero iscrizione operatore rilasciato all'iscrizione. Per recuperare i numeri iscrizione attribuiti agli operatori è possibile utilizzare /anagrafiche/v1.0/operatore.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("num_iscr_operatore")]
+        [Newtonsoft.Json.JsonProperty("num_iscr_operatore", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Num_iscr_operatore { get; set; }
 
         /// <summary>
         /// Codice fiscale dell'operatore
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("identificativo_operatore")]
+        [Newtonsoft.Json.JsonProperty("identificativo_operatore", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Identificativo_operatore { get; set; }
 
         /// <summary>
         /// Denominazione dell'operatore
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("denominazione_operatore")]
+        [Newtonsoft.Json.JsonProperty("denominazione_operatore", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Denominazione_operatore { get; set; }
 
         /// <summary>
         /// Numero iscrizione unità locale rilasciato all'iscrizione. Per recuperare i numeri di iscrizione attribuiti alle unità locali è possibile utilizzare /anagrafiche/v1.0/operatore/{num_iscr}/siti.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("num_iscr_sito")]
+        [Newtonsoft.Json.JsonProperty("num_iscr_sito", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Num_iscr_sito { get; set; }
 
         /// <summary>
         /// Comune dell'unità locale
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("sito_comune_id")]
+        [Newtonsoft.Json.JsonProperty("sito_comune_id", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Sito_comune_id { get; set; }
 
         /// <summary>
         /// Provincia dell'unità locale
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("sito_provincia_id")]
+        [Newtonsoft.Json.JsonProperty("sito_provincia_id", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Sito_provincia_id { get; set; }
 
         /// <summary>
         /// Indirizzo dell'unità locale
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("sito_indirizzo")]
+        [Newtonsoft.Json.JsonProperty("sito_indirizzo", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Sito_indirizzo { get; set; }
 
         /// <summary>
         /// Numero civico dell'unità locale
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("sito_civico")]
+        [Newtonsoft.Json.JsonProperty("sito_civico", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Sito_civico { get; set; }
 
     }
@@ -5937,36 +5938,36 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <summary>
         /// Anno di riferimento della registrazione
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("anno")]
+        [Newtonsoft.Json.JsonProperty("anno", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public int? Anno { get; set; }
 
         /// <summary>
         /// Progressivo della registrazione
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("progressivo")]
+        [Newtonsoft.Json.JsonProperty("progressivo", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public int? Progressivo { get; set; }
 
         /// <summary>
         /// Identificativo RENTRI
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("identificativo")]
+        [Newtonsoft.Json.JsonProperty("identificativo", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Identificativo { get; set; }
 
         /// <summary>
         /// Indica se la registrazione associata è stata comunicata durante la trasmissione della stessa (true), oppure se è stata derivata in modo indiretto dal RENTRI (false)
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("associazione_diretta")]
+        [Newtonsoft.Json.JsonProperty("associazione_diretta", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public bool Associazione_diretta { get; set; }
 
         /// <summary>
         /// Indica se la registrazione è incompleta (true), nel caso in cui sia stata generata a partire da una registrazione trasmessa solamente come riferimento operazione (anno/progressivo) di un'altra registrazione
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("incompleto")]
+        [Newtonsoft.Json.JsonProperty("incompleto", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public bool Incompleto { get; set; }
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
 
-        [System.Text.Json.Serialization.JsonExtensionData]
+        [Newtonsoft.Json.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
@@ -5985,7 +5986,7 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <summary>
         /// Riferimenti operazione
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("riferimenti")]
+        [Newtonsoft.Json.JsonProperty("riferimenti", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public DatiRiferimentiCompletoModel Riferimenti { get; set; }
 
         /// <summary>
@@ -5993,7 +5994,7 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <br/>
         /// <br/>Richiesto solamente se causale_operazione è diversa da "M".
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("rifiuto")]
+        [Newtonsoft.Json.JsonProperty("rifiuto", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public DatiRifiutoModel Rifiuto { get; set; }
 
         /// <summary>
@@ -6001,7 +6002,7 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <br/>
         /// <br/>Richiesto solamente se causale_operazione è uguale a "M".
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("materiali")]
+        [Newtonsoft.Json.JsonProperty("materiali", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public DatiMaterialiModel Materiali { get; set; }
 
         /// <summary>
@@ -6009,7 +6010,7 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <br/>
         /// <br/>Non deve essere indicato se causale_operazione è diversa da "aT", "TR", "T*", "T*AT".
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("integrazione_fir")]
+        [Newtonsoft.Json.JsonProperty("integrazione_fir", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public DatiIntegrazioneFirModel Integrazione_fir { get; set; }
 
         /// <summary>
@@ -6017,25 +6018,25 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <br/>
         /// <br/>Non deve essere indicato se causale_operazione è diversa da "aT", "T*AT".
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("esito")]
+        [Newtonsoft.Json.JsonProperty("esito", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public DatiEsitoModel Esito { get; set; }
 
         /// <summary>
         /// Produttore del rifiuto
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("produttore")]
+        [Newtonsoft.Json.JsonProperty("produttore", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public DatiProduttoreModel Produttore { get; set; }
 
         /// <summary>
         /// Trasportatore
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("trasportatore")]
+        [Newtonsoft.Json.JsonProperty("trasportatore", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public DatiTrasportatoreModel Trasportatore { get; set; }
 
         /// <summary>
         /// Destinatario
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("destinatario")]
+        [Newtonsoft.Json.JsonProperty("destinatario", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public DatiDestinatarioModel Destinatario { get; set; }
 
         /// <summary>
@@ -6043,50 +6044,50 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <br/> 
         /// <br/>⚠️ Deprecato: utilizzare "intermediari"
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("intermediario")]
+        [Newtonsoft.Json.JsonProperty("intermediario", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.Obsolete]
         public DatiIntermediarioModel Intermediario { get; set; }
 
         /// <summary>
         /// Intermediari
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("intermediari")]
+        [Newtonsoft.Json.JsonProperty("intermediari", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<DatiIntermediarioModel> Intermediari { get; set; }
 
         /// <summary>
         /// Annotazioni generiche
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("annotazioni")]
+        [Newtonsoft.Json.JsonProperty("annotazioni", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.StringLength(500)]
         public string Annotazioni { get; set; }
 
         /// <summary>
         /// Indica se la registrazione è stata annullata
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("annullato")]
+        [Newtonsoft.Json.JsonProperty("annullato", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public bool Annullato { get; set; }
 
         /// <summary>
         /// Indica se la registrazione è stata rettificata
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("rettificato")]
+        [Newtonsoft.Json.JsonProperty("rettificato", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public bool Rettificato { get; set; }
 
         /// <summary>
         /// Indica se la registrazione è stata trasmessa da un soggetto delegato
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("trasmesso_da_soggetto_delegato")]
+        [Newtonsoft.Json.JsonProperty("trasmesso_da_soggetto_delegato", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public bool? Trasmesso_da_soggetto_delegato { get; set; }
 
         /// <summary>
         /// Variazioni
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("variazioni")]
+        [Newtonsoft.Json.JsonProperty("variazioni", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<DatiMovimentoModel> Variazioni { get; set; }
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
 
-        [System.Text.Json.Serialization.JsonExtensionData]
+        [Newtonsoft.Json.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
@@ -6105,25 +6106,25 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <summary>
         /// Anno di riferimento della registrazione
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("anno")]
+        [Newtonsoft.Json.JsonProperty("anno", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public int? Anno { get; set; }
 
         /// <summary>
         /// Progressivo della registrazione
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("progressivo")]
+        [Newtonsoft.Json.JsonProperty("progressivo", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public int? Progressivo { get; set; }
 
         /// <summary>
         /// Identificativo RENTRI della registrazione (solo nel caso di registrazione di rettifica o annullamento)
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("identificativo")]
+        [Newtonsoft.Json.JsonProperty("identificativo", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Identificativo { get; set; }
 
         /// <summary>
         /// Data e ora di registrazione
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("data_ora_registrazione")]
+        [Newtonsoft.Json.JsonProperty("data_ora_registrazione", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset? Data_ora_registrazione { get; set; }
 
     }
@@ -6138,7 +6139,7 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <summary>
         /// Riferimenti operazione
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("riferimenti")]
+        [Newtonsoft.Json.JsonProperty("riferimenti", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         public DatiRiferimentiModel Riferimenti { get; set; } = new DatiRiferimentiModel();
 
@@ -6147,7 +6148,7 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <br/>
         /// <br/>Richiesto solamente se causale_operazione è diversa da "M".
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("rifiuto")]
+        [Newtonsoft.Json.JsonProperty("rifiuto", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public DatiRifiutoModel Rifiuto { get; set; }
 
         /// <summary>
@@ -6155,7 +6156,7 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <br/>
         /// <br/>Richiesto solamente se causale_operazione è uguale a "M".
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("materiali")]
+        [Newtonsoft.Json.JsonProperty("materiali", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public DatiMaterialiModel Materiali { get; set; }
 
         /// <summary>
@@ -6163,7 +6164,7 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <br/>
         /// <br/>Non deve essere indicato se causale_operazione è diversa da "aT", "TR", "T*", "T*AT".
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("integrazione_fir")]
+        [Newtonsoft.Json.JsonProperty("integrazione_fir", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public DatiIntegrazioneFirModel Integrazione_fir { get; set; }
 
         /// <summary>
@@ -6171,25 +6172,25 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <br/>
         /// <br/>Non deve essere indicato se causale_operazione è diversa da "aT", "T*AT".
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("esito")]
+        [Newtonsoft.Json.JsonProperty("esito", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public DatiEsitoModel Esito { get; set; }
 
         /// <summary>
         /// Produttore del rifiuto
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("produttore")]
+        [Newtonsoft.Json.JsonProperty("produttore", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public DatiProduttoreModel Produttore { get; set; }
 
         /// <summary>
         /// Trasportatore
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("trasportatore")]
+        [Newtonsoft.Json.JsonProperty("trasportatore", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public DatiTrasportatoreModel Trasportatore { get; set; }
 
         /// <summary>
         /// Destinatario
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("destinatario")]
+        [Newtonsoft.Json.JsonProperty("destinatario", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public DatiDestinatarioModel Destinatario { get; set; }
 
         /// <summary>
@@ -6197,26 +6198,26 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <br/> 
         /// <br/>⚠️ Deprecato: utilizzare "intermediari"
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("intermediario")]
+        [Newtonsoft.Json.JsonProperty("intermediario", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.Obsolete]
         public DatiIntermediarioModel Intermediario { get; set; }
 
         /// <summary>
         /// Intermediari
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("intermediari")]
+        [Newtonsoft.Json.JsonProperty("intermediari", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<DatiIntermediarioModel> Intermediari { get; set; }
 
         /// <summary>
         /// Annotazioni generiche
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("annotazioni")]
+        [Newtonsoft.Json.JsonProperty("annotazioni", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         [System.ComponentModel.DataAnnotations.StringLength(500)]
         public string Annotazioni { get; set; }
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
 
-        [System.Text.Json.Serialization.JsonExtensionData]
+        [Newtonsoft.Json.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
@@ -6234,7 +6235,7 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
 
-        [System.Text.Json.Serialization.JsonExtensionData]
+        [Newtonsoft.Json.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
@@ -6337,24 +6338,24 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
     public partial class ProblemDetails
     {
 
-        [System.Text.Json.Serialization.JsonPropertyName("type")]
+        [Newtonsoft.Json.JsonProperty("type", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Type { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("title")]
+        [Newtonsoft.Json.JsonProperty("title", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Title { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("status")]
+        [Newtonsoft.Json.JsonProperty("status", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public int? Status { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("detail")]
+        [Newtonsoft.Json.JsonProperty("detail", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Detail { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("instance")]
+        [Newtonsoft.Json.JsonProperty("instance", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Instance { get; set; }
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
 
-        [System.Text.Json.Serialization.JsonExtensionData]
+        [Newtonsoft.Json.JsonExtensionData]
         public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
             get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
@@ -6463,14 +6464,14 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <summary>
         /// Stato dell'API&lt;p&gt;Valori ammessi:&lt;ul style="margin:0"&gt;&lt;li&gt;&lt;i&gt;Ok&lt;/i&gt; - API regolarmente funzionante&lt;/li&gt;&lt;li&gt;&lt;i&gt;Warning&lt;/i&gt; - API funzionante, ma con probabili disservizi come indicato nei warning&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("status")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<StatusResponseEnum>))]
+        [Newtonsoft.Json.JsonProperty("status", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public StatusResponseEnum Status { get; set; }
 
         /// <summary>
         /// Eventuali messaggi di warning relativi allo stato dell'API
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("warnings")]
+        [Newtonsoft.Json.JsonProperty("warnings", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.ICollection<string> Warnings { get; set; }
 
     }
@@ -6539,7 +6540,7 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
     public partial class TransazioneModel
     {
 
-        [System.Text.Json.Serialization.JsonPropertyName("transazione_id")]
+        [Newtonsoft.Json.JsonProperty("transazione_id", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Guid Transazione_id { get; set; }
 
     }
@@ -6554,19 +6555,19 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <summary>
         /// Claims
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("claims")]
+        [Newtonsoft.Json.JsonProperty("claims", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Claims { get; set; }
 
         /// <summary>
         /// Headers
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("headers")]
+        [Newtonsoft.Json.JsonProperty("headers", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Headers { get; set; }
 
         /// <summary>
         /// Body
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("body")]
+        [Newtonsoft.Json.JsonProperty("body", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Body { get; set; }
 
     }
@@ -6581,37 +6582,37 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <summary>
         /// Identificativo della transazione
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("identificativo_transazione")]
+        [Newtonsoft.Json.JsonProperty("identificativo_transazione", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Guid Identificativo_transazione { get; set; }
 
         /// <summary>
         /// Identificativo univoco del JWT
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("jti")]
+        [Newtonsoft.Json.JsonProperty("jti", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Jti { get; set; }
 
         /// <summary>
         /// Codice fiscale dell'operatore, del rappresentante o di un incaricato
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("issuer")]
+        [Newtonsoft.Json.JsonProperty("issuer", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Issuer { get; set; }
 
         /// <summary>
         /// Data e ora della ricezione della request
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("date_time")]
+        [Newtonsoft.Json.JsonProperty("date_time", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset Date_time { get; set; }
 
         /// <summary>
         /// Endpoint richiamato per l'invio dei dati
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("endpoint")]
+        [Newtonsoft.Json.JsonProperty("endpoint", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Endpoint { get; set; }
 
         /// <summary>
         /// Dati della request associata
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("data")]
+        [Newtonsoft.Json.JsonProperty("data", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public TransazioneRequestDataModel Data { get; set; }
 
     }
@@ -6644,7 +6645,7 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <summary>
         /// Quantità (parte intera: 10, parte decimale: 4) compresa tra 0.0000 e 9999999999.9999.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("valore")]
+        [Newtonsoft.Json.JsonProperty("valore", Required = Newtonsoft.Json.Required.Always)]
         public double Valore { get; set; }
 
         /// <summary>
@@ -6652,9 +6653,9 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <br/>
         /// <br/>Vedi API di codifica: &lt;i&gt;GET /codifiche/v1.0/unita-misura&lt;/i&gt;&lt;p&gt;Valori ammessi:&lt;ul style="margin:0"&gt;&lt;li&gt;&lt;i&gt;kg&lt;/i&gt; - Chilogrammi&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("unita_misura")]
+        [Newtonsoft.Json.JsonProperty("unita_misura", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<UnitaMisuraPeso>))]
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public UnitaMisuraPeso Unita_misura { get; set; }
 
     }
@@ -6666,7 +6667,7 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <summary>
         /// Quantità (parte intera: 10, parte decimale: 4) compresa tra 0.0000 e 9999999999.9999.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("valore")]
+        [Newtonsoft.Json.JsonProperty("valore", Required = Newtonsoft.Json.Required.Always)]
         public double Valore { get; set; }
 
         /// <summary>
@@ -6674,9 +6675,9 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <br/>
         /// <br/>Vedi API di codifica: &lt;i&gt;GET /codifiche/v1.0/unita-misura&lt;/i&gt;&lt;p&gt;Valori ammessi:&lt;ul style="margin:0"&gt;&lt;li&gt;&lt;i&gt;kg&lt;/i&gt; - Chilogrammi&lt;/li&gt;&lt;li&gt;&lt;i&gt;l&lt;/i&gt; - Litri&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("unita_misura")]
+        [Newtonsoft.Json.JsonProperty("unita_misura", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<UnitaMisura>))]
+        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public UnitaMisura Unita_misura { get; set; }
 
     }
@@ -6692,7 +6693,7 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// Contenuto in Base64 del file XML, o del file ZIP contenente il file XML, del registro cronologico di carico e scarico digitale.
         /// <br/>Dimensione massima consentita del file 10 MB.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("file_content")]
+        [Newtonsoft.Json.JsonProperty("file_content", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
         public byte[] File_content { get; set; }
 
@@ -6701,14 +6702,14 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <br/>.xml per il file del registro in formato XML standard, .zip se il file XML è stato compresso. 
         /// <br/>Richieste prive di estensione o con estensioni non supportate verranno scartate dal sistema.
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("nome_file")]
+        [Newtonsoft.Json.JsonProperty("nome_file", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         public string Nome_file { get; set; }
 
         /// <summary>
         /// Tipo MIME del file da caricare
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("mime")]
+        [Newtonsoft.Json.JsonProperty("mime", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         public string Mime { get; set; }
 
@@ -6724,7 +6725,7 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <summary>
         /// Numero reg. pubblica sicurezza
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("numero")]
+        [Newtonsoft.Json.JsonProperty("numero", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         [System.ComponentModel.DataAnnotations.StringLength(50, MinimumLength = 1)]
         public string Numero { get; set; }
@@ -6732,7 +6733,7 @@ namespace GKit.RENTRI.Stubs.DatiRegistri
         /// <summary>
         /// Data reg. pubblica sicurezza (formato ISO 8601 UTC)
         /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("data")]
+        [Newtonsoft.Json.JsonProperty("data", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.DateTimeOffset? Data { get; set; }
 
     }
