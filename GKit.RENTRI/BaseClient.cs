@@ -7,7 +7,7 @@ namespace GKit.RENTRI;
 
 public abstract class BaseClient : IDisposable
 {
-    public ClientOptions Options { get; init; } = null!;
+    public ClientOptions? Options { get; init; }
 
     protected string GetAlgorithm(X509Certificate2 certificate)
     {
@@ -147,10 +147,13 @@ public abstract class BaseClient : IDisposable
 
     protected void OnPrepareRequest(HttpClient client, HttpRequestMessage request, string url)
     {
-        AddAuthToHttpRequestMessage(request);
+        if(Options is not null)
+        {
+            AddAuthToHttpRequestMessage(request);
 
-        if (request.Content is not null)
-            AddIntegrityHttpRequestMessage(request);
+            if (request.Content is not null)
+                AddIntegrityHttpRequestMessage(request);
+        }
 
         PrepareRequestHandler?.Invoke(client, request, url);
     }

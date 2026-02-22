@@ -2,9 +2,9 @@ using GKit.RENTRI.Stubs.Anagrafiche;
 
 namespace GKit.RENTRI;
 
-public class AnagraficheClientFactory(ClientOptions options, ApiStatusProvider apiStatusProvider) : BaseClientFactory<AnagraficheClient>(apiStatusProvider)
+public class AnagraficheClientFactory(ApiStatusProvider apiStatusProvider) : BaseClientFactory<AnagraficheClient>(apiStatusProvider)
 {
-    protected override AnagraficheClient BuildClient()
+    protected override AnagraficheClient BuildClient(ClientOptions options)
     {
         return new AnagraficheClient(new HttpClient(), options);
     }

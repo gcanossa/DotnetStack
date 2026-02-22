@@ -2,9 +2,9 @@ using GKit.RENTRI.Stubs.DatiRegistri;
 
 namespace GKit.RENTRI;
 
-public class DatiRegistriClientFactory(ClientOptions options, ApiStatusProvider apiStatusProvider) : BaseClientFactory<DatiRegistriClient>(apiStatusProvider)
+public class DatiRegistriClientFactory(ApiStatusProvider apiStatusProvider) : BaseClientFactory<DatiRegistriClient>(apiStatusProvider)
 {
-    protected override DatiRegistriClient BuildClient()
+    protected override DatiRegistriClient BuildClient(ClientOptions options)
     {
         return new DatiRegistriClient(new HttpClient(), options);
     }

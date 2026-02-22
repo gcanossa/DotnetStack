@@ -162,7 +162,7 @@ public partial class EntityGrid<T, TDialog>
     await RefreshDataAsync();
   }
 
-  protected async Task RefreshDataAsync()
+  public async Task RefreshDataAsync()
   {
     await _dataGrid.ReloadServerData();
     await InvokeAsync(StateHasChanged);

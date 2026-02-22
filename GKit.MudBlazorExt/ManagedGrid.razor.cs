@@ -65,7 +65,7 @@ public partial class ManagedGrid<T>
     });
   }
 
-  protected async Task RefreshDataAsync()
+  public async Task RefreshDataAsync()
   {
     await _dataGrid.ReloadServerData();
     await InvokeAsync(StateHasChanged);

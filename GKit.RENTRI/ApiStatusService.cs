@@ -60,12 +60,12 @@ public class ApiStatusService : BackgroundService
         {
             try
             {
-                using var anagraficheClient = anagraficheClientFactory.CreateClient();
-                using var caRentriClient = caRentriClientFactory.CreateClient();
-                using var codificheClient = codificheClientFactory.CreateClient();
-                using var datiRegistriClient = datiRegistriClientFactory.CreateClient();
-                using var formulariClient = formulariClientFactory.CreateClient();
-                using var vidimazioneFormulariClient = vidimazioneFormulariClientFactory.CreateClient();
+                using var anagraficheClient = anagraficheClientFactory.CreateAnonymousClient();
+                using var caRentriClient = caRentriClientFactory.CreateAnonymousClient();
+                using var codificheClient = codificheClientFactory.CreateAnonymousClient();
+                using var datiRegistriClient = datiRegistriClientFactory.CreateAnonymousClient();
+                using var formulariClient = formulariClientFactory.CreateAnonymousClient();
+                using var vidimazioneFormulariClient = vidimazioneFormulariClientFactory.CreateAnonymousClient();
 
                 var source = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
 

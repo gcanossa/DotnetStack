@@ -1,9 +1,9 @@
 namespace GKit.RENTRI;
 
-public class VidimazioneFormulariClientFactory(ClientOptions options, ApiStatusProvider apiStatusProvider)
+public class VidimazioneFormulariClientFactory(ApiStatusProvider apiStatusProvider)
     : BaseClientFactory<VidimazioneFormulariClient>(apiStatusProvider)
 {
-    protected override VidimazioneFormulariClient BuildClient()
+    protected override VidimazioneFormulariClient BuildClient(ClientOptions options)
     {
         return new VidimazioneFormulariClient(new HttpClient(), options);
     }

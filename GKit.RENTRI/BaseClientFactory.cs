@@ -9,11 +9,11 @@ public abstract class BaseClientFactory<T> where T : BaseClient
         this.apiStatusProvider = apiStatusProvider;
     }
 
-    protected abstract T BuildClient();
+    protected abstract T BuildClient(ClientOptions options);
 
-    public T CreateClient()
+    public T CreateClient(ClientOptions options)
     {
-        var result = BuildClient();
+        var result = BuildClient(options);
 
         result.PrepareRequestHandler = (client, request, url) =>
         {
@@ -30,5 +30,10 @@ public abstract class BaseClientFactory<T> where T : BaseClient
         };
 
         return result;
+    }
+
+    public T CreateAnonymousClient()
+    {
+        return CreateClient(null!);
     }
 }

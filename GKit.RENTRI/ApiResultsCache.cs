@@ -52,4 +52,14 @@ public class ApiResultsCache
 
         return (T)value.Value;
     }
+
+    public void InvalidateKey(string cacheKey)
+    {
+        _cache.Remove(cacheKey);
+    }
+
+    public void InvalidateAll()
+    {
+        _cache.Clear();
+    }
 }
