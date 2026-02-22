@@ -75,7 +75,7 @@
 
   protected async Task CancelAsync()
   {
-    _form!.ResetValidation();
+    await _form!.ResetValidationAsync();
     _mudDialog.Cancel();
   }
 

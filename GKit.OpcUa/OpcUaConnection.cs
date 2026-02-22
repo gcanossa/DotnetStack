@@ -6,7 +6,8 @@ namespace GKit.OpcUa;
 
 public class OpcUaConnection : IDisposable
 {
-    protected ILogger Logger => Utils.Logger;
+    private ILogger _logger;
+    protected ILogger Logger => _logger;
     public ISession? Session { get; protected set; }
     protected SessionReconnectHandler? SessionReconnectHandler { get; set; }
     protected IOpcUaContextOptions Options { get; }
@@ -14,6 +15,8 @@ public class OpcUaConnection : IDisposable
     protected ReverseConnectManager? ReverseConnectManager { get; }
     protected IUserIdentity? UserIdentity { get; }
     protected ApplicationConfiguration? ApplicationConfiguration { get; }
+
+    protected ITelemetryContext TelemetryContext { get; }
 
     private bool _disposed;
     private bool _certificateValidatorRegistered;
@@ -26,6 +29,8 @@ public class OpcUaConnection : IDisposable
         CertificateValidator = options.CertificateValidator;
         ApplicationConfiguration = options.ApplicationConfiguration;
         UserIdentity = options.UserIdentity;
+        TelemetryContext = options.TelemetryContext;
+        _logger = TelemetryContext.CreateLogger(nameof(OpcUaConnection));
     }
 
     public void Dispose()
@@ -100,6 +105,7 @@ public class OpcUaConnection : IDisposable
                     ApplicationConfiguration,
                     Options.ServerUrl,
                     Options.UserIdentity is not null,
+                    TelemetryContext,
                     ct).ConfigureAwait(false);
             }
 
@@ -111,7 +117,7 @@ public class OpcUaConnection : IDisposable
                 endpointDescription,
                 endpointConfiguration);
 
-            var sessionFactory = TraceableSessionFactory.Instance;
+            var sessionFactory = new DefaultSessionFactory(TelemetryContext);
 
             // Create the session
             var session = await sessionFactory

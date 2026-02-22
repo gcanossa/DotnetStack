@@ -1,5 +1,6 @@
 ﻿using Opc.Ua;
 using Opc.Ua.Client;
+using Microsoft.Extensions.Logging;
 
 namespace GKit.OpcUa;
 
@@ -11,6 +12,7 @@ public interface IOpcUaContextOptions
     public CertificateValidator? CertificateValidator { get; }
     public IUserIdentity? UserIdentity { get; }
     public ApplicationConfiguration? ApplicationConfiguration { get; }
+    public ITelemetryContext TelemetryContext { get; set; }
     
     public bool AcceptUntrustedCertificates { get; }
     public TimeSpan KeepAliveInterval { get; }
@@ -26,6 +28,7 @@ internal class OpcUaContextOptions : IOpcUaContextOptions
     public CertificateValidator? CertificateValidator { get; internal set; }
     public IUserIdentity? UserIdentity { get; internal set; }
     public ApplicationConfiguration? ApplicationConfiguration { get; internal set; }
+    public ITelemetryContext TelemetryContext { get; set; } = null!;
     
     public bool AcceptUntrustedCertificates { get; set; }
     public TimeSpan KeepAliveInterval { get; set; } = TimeSpan.FromMilliseconds(5000);

@@ -86,7 +86,7 @@ public partial class EntityGrid<T, TDialog>
 
   protected async Task DeleteAsync(T entity)
   {
-    var choice = await dialogService.ShowMessageBox(
+    var choice = await dialogService.ShowMessageBoxAsync(
     "Conferma Operazione",
     (MarkupString)(ToStringFunc != null ?
     $"Confermi di voler eliminare <strong>{ToStringFunc(entity)}</strong>?" : "Confermi l'operazione?"),

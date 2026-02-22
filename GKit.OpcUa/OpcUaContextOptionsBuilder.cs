@@ -1,4 +1,5 @@
 ﻿using System.Net.Mime;
+using Microsoft.Extensions.Logging;
 using Opc.Ua;
 using Opc.Ua.Client;
 using Opc.Ua.Configuration;
@@ -14,6 +15,8 @@ public interface IOpcUaContextOptionsSpecBuilder<T> where T : OpcUaContext
         Func<IServiceProvider, Task<CertificateValidator>> provider);
 
     public IOpcUaContextOptionsSpecBuilder<T> WithUserIdentity(Func<IServiceProvider, Task<IUserIdentity>> provider);
+
+    public IOpcUaContextOptionsSpecBuilder<T> WithTelemetryContext(Func<IServiceProvider, Task<ITelemetryContext>> provider);
 
     public IOpcUaContextOptionsSpecBuilder<T> AcceptUntrustedCertificates(bool accept = true);
 
@@ -46,6 +49,12 @@ internal class OpcUaContextOptionsSpecBuilder<T>(OpcUaContextOptionsBuilder<T> b
     public IOpcUaContextOptionsSpecBuilder<T> WithUserIdentity(Func<IServiceProvider, Task<IUserIdentity>> provider)
     {
         builder.UserIdentityFactory = provider;
+        return this;
+    }
+
+    public IOpcUaContextOptionsSpecBuilder<T> WithTelemetryContext(Func<IServiceProvider, Task<ITelemetryContext>> provider)
+    {
+        builder.TelemetryContextFactory = provider;
         return this;
     }
     
@@ -95,6 +104,9 @@ internal class OpcUaContextOptionsSpecBuilder<T>(OpcUaContextOptionsBuilder<T> b
         
         builder.Options.UserIdentity = builder.UserIdentityFactory is not null ? 
             await builder.UserIdentityFactory!.Invoke(builder.ServiceProvider) : null;
+
+        builder.Options.TelemetryContext = builder.TelemetryContextFactory is not null ?
+            await builder.TelemetryContextFactory!.Invoke(builder.ServiceProvider) : DefaultTelemetry.Create(b => b.AddConsole());;
         
         return builder.Options;
     }
@@ -110,6 +122,7 @@ public sealed class OpcUaContextOptionsBuilder<T> where T : OpcUaContext
     internal Func<IServiceProvider, Task<ReverseConnectManager>>? ReverseConnectManagerFactory { get; set; }
     internal Func<IServiceProvider, Task<CertificateValidator>>? CertificateValidatorFactory { get; set; }
     internal Func<IServiceProvider, Task<IUserIdentity>>? UserIdentityFactory { get; set; }
+    internal Func<IServiceProvider, Task<ITelemetryContext>>? TelemetryContextFactory { get; set; }
     
     internal OpcUaContextOptionsBuilder(OpcUaContextOptions<T> options, IServiceProvider provider)
     {
