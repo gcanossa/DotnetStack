@@ -4,9 +4,6 @@
 @attribute [CascadingTypeParameter(nameof(T))]
 @typeparam T where T : class
 
-@inject ISnackbar snackbar
-@inject IDialogService dialogService
-@inject ILogger<ManagedGrid<T>> logger
 @inject DownloadFileService downloadFileService
 
 <MudDataGrid @ref="_dataGrid" T="T" VirtualizeServerData="ManagedLoadServerData" Height="75vh" ItemSize="43" FixedHeader
