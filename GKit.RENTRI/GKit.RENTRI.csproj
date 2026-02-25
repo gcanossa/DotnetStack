@@ -14,24 +14,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="10.0.3" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions" Version="10.0.3" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.3" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.3" />
     <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.16.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Update="Nerdbank.GitVersioning">
       <Version>3.9.50</Version>
     </PackageReference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="Microsoft.Extensions.Diagnostics.HealthChecks">
-      <HintPath>..\..\..\..\.nuget\packages\microsoft.extensions.diagnostics.healthchecks\10.0.2\lib\net10.0\Microsoft.Extensions.Diagnostics.HealthChecks.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions">
-      <HintPath>..\..\..\..\.nuget\packages\microsoft.extensions.diagnostics.healthchecks.abstractions\10.0.0\lib\net10.0\Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Extensions.Hosting.Abstractions">
-      <HintPath>..\..\..\..\.nuget\packages\microsoft.extensions.hosting.abstractions\10.0.0\lib\net10.0\Microsoft.Extensions.Hosting.Abstractions.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
 </Project>
