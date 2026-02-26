@@ -6,6 +6,6 @@ public class CaRentriClientFactory(ApiStatusProvider apiStatusProvider) : BaseCl
 {
     protected override CaRentriClient BuildClient(ClientOptions options)
     {
-        return new CaRentriClient(new HttpClient(), options);
+        return new CaRentriClient(RentriHttpClientFactory.Create(), options);
     }
 }

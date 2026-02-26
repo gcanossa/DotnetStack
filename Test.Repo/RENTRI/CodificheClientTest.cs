@@ -16,9 +16,9 @@ public class CodificheClientTest
     {
         _output = output;
 
-        var data = JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText("../../../RENTRI/test/certificate-data.json"));
+        var data = JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText("../../../RENTRI/test/demo3-certificate-data.json"));
         var certificate = X509CertificateLoader.LoadPkcs12FromFile(
-            "../../../RENTRI/test/certificate.p12",
+            "../../../RENTRI/test/demo3-certificate.p12",
             data!["password"],
             X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.EphemeralKeySet);
 

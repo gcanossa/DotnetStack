@@ -6,6 +6,6 @@ public class DatiRegistriClientFactory(ApiStatusProvider apiStatusProvider) : Ba
 {
     protected override DatiRegistriClient BuildClient(ClientOptions options)
     {
-        return new DatiRegistriClient(new HttpClient(), options);
+        return new DatiRegistriClient(RentriHttpClientFactory.Create(), options);
     }
 }

@@ -5,6 +5,6 @@ public class VidimazioneFormulariClientFactory(ApiStatusProvider apiStatusProvid
 {
     protected override VidimazioneFormulariClient BuildClient(ClientOptions options)
     {
-        return new VidimazioneFormulariClient(new HttpClient(), options);
+        return new VidimazioneFormulariClient(RentriHttpClientFactory.Create(), options);
     }
 }

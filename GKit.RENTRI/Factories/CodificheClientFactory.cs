@@ -6,6 +6,6 @@ public class CodificheClientFactory(ApiStatusProvider apiStatusProvider) : BaseC
 {
     protected override CodificheClient BuildClient(ClientOptions options)
     {
-        return new CodificheClient(new HttpClient(), options);
+        return new CodificheClient(RentriHttpClientFactory.Create(), options);
     }
 }

@@ -6,6 +6,6 @@ public class AnagraficheClientFactory(ApiStatusProvider apiStatusProvider) : Bas
 {
     protected override AnagraficheClient BuildClient(ClientOptions options)
     {
-        return new AnagraficheClient(new HttpClient(), options);
+        return new AnagraficheClient(RentriHttpClientFactory.Create(), options);
     }
 }

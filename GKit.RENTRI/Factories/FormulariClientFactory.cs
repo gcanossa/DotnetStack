@@ -6,6 +6,6 @@ public class FormulariClientFactory(ApiStatusProvider apiStatusProvider) : BaseC
 {
     protected override FormulariClient BuildClient(ClientOptions options)
     {
-        return new FormulariClient(new HttpClient(), options);
+        return new FormulariClient(RentriHttpClientFactory.Create(), options);
     }
 }
