@@ -43,13 +43,13 @@ public abstract partial class OpcUaContext : IDisposable
         GC.SuppressFinalize(this);
     }
 
-    protected async Task EnsureConnected(CancellationToken ct = default)
+    public async Task EnsureConnected(CancellationToken ct = default)
     {
         var connected = await Connection.ConnectAsync(ct).ConfigureAwait(false);
         if (!connected) throw new InvalidOperationException("Connection failed");
     }
 
-    protected async Task RenewConnection(CancellationToken ct = default)
+    public async Task RenewConnection(CancellationToken ct = default)
     {
         try
         {
@@ -63,7 +63,7 @@ public abstract partial class OpcUaContext : IDisposable
         await OpenConnectionAsync(ct);
     }
     
-    protected async Task OpenConnectionAsync(CancellationToken ct = default)
+    public async Task OpenConnectionAsync(CancellationToken ct = default)
     {
         var connection = new OpcUaConnection(Options);
         if(OpcUaConnectionPool.Connections.TryAdd(Options, connection))
@@ -72,7 +72,7 @@ public abstract partial class OpcUaContext : IDisposable
         }
     }
     
-    protected async Task CloseConnectionAsync(CancellationToken ct = default)
+    public async Task CloseConnectionAsync(CancellationToken ct = default)
     {
         OpcUaConnectionPool.Connections.Remove(Options, out var connection);
         if(connection != null)

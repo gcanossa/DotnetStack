@@ -14,8 +14,8 @@ internal class OpcUaContextFactory<T>(IOpcUaContextOptions<T> options) : IOpcUaC
     {
         var context = (T)Activator.CreateInstance(typeof(T), Options)!;
 
-        await context.Connection!.ConnectAsync(ct);
-        
+        await context.RenewConnection(ct).ConfigureAwait(false);
+
         return context;
     }
 }
