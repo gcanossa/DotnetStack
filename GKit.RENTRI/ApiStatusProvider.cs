@@ -2,12 +2,67 @@ namespace GKit.RENTRI;
 
 public class ApiStatusProvider
 {
-    public ApiStatus Anagrafiche { get; internal set; } = ApiStatus.Unavailable;
-    public ApiStatus CaRentri { get; internal set; } = ApiStatus.Unavailable;
-    public ApiStatus Codifiche { get; internal set; } = ApiStatus.Unavailable;
-    public ApiStatus DatiRegistri { get; internal set; } = ApiStatus.Unavailable;
-    public ApiStatus Formulari { get; internal set; } = ApiStatus.Unavailable;
-    public ApiStatus VidimazioneFormulari { get; internal set; } = ApiStatus.Unavailable;
+    public ApiStatus Anagrafiche
+    {
+        get;
+        internal set
+        {
+            field = value;
+            StatusChanged?.Invoke(value);
+        }
+    } = ApiStatus.Unavailable;
+
+    public ApiStatus CaRentri
+    {
+        get;
+        internal set
+        {
+            field = value;
+            StatusChanged?.Invoke(value);
+        }
+    } = ApiStatus.Unavailable;
+
+    public ApiStatus Codifiche
+    {
+        get;
+        internal set
+        {
+            field = value;
+            StatusChanged?.Invoke(value);
+        }
+    } = ApiStatus.Unavailable;
+
+    public ApiStatus DatiRegistri
+    {
+        get;
+        internal set
+        {
+            field = value;
+            StatusChanged?.Invoke(value);
+        }
+    } = ApiStatus.Unavailable;
+
+    public ApiStatus Formulari
+    {
+        get;
+        internal set
+        {
+            field = value;
+            StatusChanged?.Invoke(value);
+        }
+    } = ApiStatus.Unavailable;
+
+    public ApiStatus VidimazioneFormulari
+    {
+        get;
+        internal set
+        {
+            field = value;
+            StatusChanged?.Invoke(value);
+        }
+    } = ApiStatus.Unavailable;
+
+    public event Action<ApiStatus> StatusChanged;
 
     public ApiStatus Status
     {
