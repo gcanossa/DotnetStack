@@ -41,7 +41,7 @@ public class ApiResultsCache
                 {
                     value = new CacheEntry(expiresAt ?? DateTimeOffset.Now.AddHours(1), (await valueProvider())!);
 
-                    _cache.Add(cacheKey, value);
+                    _cache[cacheKey] = value;
                 }
             }
             finally
