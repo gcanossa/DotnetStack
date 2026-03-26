@@ -1,0 +1,68 @@
+@using GKit.BlazorExt
+@using System.Linq.Expressions
+@using Microsoft.Extensions.Logging
+@typeparam T
+@typeparam TItem
+
+@inject ISnackbar snackbar
+@inject ILogger<ManagedItemAutocomplete<T, TItem>> logger
+
+<MudAutocomplete T="T" For="@For" Label="@Label" ToStringFunc="ByValueToStringFunc" SearchFunc="Search"
+                 Clearable Value="@Value" ValueChanged="ValueChangedHandler" ShowProgressIndicator Disabled="Disabled"
+                 ResetValueOnEmptyText data-attr-setter="force">
+    <NoItemsTemplate>
+        <MudText>Nessun elemento trovato</MudText>
+    </NoItemsTemplate>
+</MudAutocomplete>
+
+@code
+{
+    private IEnumerable<TItem> FilteredItems { get; set; } = [];
+
+    private TItem? GetByValue(T value)
+    {
+        return value == null ? default(TItem) : 
+            FilteredItems.FirstOrDefault(p => value.Equals(ToValue.Invoke(p))) ?? 
+            ToItem.Invoke(value);
+    }
+
+    private string ByValueToStringFunc(T value)
+    {
+        return ToStringFunc?.Invoke(GetByValue(value)) ?? "";
+    }
+
+    [Parameter, EditorRequired] public Func<string, Task<IQueryable<TItem>>> FetchData { get; set; } = default!;
+    [Parameter, EditorRequired] public Func<TItem, T> ToValue { get; set; }
+    [Parameter, EditorRequired] public Func<T, TItem> ToItem { get; set; }
+
+    [Parameter] public bool Disabled { get; set; } = false;
+    [Parameter] public T Value { get; set; } = default!;
+
+    [Parameter] public EventCallback<T> ValueChanged { get; set; }
+
+    private void ValueChangedHandler(T? value)
+    {
+        ValueChanged.InvokeAsync(value);
+    }
+
+    [Parameter] public string Label { get; set; } = "";
+    [Parameter] public Expression<Func<T>> For { get; set; } = null!;
+
+    [Parameter] public Func<TItem?, string> ToStringFunc { get; set; } = p => p?.ToString() ?? "";
+
+    private async Task<IEnumerable<T>> Search(string value, CancellationToken token)
+    {
+        try
+        {
+            FilteredItems = await FetchData(value);
+            return FilteredItems.Select(p => ToValue(p));
+        }
+        catch (Exception e)
+        {
+            snackbar.Add("Impossibile recuperare i valori", MudBlazor.Severity.Error);
+            logger.LogWarning(e, "Error fetching data");
+        }
+
+        return [];
+    }
+}
