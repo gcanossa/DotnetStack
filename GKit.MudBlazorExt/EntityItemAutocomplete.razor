@@ -1,0 +1,89 @@
+@using GKit.BlazorExt
+@using Microsoft.EntityFrameworkCore
+@using System.Linq.Expressions
+@typeparam T where T : class
+@typeparam TItem
+
+@inherits ManagedItemAutocomplete<T, TItem>
+
+@inject NavigationManager navigationManager
+@inject IDialogService dialogService
+@inject ISnackbar snackbar
+
+@{
+  base.BuildRenderTree(__builder);
+}
+
+@code
+{
+  protected new RenderFragment? BeforeItemsTemplate { get; set; }
+
+  protected override async Task OnInitializedAsync()
+  {
+    base.BeforeItemsTemplate = @<MudStack Row Justify="Justify.Center" Style="border-bottom: 1px solid lightgray;">
+                                 @if (EditDialog != null)
+                                 {
+                                   <MudButton Color="Color.Primary" OnClick="NewAsync">Aggiungi</MudButton>
+                                 }
+                                 @if (EntitiesHref != null)
+                                 {
+                                   <MudButton OnClick="() => navigationManager.NavigateTo(EntitiesHref)">Apri
+                                     Anagrafica
+                                   </MudButton>
+                                 }
+                               </MudStack>;
+
+    await base.OnInitializedAsync();
+  }
+
+  [Parameter, EditorRequired] public DbContext Context { get; set; } = null!;
+
+  [Parameter] public string EntitiesHref { get; set; } = null!;
+
+  [Parameter] public Expression<Func<IEditEntityDialog<T>>> EditDialog { get; set; } = null!;
+
+  [Parameter, EditorRequired] public Func<DbContext, IQueryable<T>> QueryFactory { get; set; } = null!;
+
+  [Parameter, EditorRequired] public Func<string, Expression<Func<T, bool>>> SearchExp { get; set; } = null!;
+
+  protected override async Task<IEnumerable<T>> Search(string value, CancellationToken token)
+  {
+    var query = QueryFactory(Context);
+    if (string.IsNullOrEmpty(value))
+      return await query.ToListAsync(token);
+
+    return await query.Where(SearchExp(value)).ToListAsync(token);
+  }
+
+  protected async Task NewAsync()
+  {
+    await Component.CloseMenuAsync();
+
+    var dialogType = (EditDialog.Body as NewExpression)!.Type;
+
+    var parameters = new DialogParameters<IEditEntityDialog<T>>
+    {
+      { p => p.Context, Context }
+    };
+
+    var dialog = await dialogService.ShowAsync(dialogType, "Crea Elemento", parameters);
+
+    var shouldSave = await dialog.Result;
+    if (shouldSave != null && !shouldSave.Canceled)
+    {
+      try
+      {
+        var entry = Context.Attach(shouldSave.Data!);
+
+        await Context.SaveChangesAsync();
+        snackbar.Add("Elemento aggiunto con successo", Severity.Success);
+
+        await Component.SelectOptionAsync((T)(entry.Entity));
+      }
+      catch (Exception e)
+      {
+        snackbar.Add("Impossibile aggiungere l'elemento", Severity.Error);
+      }
+    }
+  }
+}

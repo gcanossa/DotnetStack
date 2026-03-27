@@ -55,11 +55,11 @@ public partial class ManagedGrid<T>
 
       var query = await ExportServerData(CancellationToken.None);
 
-      query = QueryFilterExtensions.Where(query, _dataGrid.FilterDefinitions);
-      query = QuerySortExtensions.OrderBy(query, _dataGrid.SortDefinitions.Values);
+      query = QueryFilterExtensions.Where(query, Component.FilterDefinitions);
+      query = QuerySortExtensions.OrderBy(query, Component.SortDefinitions.Values);
 
       using var ms = new MemoryStream();
-      await query.ToXlsAsync(title, _dataGrid, ms);
+      await query.ToXlsAsync(title, Component, ms);
       ms.Position = 0;
       await downloadFileService.DownloadFileFromStream(ms, $"{title}.xls");
     });
@@ -67,7 +67,7 @@ public partial class ManagedGrid<T>
 
   public async Task RefreshDataAsync()
   {
-    await _dataGrid.ReloadServerData();
+    await Component.ReloadServerData();
     await InvokeAsync(StateHasChanged);
   }
 

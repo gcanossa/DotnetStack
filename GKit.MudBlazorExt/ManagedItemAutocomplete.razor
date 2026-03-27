@@ -7,9 +7,9 @@
 @inject ISnackbar snackbar
 @inject ILogger<ManagedItemAutocomplete<T, TItem>> logger
 
-<MudAutocomplete T="T" For="@For" Label="@Label" ToStringFunc="ByValueToStringFunc" SearchFunc="Search"
+<MudAutocomplete @ref="Component" T="T" For="@For" Label="@Label" ToStringFunc="ByValueToStringFunc" SearchFunc="Search"
                  Clearable Value="@Value" ValueChanged="ValueChangedHandler" ShowProgressIndicator Disabled="Disabled"
-                 ResetValueOnEmptyText data-attr-setter="force">
+                 ResetValueOnEmptyText data-attr-setter="force" BeforeItemsTemplate="BeforeItemsTemplate">
     <NoItemsTemplate>
         <MudText>Nessun elemento trovato</MudText>
     </NoItemsTemplate>
@@ -17,6 +17,8 @@
 
 @code
 {
+    protected MudAutocomplete<T> Component = null!;
+    
     private IEnumerable<TItem> FilteredItems { get; set; } = [];
 
     private TItem? GetByValue(T value)
@@ -30,7 +32,10 @@
     {
         return ToStringFunc?.Invoke(GetByValue(value)) ?? "";
     }
-
+    
+    [Parameter]
+    public RenderFragment? BeforeItemsTemplate { get; set; }
+    
     [Parameter, EditorRequired] public Func<string, Task<IQueryable<TItem>>> FetchData { get; set; } = default!;
     [Parameter, EditorRequired] public Func<TItem, T> ToValue { get; set; }
     [Parameter, EditorRequired] public Func<T, TItem> ToItem { get; set; }
@@ -40,7 +45,7 @@
 
     [Parameter] public EventCallback<T> ValueChanged { get; set; }
 
-    private void ValueChangedHandler(T? value)
+    protected void ValueChangedHandler(T? value)
     {
         ValueChanged.InvokeAsync(value);
     }
@@ -50,7 +55,7 @@
 
     [Parameter] public Func<TItem?, string> ToStringFunc { get; set; } = p => p?.ToString() ?? "";
 
-    private async Task<IEnumerable<T>> Search(string value, CancellationToken token)
+    protected virtual async Task<IEnumerable<T>> Search(string value, CancellationToken token)
     {
         try
         {

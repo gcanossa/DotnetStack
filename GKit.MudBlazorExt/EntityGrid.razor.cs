@@ -7,83 +7,13 @@ using MudBlazor;
 
 namespace GKit.MudBlazorExt;
 
-public enum EntityGridRowControlsVariant
-{
-  Expanded,
-  Menu
-}
-
 public record NewValueResult<N>(bool Canceled, N Value);
 
-public class EntityGridRowControlDescriptor<T>
-{
-  public required string Text { get; set; }
-  public required Func<CellContext<T>, Task> Action { get; set; }
-
-  public string? Icon { get; set; }
-
-  public Color Color { get; set; } = Color.Default;
-
-  public Func<CellContext<T>, bool>? Disabled { get; set; }
-}
-
 [CascadingTypeParameter(nameof(T))]
-public partial class EntityGrid<T, TDialog>
+public partial class EntityGrid<T, TDialog> : ManagedGrid<T>
   where T : class
   where TDialog : IEditEntityDialog<T>, IComponent
 {
-  protected override async Task OnInitializedAsync()
-  {
-    await base.OnInitializedAsync();
-
-    _defaultControls.Add(new EntityGridRowControlDescriptor<T>
-    {
-      Text = "Modifica",
-      Action = ctx => EditAsync(ctx.Item),
-      Icon = Icons.Material.Filled.Edit
-    });
-    _defaultControls.Add(new EntityGridRowControlDescriptor<T>
-    {
-      Text = "Elimina",
-      Action = ctx => DeleteAsync(ctx.Item),
-      Icon = Icons.Material.Filled.Delete,
-      Color = Color.Error
-    });
-  }
-
-  public async Task WithLoading(Func<Task> fn)
-  {
-    try
-    {
-      _loading = true;
-
-      await fn.Invoke();
-    }
-    finally
-    {
-      _loading = false;
-    }
-  }
-
-  protected async Task ExportXlsAsync()
-  {
-    await WithLoading(async () =>
-    {
-      using var ctx = ContextFactory.Invoke();
-      var title = Title ?? typeof(T).Name;
-
-      var query = QueryFactory?.Invoke(ctx) ?? throw new InvalidOperationException($"{nameof(QueryFactory)} is not set");
-
-      query = QueryFilterExtensions.Where(query, _dataGrid.FilterDefinitions);
-      query = QuerySortExtensions.OrderBy(query, _dataGrid.SortDefinitions.Values);
-
-      using var ms = new MemoryStream();
-      await query.ToXlsAsync(title, _dataGrid, ms);
-      ms.Position = 0;
-      await downloadFileService.DownloadFileFromStream(ms, $"{title}.xls");
-    });
-  }
-
   protected async Task DeleteAsync(T entity)
   {
     var choice = await dialogService.ShowMessageBoxAsync(
@@ -97,7 +27,7 @@ public partial class EntityGrid<T, TDialog>
     {
       try
       {
-        using var ctx = ContextFactory.Invoke();
+        await using var ctx = ContextFactory.Invoke();
         
         try
         {
@@ -164,7 +94,7 @@ public partial class EntityGrid<T, TDialog>
 
   public async Task RefreshDataAsync()
   {
-    await _dataGrid.ReloadServerData();
+    await Component.ReloadServerData();
     await InvokeAsync(StateHasChanged);
   }
 
@@ -211,7 +141,7 @@ public partial class EntityGrid<T, TDialog>
     await RefreshDataAsync();
   }
 
-  protected async Task<GridData<T>> LoadServerData(GridStateVirtualize<T> gridState, CancellationToken token)
+  protected async Task<GridData<T>> LoadEntityData(GridStateVirtualize<T> gridState, CancellationToken token)
   {
     try
     {
@@ -255,22 +185,5 @@ public partial class EntityGrid<T, TDialog>
     {
       await OnLoadedServerData.InvokeAsync(gridState);
     }
-  }
-  
-  protected async Task RowClick(DataGridRowClickEventArgs<T> arg)
-  {
-    await OnRowClick.InvokeAsync(arg);
-  }
-
-  protected async Task OnRowControlClick(MouseEventArgs args, EntityGridRowControlDescriptor<T> control,
-    CellContext<T> context)
-  {
-    if(OnBeforeRowControlAction != null && !await OnBeforeRowControlAction.Invoke(control, context))
-      return;
-
-    await control.Action.Invoke(context);
-
-    if (OnAfterRowControlAction != null)
-      await OnAfterRowControlAction(control, context);
   }
 }

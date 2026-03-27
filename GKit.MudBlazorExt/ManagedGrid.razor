@@ -6,11 +6,14 @@
 
 @inject DownloadFileService downloadFileService
 
-<MudDataGrid @ref="_dataGrid" T="T" VirtualizeServerData="ManagedLoadServerData" Height="75vh" ItemSize="43" FixedHeader
+<MudDataGrid @ref="Component" T="T" VirtualizeServerData="ManagedLoadServerData" Height="75vh" ItemSize="43" FixedHeader
   FixedFooter Filterable SortMode="SortMode.Multiple" Virtualize Dense Hover ShowColumnOptions
   DragDropColumnReordering="@DragDropColumnReordering" DragIndicatorIcon="@Icons.Material.Filled.DragIndicator"
   ApplyDropClassesOnDragStarted="true" RowClassFunc="RowClassFunc" Loading="_loading"
-  ColumnResizeMode="ColumnResizeMode" RowClick="RowClick">
+  ColumnResizeMode="ColumnResizeMode" RowClick="RowClick"
+  MultiSelection="MultiSelection" SelectOnRowClick="SelectOnRowClick" 
+  SelectedItems="SelectedItems" SelectedItemsChanged="SelectedItemsChanged" 
+  SelectedItem="SelectedItem" SelectedItemChanged="SelectedItemChanged">
   <ToolBarContent>
     <MudText Typo="Typo.h6">@Title</MudText>
     <MudSpacer />
@@ -28,33 +31,40 @@
       <MudFab StartIcon="@Icons.Material.Filled.Refresh" Size="Size.Small" Color="Color.Default"
         OnClick="() => RefreshDataAsync()" Class="mx-2" />
     }
+    @if (DefaultHeaderControls != null)
+    {
+      @DefaultHeaderControls
+    }
   </ToolBarContent>
   <Columns>
     @if (EffectiveRowControls.Any())
     {
-      <TemplateColumn CellClass="d-flex justify-end" HeaderStyle="width: 6rem;" StickyLeft="true">
+      <TemplateColumn CellClass="d-flex justify-end" HeaderStyle="@($"width: {ControlHeaderWidth}rem;")" StickyLeft="true">
         <CellTemplate>
-          @if (RowControlsVariant == ManagedGridRowControlsVariant.Expanded)
+          @switch (RowControlsVariant)
           {
-            <MudStack Row>
-              @foreach (var control in EffectiveRowControls)
-              {
-                <MudTooltip Text="@control.Text">
-                  <MudIconButton Icon="@control.Icon" Size="Size.Small" Color="@control.Color"
-                                 OnClick="(evt) => OnRowControlClick(evt, control, context)" Disabled="@(control.Disabled?.Invoke(context) ?? false)"/>
-                </MudTooltip>
-              }
-            </MudStack>
-          }
-          else if (RowControlsVariant == ManagedGridRowControlsVariant.Menu)
-          {
-            <MudMenu Icon="@Icons.Material.Filled.MoreVert" AriaLabel="Open user menu" Dense Size="Size.Small">
-              @foreach (var control in EffectiveRowControls)
-              {
-                <MudMenuItem Icon="@control.Icon" IconColor="@control.Color" Label="@control.Text"
-                             OnClick="((evt) => OnRowControlClick(evt, control, context))" Disabled="@(control.Disabled?.Invoke(context) ?? false)"/>
-              }
-            </MudMenu>
+            case ManagedGridRowControlsVariant.Expanded:
+              <MudStack Row>
+                @foreach (var control in EffectiveRowControls)
+                {
+                  <MudTooltip Text="@control.Text">
+                    <MudIconButton Icon="@control.Icon" Size="Size.Small" Color="@control.Color"
+                                   OnClick="(evt) => OnRowControlClick(evt, control, context)" Disabled="@(control.Disabled?.Invoke(context) ?? false)"/>
+                  </MudTooltip>
+                }
+              </MudStack>
+              break;
+            case ManagedGridRowControlsVariant.Menu:
+              <MudMenu Icon="@Icons.Material.Filled.MoreVert" AriaLabel="Open user menu" Dense Size="Size.Small">
+                @foreach (var control in EffectiveRowControls)
+                {
+                  <MudMenuItem Icon="@control.Icon" IconColor="@control.Color" Label="@control.Text"
+                               OnClick="((evt) => OnRowControlClick(evt, control, context))" Disabled="@(control.Disabled?.Invoke(context) ?? false)"/>
+                }
+              </MudMenu>
+              break;
+            default:
+              break;
           }
         </CellTemplate>
       </TemplateColumn>
@@ -70,21 +80,25 @@
 
 @code {
 
-  private ICollection<ManagedGridRowControlDescriptor<T>> _defaultControls = [];
+  protected ICollection<ManagedGridRowControlDescriptor<T>> DefaultControls { get; set; } = [];
 
-  private IEnumerable<ManagedGridRowControlDescriptor<T>> EffectiveRowControls => _defaultControls.Concat(RowControls);
+  protected IEnumerable<ManagedGridRowControlDescriptor<T>> EffectiveRowControls => DefaultControls.Concat(RowControls);
+
+  protected float ControlHeaderWidth => RowControlsVariant == ManagedGridRowControlsVariant.Menu ? 2.5f : 2.5f * EffectiveRowControls.Count();
+  
+  [Parameter, EditorRequired]
+  public Func<GridStateVirtualize<T>, CancellationToken, Task<GridData<T>>> LoadServerData { get; set; } = null!;
 
   [Parameter, EditorRequired]
-  public Func<GridStateVirtualize<T>, CancellationToken, Task<GridData<T>>> LoadServerData { get; set; } = default!;
-
-  [Parameter, EditorRequired]
-  public Func<CancellationToken, Task<IQueryable<T>>> ExportServerData { get; set; } = default!;
+  public Func<CancellationToken, Task<IQueryable<T>>> ExportServerData { get; set; } = null!;
 
   [Parameter]
   public string? Title { get; set; }
 
   [Parameter]
-  public RenderFragment HeaderControls { get; set; } = default!;
+  public RenderFragment? HeaderControls { get; set; } = null!;
+  
+  protected RenderFragment? DefaultHeaderControls { get; set; } = null!;
 
   [Parameter]
   public ICollection<ManagedGridRowControlDescriptor<T>> RowControls { get; set; } = [];
@@ -93,41 +107,48 @@
   public ManagedGridRowControlsVariant RowControlsVariant { get; set; } = ManagedGridRowControlsVariant.Expanded;
 
   [Parameter, EditorRequired]
-  public RenderFragment Columns { get; set; } = default!;
+  public RenderFragment Columns { get; set; } = null!;
 
   [Parameter]
-  public Func<T, string> ToStringFunc { get; set; } = default!;
+  public Func<T, string> ToStringFunc { get; set; } = null!;
 
   [Parameter]
-  public bool Exportable { get; set; } = false;
+  public bool Exportable { get; set; }
 
   [Parameter]
-  public bool Refreshable { get; set; } = false;
+  public bool Refreshable { get; set; }
 
   [Parameter]
-  public Func<T, int, string> RowClassFunc { get; set; } = default!;
+  public Func<T, int, string> RowClassFunc { get; set; } = null!;
 
   [Parameter]
-  public EventCallback<GridStateVirtualize<T>> OnLoadedServerData { get; set; } = default!;
+  public EventCallback<GridStateVirtualize<T>> OnLoadedServerData { get; set; }
 
   [Parameter]
-  public EventCallback<DataGridRowClickEventArgs<T>> OnRowClick { get; set; } = default!;
+  public EventCallback<DataGridRowClickEventArgs<T>> OnRowClick { get; set; }
 
   [Parameter]
-  public Func<ManagedGridRowControlDescriptor<T>, CellContext<T>, Task<bool>>? OnBeforeRowControlAction { get; set; } = default;
+  public Func<ManagedGridRowControlDescriptor<T>, CellContext<T>, Task<bool>>? OnBeforeRowControlAction { get; set; }
 
   [Parameter]
-  public Func<ManagedGridRowControlDescriptor<T>, CellContext<T>, Task>? OnAfterRowControlAction { get; set; } = default;
+  public Func<ManagedGridRowControlDescriptor<T>, CellContext<T>, Task>? OnAfterRowControlAction { get; set; }
 
   [Parameter]
-  public bool DragDropColumnReordering { get; set; } = false;
+  public bool DragDropColumnReordering { get; set; }
 
   [Parameter]
   public ResizeMode ColumnResizeMode { get; set; } = ResizeMode.None;
 
-  private bool _loading = false;
+  protected bool _loading;
 
-  MudDataGrid<T> _dataGrid = default!;
+  protected MudDataGrid<T> Component = null!;
 
-  public IEnumerable<IFilterDefinition<T>> FilterDefinitions => _dataGrid.FilterDefinitions;
+  public IEnumerable<IFilterDefinition<T>> FilterDefinitions => Component.FilterDefinitions;
+  
+  [Parameter] public bool MultiSelection { get; set; }
+  [Parameter] public bool SelectOnRowClick { get; set; } = true;
+  [Parameter] public HashSet<T>? SelectedItems { get; set; }
+  [Parameter] public EventCallback<HashSet<T>?> SelectedItemsChanged { get; set; }
+  [Parameter] public T? SelectedItem { get; set; }
+  [Parameter] public EventCallback<T?> SelectedItemChanged { get; set; }
 }
