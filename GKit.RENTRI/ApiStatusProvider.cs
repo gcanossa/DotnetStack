@@ -87,7 +87,7 @@ public class ApiStatusProvider
     {
         return statusCode switch
         {
-            < 400 => ApiStatus.Available,
+            <= 400 => ApiStatus.Available,
             401 => ApiStatus.Unauthorized,
             403 => ApiStatus.Forbidden,
             423 => ApiStatus.Banned,

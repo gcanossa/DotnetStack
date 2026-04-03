@@ -37,17 +37,17 @@ public partial class ManagedGrid<T>
   {
     try
     {
-      _loading = true;
+      Loading = true;
 
       await fn.Invoke();
     }
     finally
     {
-      _loading = false;
+      Loading = false;
     }
   }
 
-  protected async Task ExportXlsAsync()
+  protected virtual async Task ExportXlsAsync()
   {
     await WithLoading(async () =>
     {

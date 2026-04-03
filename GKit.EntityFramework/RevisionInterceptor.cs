@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace GKit.EntityFramework;
@@ -6,11 +7,20 @@ namespace GKit.EntityFramework;
 public class RevisionInterceptor : SaveChangesInterceptor
 {
   private readonly List<IRevisionableEntity> _updateRegistrations = [];
+  private readonly List<object> _referenceUpdateRegistrations = [];
+  
   public void RegisterForUpdate(IRevisionableEntity entity)
   {
     if (!_updateRegistrations.Contains(entity))
     {
       _updateRegistrations.Add(entity);
+    }
+  }
+  public void RegisterForRevisionReferenceUpdate(object entity)
+  {
+    if (!_referenceUpdateRegistrations.Contains(entity))
+    {
+      _referenceUpdateRegistrations.Add(entity);
     }
   }
 
@@ -30,11 +40,26 @@ public class RevisionInterceptor : SaveChangesInterceptor
 
       entry.Reload();
       entity.Revision.IsCurrent = false;
+      
+      AdjustNewRevisionReferences(entries, entity, newEntity);
     }
 
     _updateRegistrations.Clear();
+    _referenceUpdateRegistrations.Clear();
 
     return result;
+  }
+
+  protected void AdjustNewRevisionReferences(List<EntityEntry> entries, IRevisionableEntity currentRevision, IRevisionableEntity newRevision)
+  {
+    foreach (var entry in entries.Where(p => _referenceUpdateRegistrations.Contains(p.Entity)))
+    {
+      foreach (var property in entry.Entity.GetType().GetProperties())
+      {
+        if(property.GetValue(entry.Entity) == currentRevision)
+          property.SetValue(entry.Entity, newRevision);
+      }
+    }
   }
 
   public override ValueTask<InterceptionResult<int>> SavingChangesAsync(DbContextEventData eventData, InterceptionResult<int> result, CancellationToken cancellationToken = default)

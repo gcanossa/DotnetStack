@@ -9,7 +9,7 @@
 <MudDataGrid @ref="Component" T="T" VirtualizeServerData="ManagedLoadServerData" Height="75vh" ItemSize="43" FixedHeader
   FixedFooter Filterable SortMode="SortMode.Multiple" Virtualize Dense Hover ShowColumnOptions
   DragDropColumnReordering="@DragDropColumnReordering" DragIndicatorIcon="@Icons.Material.Filled.DragIndicator"
-  ApplyDropClassesOnDragStarted="true" RowClassFunc="RowClassFunc" Loading="_loading"
+  ApplyDropClassesOnDragStarted="true" RowClassFunc="RowClassFunc" Loading="Loading"
   ColumnResizeMode="ColumnResizeMode" RowClick="RowClick"
   MultiSelection="MultiSelection" SelectOnRowClick="SelectOnRowClick" 
   SelectedItems="SelectedItems" SelectedItemsChanged="SelectedItemsChanged" 
@@ -23,13 +23,17 @@
     }
     @if (Exportable)
     {
-      <MudFab StartIcon="@Icons.Material.Filled.Download" Size="Size.Small" Color="Color.Default"
-        OnClick="() => ExportXlsAsync()" Class="mx-2" />
+      <MudTooltip Text="Esporta XLSX">
+        <MudFab StartIcon="@Icons.Material.Filled.Download" Size="Size.Small" Color="Color.Default"
+                OnClick="() => ExportXlsAsync()" Class="mx-2" />
+      </MudTooltip>
     }
     @if (Refreshable)
     {
-      <MudFab StartIcon="@Icons.Material.Filled.Refresh" Size="Size.Small" Color="Color.Default"
-        OnClick="() => RefreshDataAsync()" Class="mx-2" />
+      <MudTooltip Text="Aggiorna">
+        <MudFab StartIcon="@Icons.Material.Filled.Refresh" Size="Size.Small" Color="Color.Default"
+                OnClick="() => RefreshDataAsync()" Class="mx-2" />
+      </MudTooltip>
     }
     @if (DefaultHeaderControls != null)
     {
@@ -138,8 +142,8 @@
 
   [Parameter]
   public ResizeMode ColumnResizeMode { get; set; } = ResizeMode.None;
-
-  protected bool _loading;
+  
+  [Parameter] public bool Loading { get; set; }
 
   protected MudDataGrid<T> Component = null!;
 

@@ -6,11 +6,9 @@ namespace GKit.EntityFramework;
 
 public static class RevisionExtensions
 {
-  public static T CopyTo<T>(this T from, T to, Expression<Func<T, object>>? exclude = null) where T : class, IRevisionableEntity
+  public static T CopyToObject<T>(this T from, T to, Expression<Func<T, object>>? exclude = null, IEnumerable<string>? excludeProps = null) where T : class
   {
-    to.Revision = from.Revision.Clone();
-
-    List<string> excludedPropNames = [nameof(from.Revision)];
+    List<string> excludedPropNames = excludeProps?.ToList() ?? [];
 
     if (exclude != null)
     {
@@ -30,6 +28,22 @@ public static class RevisionExtensions
     }
 
     return to;
+  }
+  
+  public static T CopyTo<T>(this T from, T to, Expression<Func<T, object>>? exclude = null) where T : class, IRevisionableEntity
+  {
+    to.Revision = from.Revision.Clone();
+
+    List<string> excludedPropNames = [nameof(from.Revision)];
+
+    from.CopyToObject(to, exclude, excludedPropNames);
+
+    return to;
+  }
+
+  public static T CopyFromObject<T>(this T to, T from, Expression<Func<T, object>>? exclude = null, IEnumerable<string>? excludeProps = null) where T : class
+  {
+    return from.CopyToObject(to, exclude);
   }
 
   public static T CopyFrom<T>(this T to, T from, Expression<Func<T, object>>? exclude = null) where T : class, IRevisionableEntity
@@ -54,6 +68,13 @@ public static class RevisionExtensions
     }
 
     context.Update(entity);
+  }
+  
+  public static void UpdateRevisionReferences<T, E>(this T context, E entity)
+    where T : DbContext, IRevisionAwareContext
+    where E : class
+  {
+    context.RevisionInterceptor.RegisterForRevisionReferenceUpdate(entity);
   }
 
   public static ComplexPropertyBuilder<RevisionInfo> WithRevision<T>(this EntityTypeBuilder<T> builder) where T : class, IRevisionableEntity

@@ -65,7 +65,7 @@ public class XlsReporter<T>(string title, IEnumerable<ColumnDescriptor<T>> descr
       {
         row.CreateCell(colIdx)
           .WithStyle(dataStyle)
-          .SetCellValue(col.SelectValue(datum)?.ToString());
+          .SetCellValue(col.SelectValue(datum)?.ToString()??"");
         colIdx++;
       }
     }

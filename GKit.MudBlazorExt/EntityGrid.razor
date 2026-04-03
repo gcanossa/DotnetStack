@@ -11,6 +11,7 @@
 @inject ISnackbar snackbar
 @inject IDialogService dialogService
 @inject ILogger<EntityGrid<T, TDialog>> logger
+@inject DownloadFileService downloadFileService
 
 @{
   base.BuildRenderTree(__builder);
@@ -19,6 +20,7 @@
 @code {
   
   protected new Func<GridStateVirtualize<T>, CancellationToken, Task<GridData<T>>> LoadServerData { get; set; } = null!;
+  protected new Func<CancellationToken, Task<IQueryable<T>>> ExportServerData { get; set; } = null!;
   
   [Parameter]
   public Func<Task<NewValueResult<T>>>? NewValueFactory { get; set; } = null;
@@ -28,6 +30,11 @@
 
   [Parameter, EditorRequired]
   public Func<DbContext> ContextFactory { get; set; } = null!;
+
+  [Parameter] public DbContext? SharedContext { get; set; } = null;
+
+  [Parameter] public Func<CellContext<T>, bool>? EditRowDisable { get; set; } = null;
+  [Parameter] public Func<CellContext<T>, bool>? DeleteRowDisable { get; set; } = null;
   
   protected override async Task OnInitializedAsync()
   {
@@ -39,16 +46,20 @@
     {
       Text = "Modifica",
       Action = ctx => EditAsync(ctx.Item),
-      Icon = Icons.Material.Filled.Edit
+      Icon = Icons.Material.Filled.Edit,
+      Disabled = p => EditRowDisable?.Invoke(p) ?? false
     });
     DefaultControls.Add(new ManagedGridRowControlDescriptor<T>
     {
       Text = "Elimina",
       Action = ctx => DeleteAsync(ctx.Item),
       Icon = Icons.Material.Filled.Delete,
-      Color = Color.Error
+      Color = Color.Error,
+      Disabled = p => DeleteRowDisable?.Invoke(p) ?? false
     });
     
-    DefaultHeaderControls = @<MudFab StartIcon="@Icons.Material.Filled.Add" Size="Size.Small" Color="Color.Primary" OnClick="() => NewAsync()" Class = "mx-2" />;
+    DefaultHeaderControls = @<MudTooltip Text="Aggiungi">
+                              <MudFab StartIcon="@Icons.Material.Filled.Add" Size="Size.Small" Color="Color.Primary" OnClick="() => NewAsync()" Class="mx-2"/>
+                            </MudTooltip>;
   }
 }

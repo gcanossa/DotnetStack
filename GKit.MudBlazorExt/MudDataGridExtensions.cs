@@ -20,9 +20,9 @@ public static class MudDataGridExtensions
       return acc;
     }));
 
-    var descriptors = columns.Select((col, idx) => new ColumnDescriptor<T, object>(
+    var descriptors = columns.Select((col, idx) => new ColumnDescriptor<T, object?>(
       col.Title ?? col.PropertyName ?? $"Colonna {idx}",
-      p => properties[col].Aggregate((object?)p, (acc, prop) => prop.GetValue(acc))!));
+      p => properties[col].Aggregate((object?)p, (acc, prop) => acc == null ? null : prop.GetValue(acc))));
 
     var reporter = new XlsReporter<T>(title, descriptors);
 
