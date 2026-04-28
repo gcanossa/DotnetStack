@@ -45,6 +45,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GKit.SmartCardHost.Blazor",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GKit.RENTRI", "GKit.RENTRI\GKit.RENTRI.csproj", "{A391E59A-DE59-40F0-BE95-9E11150FF842}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GKit.PLC", "GKit.PLC\GKit.PLC.csproj", "{1E1499EB-9B9D-4C1F-8362-8C5AA7A8A866}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -307,6 +309,18 @@ Global
 		{A391E59A-DE59-40F0-BE95-9E11150FF842}.Release|x64.Build.0 = Release|Any CPU
 		{A391E59A-DE59-40F0-BE95-9E11150FF842}.Release|x86.ActiveCfg = Release|Any CPU
 		{A391E59A-DE59-40F0-BE95-9E11150FF842}.Release|x86.Build.0 = Release|Any CPU
+		{1E1499EB-9B9D-4C1F-8362-8C5AA7A8A866}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1E1499EB-9B9D-4C1F-8362-8C5AA7A8A866}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1E1499EB-9B9D-4C1F-8362-8C5AA7A8A866}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{1E1499EB-9B9D-4C1F-8362-8C5AA7A8A866}.Debug|x64.Build.0 = Debug|Any CPU
+		{1E1499EB-9B9D-4C1F-8362-8C5AA7A8A866}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{1E1499EB-9B9D-4C1F-8362-8C5AA7A8A866}.Debug|x86.Build.0 = Debug|Any CPU
+		{1E1499EB-9B9D-4C1F-8362-8C5AA7A8A866}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1E1499EB-9B9D-4C1F-8362-8C5AA7A8A866}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1E1499EB-9B9D-4C1F-8362-8C5AA7A8A866}.Release|x64.ActiveCfg = Release|Any CPU
+		{1E1499EB-9B9D-4C1F-8362-8C5AA7A8A866}.Release|x64.Build.0 = Release|Any CPU
+		{1E1499EB-9B9D-4C1F-8362-8C5AA7A8A866}.Release|x86.ActiveCfg = Release|Any CPU
+		{1E1499EB-9B9D-4C1F-8362-8C5AA7A8A866}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
