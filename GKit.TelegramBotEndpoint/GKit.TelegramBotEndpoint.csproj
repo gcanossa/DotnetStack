@@ -7,8 +7,8 @@
   </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.5" />
-        <PackageReference Include="Telegram.Bot" Version="22.9.5.3" />
+        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.7" />
+        <PackageReference Include="Telegram.Bot" Version="22.9.6.2" />
         <PackageReference Update="Nerdbank.GitVersioning">
           <Version>3.9.50</Version>
         </PackageReference>
