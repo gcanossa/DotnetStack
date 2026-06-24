@@ -8,39 +8,56 @@ public interface IEntityTypeBuilder<T> where T : class
     public IPropertyBuilder<TProperty> Property<TProperty>(Expression<Func<T, TProperty>> expression);
 }
 
-internal class EntityTypeBuilder<T>(Dictionary<PropertyInfo, EntityPropertyDescriptor> propertyDescriptors) : IEntityTypeBuilder<T> where T : class
+internal class EntityTypeBuilder<T>(Dictionary<PropertyInfo, EntityPropertyDescriptor> propertyDescriptors)
+    : IEntityTypeBuilder<T> where T : class
 {
     public IPropertyBuilder<TProperty> Property<TProperty>(Expression<Func<T, TProperty>> expression)
     {
         var propertyInfo = (PropertyInfo)((MemberExpression)expression.Body).Member;
-        if(propertyInfo == null)
+        if (propertyInfo == null)
             throw new ArgumentException($"Expression '{expression}' refers to a method, not a property.");
 
         if (!propertyDescriptors.ContainsKey(propertyInfo))
         {
-            propertyDescriptors.Add(propertyInfo, new EntityPropertyDescriptor() { NodeId = $"ns=0;s={propertyInfo.Name}"});
+            propertyDescriptors.Add(propertyInfo,
+                new EntityPropertyDescriptor() { NodeId = $"ns=0;s={propertyInfo.Name}" });
         }
-        
+
         return new PropertyBuilder<TProperty>(propertyDescriptors[propertyInfo]);
     }
 }
 
 public interface IPropertyBuilder<T>
 {
-    public void ToNodeId(string nodeId);
+    public IPropertyHasConversionBuilder<T> ToNodeId(string nodeId);
 }
 
 internal class PropertyBuilder<T>(EntityPropertyDescriptor descriptor) : IPropertyBuilder<T>
 {
-    public void ToNodeId(string nodeId)
+    public IPropertyHasConversionBuilder<T> ToNodeId(string nodeId)
     {
         descriptor.NodeId = nodeId;
+        return new PropertyHasConversionBuilder<T>(descriptor);
+    }
+}
+
+public interface IPropertyHasConversionBuilder<T>
+{
+    public void HasConversion(ValueConverter converter);
+}
+
+internal class PropertyHasConversionBuilder<T>(EntityPropertyDescriptor descriptor) : IPropertyHasConversionBuilder<T>
+{
+    public void HasConversion(ValueConverter converter)
+    {
+        descriptor.ValueConverter = converter;
     }
 }
 
 internal class EntityPropertyDescriptor
 {
     public required string NodeId { get; set; }
+    public ValueConverter? ValueConverter { get; set; }
 }
 
 public interface IModelBuilder
@@ -50,8 +67,8 @@ public interface IModelBuilder
 
 internal class ModelBuilder : IModelBuilder
 {
-    internal Dictionary<Type, Dictionary<PropertyInfo, EntityPropertyDescriptor>> EntityModels { get; } = new ();
-    
+    internal Dictionary<Type, Dictionary<PropertyInfo, EntityPropertyDescriptor>> EntityModels { get; } = new();
+
     public IEntityTypeBuilder<T> Entity<T>() where T : class
     {
         if (!EntityModels.ContainsKey(typeof(T)))
@@ -61,4 +78,17 @@ internal class ModelBuilder : IModelBuilder
 
         return new EntityTypeBuilder<T>(EntityModels[typeof(T)]);
     }
+}
+
+public abstract class ValueConverter(Func<object?, object?> toProvider, Func<object?, object?> fromProvider)
+{
+    public Func<object?, object?> FromProvider => fromProvider;
+    public Func<object?, object?> ToProvider => toProvider;
+}
+
+public abstract class ValueConverter<TModel, TProvider>(
+    Func<TModel, TProvider> toProvider,
+    Func<TProvider, TModel> fromProvider)
+    : ValueConverter(p => toProvider((TModel)p!), p => fromProvider((TProvider)p!))
+{
 }

@@ -11,7 +11,8 @@ public interface IEntityTypeBuilder<T> where T : class
     public IPropertyBuilder<TProperty> Property<TProperty>(Expression<Func<T, TProperty>> expression);
 }
 
-internal class EntityTypeBuilder<T>(Dictionary<PropertyInfo, EntityPropertyDescriptor> propertyDescriptors) : IEntityTypeBuilder<T> where T : class
+internal class EntityTypeBuilder<T>(Dictionary<PropertyInfo, EntityPropertyDescriptor> propertyDescriptors)
+    : IEntityTypeBuilder<T> where T : class
 {
     private static VarType FromClrType(Type clrType)
     {
@@ -20,7 +21,7 @@ internal class EntityTypeBuilder<T>(Dictionary<PropertyInfo, EntityPropertyDescr
 
         if (clrType == typeof(short) || typeof(IEnumerable<short>).IsAssignableFrom(clrType))
             return VarType.Word;
-        
+
         if (clrType == typeof(int) || typeof(IEnumerable<int>).IsAssignableFrom(clrType))
             return VarType.DWord;
 
@@ -32,30 +33,33 @@ internal class EntityTypeBuilder<T>(Dictionary<PropertyInfo, EntityPropertyDescr
 
         if (clrType == typeof(double) || typeof(IEnumerable<double>).IsAssignableFrom(clrType))
             return VarType.LReal;
-        
+
         if (clrType == typeof(string) || typeof(IEnumerable<string>).IsAssignableFrom(clrType))
             return VarType.String;
-        
+
         if (clrType == typeof(DateTime) || typeof(IEnumerable<DateTime>).IsAssignableFrom(clrType))
             return VarType.DateTimeLong;
 
         return VarType.DWord;
     }
-    
+
     public IPropertyBuilder<TProperty> Property<TProperty>(Expression<Func<T, TProperty>> expression)
     {
         var propertyInfo = (PropertyInfo)((MemberExpression)expression.Body).Member;
-        if(propertyInfo == null)
+        if (propertyInfo == null)
             throw new ArgumentException($"Expression '{expression}' refers to a method, not a property.");
 
         if (!propertyDescriptors.ContainsKey(propertyInfo))
         {
-            propertyDescriptors.Add(propertyInfo, new EntityPropertyDescriptor() { DataItem = new DataItem()
+            propertyDescriptors.Add(propertyInfo, new EntityPropertyDescriptor()
             {
-                VarType = FromClrType(propertyInfo.PropertyType),
-            } });
+                DataItem = new DataItem()
+                {
+                    VarType = FromClrType(propertyInfo.PropertyType),
+                }
+            });
         }
-        
+
         return new PropertyBuilder<TProperty>(propertyDescriptors[propertyInfo]);
     }
 }
@@ -74,9 +78,9 @@ public interface IPropertyCoordinatesBuilder<T>
 
 public interface IPropertyDetailsBuilder<T>
 {
-    public void Having(int count);
-    public void Having(int count, VarType varType);
-    public void Having(int count, VarType varType, DataType dataType);
+    public IPropertyHasConversionBuilder<T> Having(int count);
+    public IPropertyHasConversionBuilder<T> Having(int count, VarType varType);
+    public IPropertyHasConversionBuilder<T> Having(int count, VarType varType, DataType dataType);
 }
 
 internal class PropertyBuilder<T>(EntityPropertyDescriptor descriptor) : IPropertyBuilder<T>
@@ -84,7 +88,7 @@ internal class PropertyBuilder<T>(EntityPropertyDescriptor descriptor) : IProper
     public IPropertyCoordinatesBuilder<T> ToDb(int dbNumber)
     {
         descriptor.DataItem.DB = dbNumber;
-        
+
         return new PropertyCoordinatesBuilder<T>(descriptor);
     }
 
@@ -94,7 +98,7 @@ internal class PropertyBuilder<T>(EntityPropertyDescriptor descriptor) : IProper
         var prev = descriptor.DataItem;
         descriptor.DataItem = DataItem.FromAddress(address);
         descriptor.DataItem.VarType = prev.VarType;
-        
+
         return new PropertyDetailsBuilder<T>(descriptor);
     }
 }
@@ -103,36 +107,54 @@ internal class PropertyCoordinatesBuilder<T>(EntityPropertyDescriptor descriptor
 {
     public IPropertyDetailsBuilder<T> WithCoordinates(int startByte, byte bitAddress)
     {
-        descriptor.DataItem.StartByteAdr  = startByte;
+        descriptor.DataItem.StartByteAdr = startByte;
         descriptor.DataItem.BitAdr = bitAddress;
-        
+
         return new PropertyDetailsBuilder<T>(descriptor);
     }
 }
 
 internal class PropertyDetailsBuilder<T>(EntityPropertyDescriptor descriptor) : IPropertyDetailsBuilder<T>
 {
-    public void Having(int count)
+    public IPropertyHasConversionBuilder<T> Having(int count)
     {
         descriptor.DataItem.Count = count;
+
+        return new PropertyHasConversionBuilder<T>(descriptor);
     }
 
-    public void Having(int count, VarType varType)
+    public IPropertyHasConversionBuilder<T> Having(int count, VarType varType)
     {
-        this.Having(count);
         descriptor.DataItem.VarType = varType;
+
+        return this.Having(count);
     }
 
-    public void Having(int count, VarType varType, DataType dataType)
+    public IPropertyHasConversionBuilder<T> Having(int count, VarType varType, DataType dataType)
     {
-        this.Having(count, varType);
         descriptor.DataItem.DataType = dataType;
+
+        return this.Having(count, varType);
+    }
+}
+
+public interface IPropertyHasConversionBuilder<T>
+{
+    public void HasConversion(ValueConverter converter);
+}
+
+internal class PropertyHasConversionBuilder<T>(EntityPropertyDescriptor descriptor) : IPropertyHasConversionBuilder<T>
+{
+    public void HasConversion(ValueConverter converter)
+    {
+        descriptor.ValueConverter = converter;
     }
 }
 
 internal class EntityPropertyDescriptor
 {
     public required DataItem DataItem { get; set; }
+    public ValueConverter? ValueConverter { get; set; }
 }
 
 public interface IModelBuilder
@@ -142,8 +164,8 @@ public interface IModelBuilder
 
 internal class ModelBuilder : IModelBuilder
 {
-    internal Dictionary<Type, Dictionary<PropertyInfo, EntityPropertyDescriptor>> EntityModels { get; } = new ();
-    
+    internal Dictionary<Type, Dictionary<PropertyInfo, EntityPropertyDescriptor>> EntityModels { get; } = new();
+
     public IEntityTypeBuilder<T> Entity<T>() where T : class
     {
         if (!EntityModels.ContainsKey(typeof(T)))
@@ -153,4 +175,17 @@ internal class ModelBuilder : IModelBuilder
 
         return new EntityTypeBuilder<T>(EntityModels[typeof(T)]);
     }
+}
+
+public abstract class ValueConverter(Func<object?, object?> toProvider, Func<object?, object?> fromProvider)
+{
+    public Func<object?, object?> FromProvider => fromProvider;
+    public Func<object?, object?> ToProvider => toProvider;
+}
+
+public abstract class ValueConverter<TModel, TProvider>(
+    Func<TModel, TProvider> toProvider,
+    Func<TProvider, TModel> fromProvider)
+    : ValueConverter(p => toProvider((TModel)p!), p => fromProvider((TProvider)p!))
+{
 }

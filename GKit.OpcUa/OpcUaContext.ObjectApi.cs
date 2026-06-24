@@ -21,7 +21,8 @@ public abstract partial class OpcUaContext
 
         for (var i = 0; i < mappings.Count; i++)
         {
-            mappings[i].Key.SetValue(result, values[i]);
+            mappings[i].Key.SetValue(result, mappings[i].Value.ValueConverter == null ? 
+                values[i] : mappings[i].Value.ValueConverter!.FromProvider(values[i]));
         }
         
         return result;
@@ -39,6 +40,8 @@ public abstract partial class OpcUaContext
 
         await WriteValuesAsync(entityProperties.ToDictionary(
             p => p.Value.NodeId, 
-            p => p.Key.GetValue(value))!);
+            p => p.Value.ValueConverter == null
+                ? p.Key.GetValue(value)
+                : p.Value.ValueConverter.ToProvider(p.Key.GetValue(value)))!);
     }
 }

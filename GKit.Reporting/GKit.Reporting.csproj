@@ -11,6 +11,7 @@
 
     <!-- If all members are not documented, you can disable the compiler warnings -->
     <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <AcceptNPOIOSMFLicense>true</AcceptNPOIOSMFLicense>
   </PropertyGroup>
   
   <PropertyGroup>
@@ -28,13 +29,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="DotNet.ReproducibleBuilds" Version="2.0.2">
+    <PackageReference Include="System.Security.Cryptography.Xml" Version="10.0.9" />
+    <PackageReference Include="DotNet.ReproducibleBuilds" Version="2.0.5">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="NPOI" Version="2.8.0" />
     <PackageReference Update="Nerdbank.GitVersioning">
-      <Version>3.9.50</Version>
+      <Version>3.10.85</Version>
     </PackageReference>
   </ItemGroup>
 

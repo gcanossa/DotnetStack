@@ -15,43 +15,52 @@ public abstract partial class PlcContext
             StartByteAdr = value.StartByteAdr,
             BitAdr = value.BitAdr,
             Count = value.Count,
-            
+
             Value = dataValue,
         };
     }
+
     public async Task<T> ReadObjectAsync<T>() where T : class, new()
     {
-        if(!EntityModels.TryGetValue(typeof(T), out var entityProperties))
+        if (!EntityModels.TryGetValue(typeof(T), out var entityProperties))
             throw new ArgumentException($"The type {typeof(T).FullName} is not registered.");
-        
-        if(entityProperties.Count == 0)
+
+        if (entityProperties.Count == 0)
             throw new ArgumentException($"The type {typeof(T).FullName} has no properties.");
 
         var mappings = entityProperties.ToList();
 
         var values = (await ReadItemsAsync(mappings
             .Select(p => CloneDataItem(p.Value.DataItem)))).ToArray();
-        
+
         var result = new T();
 
         for (var i = 0; i < mappings.Count; i++)
         {
-            mappings[i].Key.SetValue(result, values[i].Value);
+            mappings[i].Key.SetValue(result,
+                mappings[i].Value.ValueConverter == null
+                    ? values[i].Value
+                    : mappings[i].Value.ValueConverter!.FromProvider(values[i].Value));
         }
-        
+
         return result;
     }
-    
+
     public async Task WriteObjectAsync<T>(T value) where T : class
     {
-        if(!EntityModels.TryGetValue(typeof(T), out var entityProperties))
+        if (!EntityModels.TryGetValue(typeof(T), out var entityProperties))
             throw new ArgumentException($"The type {typeof(T).FullName} is not registered.");
-        
-        if(entityProperties.Count == 0)
+
+        if (entityProperties.Count == 0)
             throw new ArgumentException($"The type {typeof(T).FullName} has no properties.");
 
         var mappings = entityProperties.ToList();
 
-        await WriteItemsAsync(entityProperties.Select(p => CloneDataItem(p.Value.DataItem, p.Key.GetValue(value))));
+        await WriteItemsAsync(entityProperties
+            .Select(p =>
+                CloneDataItem(p.Value.DataItem,
+                    p.Value.ValueConverter == null
+                        ? p.Key.GetValue(value)
+                        : p.Value.ValueConverter.ToProvider(p.Key.GetValue(value)))));
     }
 }

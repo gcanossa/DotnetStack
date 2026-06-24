@@ -14,4 +14,9 @@ public interface IEditEntityForm<T> where T : class
   {
     return Task.CompletedTask;
   }
+  
+  public Task<bool> OnBeforeSubmitAsync()
+  {
+    return Task.FromResult(true);
+  }
 }

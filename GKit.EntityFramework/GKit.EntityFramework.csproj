@@ -8,10 +8,10 @@
   
   <ItemGroup>
     <PackageReference Include="cuid.net" Version="7.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.7" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.7" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.9" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.9" />
     <PackageReference Update="Nerdbank.GitVersioning">
-      <Version>3.9.50</Version>
+      <Version>3.10.85</Version>
     </PackageReference>
   </ItemGroup>
 

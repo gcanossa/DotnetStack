@@ -40,7 +40,7 @@
   [Parameter] public T Model { get; set; } = default!;
 
   [Parameter] public DbContext Context { get; set; } = default!;
-
+  
   protected Dictionary<string, object> _formParameters = new Dictionary<string, object>();
 
   protected override void OnParametersSet()
@@ -70,7 +70,12 @@
     await ((_dynamicComponent?.Instance as IEditEntityForm<T>)?.OnAfterValidationAsync(_form.IsValid) ?? Task.CompletedTask);
     
     if (_form.IsValid)
-      _mudDialog.Close<T>(Model);
+    {
+      var shouldSubmit = await ((_dynamicComponent?.Instance as IEditEntityForm<T>)?.OnBeforeSubmitAsync() ?? Task.FromResult(true));
+      
+      if (shouldSubmit)
+        _mudDialog.Close<T>(Model);
+    }
   }
 
   protected async Task CancelAsync()
