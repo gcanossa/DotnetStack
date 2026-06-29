@@ -2,6 +2,7 @@ using GKit.Settings;
 using GKit.TelegramBotEndpoint.Data;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
@@ -12,27 +13,30 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace GKit.TelegramBotEndpoint;
 
-public class TelegramBotService : BackgroundService
+public class TelegramBotService<T> : BackgroundService where T : IUpdateHandler
 {
-    private TelegramBotClientAccessor _clientAccessor;
-    private readonly SettingsManager<TelegramBotOptions> _optionsManager;
-    private readonly ILogger<TelegramBotService> _logger;
-    private readonly TelegramBotInfo _botInfo;
+    private TelegramBotClientAccessor<T> _clientAccessor;
+    private readonly SettingsManager<TelegramBotOptions<T>> _optionsManager;
+    private readonly ILogger<TelegramBotService<T>> _logger;
+    private readonly TelegramBotInfo<T> _botInfo;
     private readonly IServiceProvider _provider;
+    private readonly IStringLocalizer<TelegramBotService<T>> _localizer;
 
     private TaskCompletionSource? _opCs;
     private CancellationTokenSource? _mainCts;
     private CancellationTokenSource? _opCts;
 
     public TelegramBotService(
-        TelegramBotClientAccessor clientAccessor,
-        SettingsManager<TelegramBotOptions> optionsManager, 
-        ILogger<TelegramBotService> logger, 
-        TelegramBotInfo botInfo,
-        IServiceProvider provider)
+        TelegramBotClientAccessor<T> clientAccessor,
+        SettingsManager<TelegramBotOptions<T>> optionsManager,
+        ILogger<TelegramBotService<T>> logger,
+        TelegramBotInfo<T> botInfo,
+        IServiceProvider provider,
+        IStringLocalizer<TelegramBotService<T>> localizer)
     {
         _clientAccessor = clientAccessor;
         _provider = provider;
+        _localizer = localizer;
         _logger = logger;
 
         _opCs = new TaskCompletionSource();
@@ -50,14 +54,14 @@ public class TelegramBotService : BackgroundService
         base.Dispose();
     }
 
-    private async Task OnOptionsChanged(TelegramBotOptions options)
+    private async Task OnOptionsChanged(TelegramBotOptions<T> options)
     {
         await StopClientAsync();
     }
 
     protected async Task StopClientAsync(CancellationToken cancellationToken = default(CancellationToken))
     {
-        if(_clientAccessor.Client is not null)
+        if (_clientAccessor.Client is not null)
         {
             _opCts?.Cancel();
             _clientAccessor.Client = null;
@@ -68,7 +72,7 @@ public class TelegramBotService : BackgroundService
 
     protected async Task StartClientAsync(CancellationToken cancellationToken = default(CancellationToken))
     {
-        if(_clientAccessor.Client is not null)
+        if (_clientAccessor.Client is not null)
         {
             throw new InvalidOperationException("Previous client must be stopped firtst.");
         }
@@ -76,7 +80,7 @@ public class TelegramBotService : BackgroundService
         _opCs = new TaskCompletionSource();
         _opCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
-        ReceiverOptions receiverOptions = new ()
+        ReceiverOptions receiverOptions = new()
         {
             AllowedUpdates = Array.Empty<UpdateType>()
         };
@@ -103,7 +107,7 @@ public class TelegramBotService : BackgroundService
     {
         _mainCts = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
 
-        while(!_mainCts.Token.IsCancellationRequested)
+        while (!_mainCts.Token.IsCancellationRequested)
         {
             await StartClientAsync(_mainCts.Token);
         }
@@ -117,15 +121,16 @@ public class TelegramBotService : BackgroundService
         await base.StopAsync(cancellationToken);
     }
 
-    private async Task<bool> ErrorAndCheckLockout(TelegramUser user, TelegramBotOptions options, ITelegramBotDataProvider dataProvider)
+    private async Task<bool> ErrorAndCheckLockout(TelegramUser user, TelegramBotOptions<T> options,
+        ITelegramBotDataProvider dataProvider)
     {
         user.ErrorCount++;
-                
-        if(user.ErrorCount >= options.LockoutErrorCount)
+
+        if (user.ErrorCount >= options.LockoutErrorCount)
         {
             user.Status = TelegramUserStatus.LockedOut;
             _logger.LogWarning("User {UserId} locked out after {ErrorCount} errors", user.Id, user.ErrorCount);
-            
+
             return true;
         }
 
@@ -135,68 +140,70 @@ public class TelegramBotService : BackgroundService
     }
 
 
-    protected async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
+    protected async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update,
+        CancellationToken cancellationToken)
     {
-        using var scope = _provider.CreateAsyncScope();
+        await using var scope = _provider.CreateAsyncScope();
         var provider = scope.ServiceProvider;
 
-        var _dataProvider = provider.GetRequiredService<ITelegramBotDataProvider>();
+        var dataProvider = provider.GetRequiredService<ITelegramBotDataProvider>();
 
-        var options = await _optionsManager.GetOptionsAsync();
+        var options = await _optionsManager.GetOptionsAsync(cancellationToken);
 
-        var userId = 
-            update.Message is {} ? update.Message.From?.Id :
-            update.CallbackQuery is {} ? update.CallbackQuery.From?.Id :
-            null;
+        var userId =
+            update.Message?.From?.Id ??
+            update.CallbackQuery?.From?.Id;
 
         var chatId =
-            update.Message is {} ? update.Message.Chat.Id :
-            update.CallbackQuery is {} ? update.CallbackQuery.Message?.Chat?.Id :
-            null;
+            update.Message?.Chat.Id ??
+            update.CallbackQuery?.Message?.Chat?.Id;
 
-        if(userId is null)
+        if (userId is null)
         {
             _logger.LogWarning("Unhandled update type {UpdateType}", update.Type);
             return;
         }
-        
-        var user = await _dataProvider.GetUserById(userId.Value);
 
-        if(user is null && !options.AllowRegistration)
+        var user = await dataProvider.GetUserById(userId.Value);
+
+        if (user is null && !options.AllowRegistration)
         {
-            _logger.LogWarning($"Unknown user update skipped because: {nameof(TelegramBotOptions.AllowRegistration)}=false");
+            _logger.LogWarning(
+                $"Unknown user update skipped because: {nameof(TelegramBotOptions<T>.AllowRegistration)}=false");
             return;
         }
 
-        if(user is null && update.Message?.Text != "/start")
+        if (user is null && update.Message?.Text != "/start")
         {
             _logger.LogWarning("Unknown user update skipped because: Not a /start command.");
             return;
         }
 
-        if(user is null)
+        if (user is null)
         {
-            await _dataProvider.CreateUser(new TelegramUser(){
+            await dataProvider.CreateUser(new TelegramUser()
+            {
                 Id = userId.Value,
                 Status = TelegramUserStatus.Joining
             });
 
-            await botClient.SendMessage(update.Message!.Chat.Id, "Condividi le tue informazioni di contatto", 
-                replyMarkup: new ReplyKeyboardMarkup(KeyboardButton.WithRequestContact("Invia")), cancellationToken: cancellationToken);
+            await botClient.SendMessage(update.Message!.Chat.Id, _localizer["messages.share_contact_info"],
+                replyMarkup: new ReplyKeyboardMarkup(KeyboardButton.WithRequestContact("Invia")),
+                cancellationToken: cancellationToken);
 
             _logger.LogInformation("Registration started for {UserId}", userId.Value);
             return;
         }
 
-        switch(user.Status)
+        switch (user.Status)
         {
-            case TelegramUserStatus.Joining: 
-                if(update.Message?.Contact is null)
-                {                
+            case TelegramUserStatus.Joining:
+                if (update.Message?.Contact is null)
+                {
                     _logger.LogWarning("Registration for {UserId}: missing contact info", userId.Value);
-                    if(!await ErrorAndCheckLockout(user, options, _dataProvider))
+                    if (!await ErrorAndCheckLockout(user, options, dataProvider))
                     {
-                        await botClient.SendMessage(update.Message!.Chat.Id, "Condividi le tue informazioni di contatto", 
+                        await botClient.SendMessage(update.Message!.Chat.Id, _localizer["messages.share_contact_info"],
                             replyMarkup: new ReplyKeyboardMarkup(KeyboardButton.WithRequestContact("Invia")));
                     }
                 }
@@ -210,31 +217,37 @@ public class TelegramBotService : BackgroundService
                     user.FirstName = update.Message.Contact.FirstName;
                     user.LastName = update.Message.Contact.LastName;
 
-                    await botClient.SendMessage(update.Message!.Chat.Id, "Inserisci il codice di verifica:",
+                    await botClient.SendMessage(update.Message!.Chat.Id,
+                        _localizer["messages.insert_verification_code"],
                         replyMarkup: new ReplyKeyboardRemove()
                     );
 
-                    await _dataProvider.UpdateUser(user);
+                    await dataProvider.UpdateUser(user);
                     _logger.LogInformation("Registration for {UserId}: Started authorization", userId.Value);
                 }
+
                 break;
             case TelegramUserStatus.Authorizing:
-                if(update.Message?.Text is null)
+                if (update.Message?.Text is null)
                 {
                     _logger.LogWarning("Registration for {UserId}: missing verification code text", userId.Value);
-                    if(!await ErrorAndCheckLockout(user, options, _dataProvider))
+                    if (!await ErrorAndCheckLockout(user, options, dataProvider))
                     {
-                        await botClient.SendMessage(update.Message!.Chat.Id, "Inserisci il codice di verifica:");
+                        await botClient.SendMessage(update.Message!.Chat.Id,
+                            _localizer["messages.insert_verification_code"]);
                     }
                 }
                 else
                 {
-                    if(update.Message.Text != user.VerificationCode || user.VerificationCodeExpiration < DateTimeOffset.Now)
+                    if (update.Message.Text != user.VerificationCode ||
+                        user.VerificationCodeExpiration < DateTimeOffset.Now)
                     {
-                        _logger.LogWarning("Registration for {UserId}: wrong or expired verification code", userId.Value);
-                        if(!await ErrorAndCheckLockout(user, options, _dataProvider))
+                        _logger.LogWarning("Registration for {UserId}: wrong or expired verification code",
+                            userId.Value);
+                        if (!await ErrorAndCheckLockout(user, options, dataProvider))
                         {
-                            await botClient.SendMessage(update.Message!.Chat.Id, "Codice errato o scaduto. Riprova:");
+                            await botClient.SendMessage(update.Message!.Chat.Id,
+                                _localizer["messages.wrong_or_expired_verification_code"]);
                         }
                     }
                     else
@@ -247,28 +260,31 @@ public class TelegramBotService : BackgroundService
                         user.VerificationCode = null;
                         user.VerificationCodeExpiration = null;
 
-                        await botClient.SendMessage(update.Message!.Chat.Id, $"Registrazione completata {user.FirstName}! 🚀");
+                        await botClient.SendMessage(update.Message!.Chat.Id,
+                            _localizer["messages.registration_success", user.FirstName!]);
 
-                        await _dataProvider.UpdateUser(user);
+                        await dataProvider.UpdateUser(user);
                     }
                 }
+
                 break;
         }
 
-        if(user.Status is not TelegramUserStatus.Joined)
+        if (user.Status is not TelegramUserStatus.Joined)
         {
             return;
         }
-        
+
         var handler = provider.GetRequiredService<IUpdateHandler>();
         await handler.HandleUpdateAsync(botClient, update, user, chatId);
     }
 
-    protected Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
+    protected Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception,
+        CancellationToken cancellationToken)
     {
-        if(exception is ApiRequestException apiRequestException)
+        if (exception is ApiRequestException apiRequestException)
         {
-            _logger.LogError("Telegram API Error: {ErrorCode} {Message}", 
+            _logger.LogError("Telegram API Error: {ErrorCode} {Message}",
                 apiRequestException.ErrorCode, apiRequestException.Message);
         }
         else

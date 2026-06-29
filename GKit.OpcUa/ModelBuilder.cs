@@ -80,13 +80,13 @@ internal class ModelBuilder : IModelBuilder
     }
 }
 
-public abstract class ValueConverter(Func<object?, object?> toProvider, Func<object?, object?> fromProvider)
+public class ValueConverter(Func<object?, object?> toProvider, Func<object?, object?> fromProvider)
 {
     public Func<object?, object?> FromProvider => fromProvider;
     public Func<object?, object?> ToProvider => toProvider;
 }
 
-public abstract class ValueConverter<TModel, TProvider>(
+public class ValueConverter<TModel, TProvider>(
     Func<TModel, TProvider> toProvider,
     Func<TProvider, TModel> fromProvider)
     : ValueConverter(p => toProvider((TModel)p!), p => fromProvider((TProvider)p!))

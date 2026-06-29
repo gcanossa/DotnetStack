@@ -76,7 +76,7 @@ public interface IPropertyCoordinatesBuilder<T>
     public IPropertyDetailsBuilder<T> WithCoordinates(int startByte, byte bitAddress);
 }
 
-public interface IPropertyDetailsBuilder<T>
+public interface IPropertyDetailsBuilder<T> : IPropertyHasConversionBuilder<T>
 {
     public IPropertyHasConversionBuilder<T> Having(int count);
     public IPropertyHasConversionBuilder<T> Having(int count, VarType varType);
@@ -136,6 +136,11 @@ internal class PropertyDetailsBuilder<T>(EntityPropertyDescriptor descriptor) : 
 
         return this.Having(count, varType);
     }
+
+    public void HasConversion(ValueConverter converter)
+    {
+        descriptor.ValueConverter = converter;
+    }
 }
 
 public interface IPropertyHasConversionBuilder<T>
@@ -177,13 +182,13 @@ internal class ModelBuilder : IModelBuilder
     }
 }
 
-public abstract class ValueConverter(Func<object?, object?> toProvider, Func<object?, object?> fromProvider)
+public class ValueConverter(Func<object?, object?> toProvider, Func<object?, object?> fromProvider)
 {
     public Func<object?, object?> FromProvider => fromProvider;
     public Func<object?, object?> ToProvider => toProvider;
 }
 
-public abstract class ValueConverter<TModel, TProvider>(
+public class ValueConverter<TModel, TProvider>(
     Func<TModel, TProvider> toProvider,
     Func<TProvider, TModel> fromProvider)
     : ValueConverter(p => toProvider((TModel)p!), p => fromProvider((TProvider)p!))
