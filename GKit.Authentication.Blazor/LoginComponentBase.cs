@@ -7,7 +7,7 @@ public abstract class LoginComponentBase<T> : ComponentBase where T : new()
   [Inject]
   protected NavigationManager NavigationManager { get; set; } = null!;
 
-  [SupplyParameterFromForm] public T? Model { get; set; }
+  [SupplyParameterFromForm] public T? Model { get; set; } = new T();
 
   [SupplyParameterFromQuery]
   public string ReturnUrl { get; set; } = "/";
