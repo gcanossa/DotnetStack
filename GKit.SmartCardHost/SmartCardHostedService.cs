@@ -1,53 +1,57 @@
 using System.Text.Json;
-using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using PCSC;
 using PCSC.Monitoring;
 
 namespace GKit.SmartCardHost;
 
-public class SmartCardManager(SmartCardStateBroker broker, ILogger<SmartCardManager> logger) : BackgroundService
+public class SmartCardHostedService(SmartCardState state, ILogger<SmartCardHostedService> logger) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        using var context = ContextFactory.Instance.Establish(SCardScope.System);
+        ISCardContext? context = null;
 
-        var availableReaders = context.GetReaders();
-        Array.Sort(availableReaders);
-
-        await broker.OnReadersChanged(availableReaders);
+        string[] availableReaders = [];
 
         ISCardMonitor? monitor = null;
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            if (context.CheckValidity() != SCardError.Success)
-                context.Establish(SCardScope.System);
-
-            var readers = context.GetReaders();
-            Array.Sort(readers);
-
-            if (!(monitor?.Monitoring ?? false) ||
-                JsonSerializer.Serialize(readers) != JsonSerializer.Serialize(availableReaders))
+            try
             {
-                availableReaders = readers;
+                if (context == null)
+                    context = ContextFactory.Instance.Establish(SCardScope.System);
 
-                if (monitor?.Monitoring ?? false)
+                if (context.CheckValidity() != SCardError.Success)
+                    context.Establish(SCardScope.System);
+
+                var readers = context.GetReaders();
+                Array.Sort(readers);
+
+                if (!(monitor?.Monitoring ?? false) ||
+                    JsonSerializer.Serialize(readers) != JsonSerializer.Serialize(availableReaders))
                 {
-                    monitor.Cancel();
-                    monitor.Dispose();
+                    availableReaders = readers;
+
+                    if (monitor?.Monitoring ?? false)
+                    {
+                        monitor.Cancel();
+                        monitor.Dispose();
+                    }
+
+                    if (availableReaders.Length > 0)
+                    {
+                        monitor = CreateMonitor(context);
+
+                        monitor.Start(availableReaders);
+                        logger.LogInformation("Restarting reader monitor. Readers changed.");
+                    }
+
+                    state.OnReadersChanged(availableReaders);
                 }
-
-                if (availableReaders.Length > 0)
-                {
-                    monitor = CreateMonitor(context);
-
-                    monitor.Start(availableReaders);
-                    logger.LogInformation("Restarting reader monitor. Readers changed.");
-                }
-
-                await broker.OnReadersChanged(availableReaders);
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Error while monitoring readers");
             }
 
             await Task.Delay(5 * 1000, stoppingToken);
@@ -90,7 +94,7 @@ public class SmartCardManager(SmartCardStateBroker broker, ILogger<SmartCardMana
         {
             var uid = Convert.ToHexString(card.GetUid());
             logger.LogInformation("Read Card uid: {UID}", uid);
-            await broker.OnCardAvailable(uid);
+            state.OnCardAvailable(uid);
 
             var error = card.Disconnect(SCardReaderDisposition.Leave);
             error.ThrowIfNotSuccess();
