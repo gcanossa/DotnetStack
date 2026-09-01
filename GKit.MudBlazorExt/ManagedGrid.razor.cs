@@ -56,7 +56,7 @@ public partial class ManagedGrid<T>
       var query = await ExportServerData(CancellationToken.None);
 
       query = QueryFilterExtensions.Where(query, Component.FilterDefinitions);
-      query = QuerySortExtensions.OrderBy(query, Component.SortDefinitions.Values);
+      query = GridQueryDataExtensions.OrderBy(query, Component.SortDefinitions.Values);
 
       using var ms = new MemoryStream();
       await query.ToXlsAsync(title, Component, ms);

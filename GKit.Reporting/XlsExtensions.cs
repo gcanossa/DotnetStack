@@ -6,92 +6,134 @@ using NPOI.SS.Util;
 
 public static class XlsExtensions
 {
-  public static ICellStyle CloneStyle(this IWorkbook workbook, ICellStyle style)
-  {
-    var newStyle = workbook.CreateCellStyle();
-    newStyle.CloneStyleFrom(style);
+    public static ICellStyle CloneStyle(this IWorkbook workbook, ICellStyle style)
+    {
+        var newStyle = workbook.CreateCellStyle();
+        newStyle.CloneStyleFrom(style);
 
-    return newStyle;
-  }
-  public static ICellStyle BorderStyle(this ICellStyle style, BorderStyle borderStyle)
-  {
-    style.BorderRight = borderStyle;
-    style.BorderBottom = borderStyle;
-    style.BorderLeft = borderStyle;
-    style.BorderTop = borderStyle;
+        return newStyle;
+    }
 
-    return style;
-  }
-  public static ICellStyle BorderColor(this ICellStyle style, IndexedColors borderColor)
-  {
-    style.RightBorderColor = borderColor.Index;
-    style.BottomBorderColor = borderColor.Index;
-    style.LeftBorderColor = borderColor.Index;
-    style.TopBorderColor = borderColor.Index;
+    public static ICellStyle BorderStyle(this ICellStyle style, BorderStyle borderStyle)
+    {
+        style.BorderRight = borderStyle;
+        style.BorderBottom = borderStyle;
+        style.BorderLeft = borderStyle;
+        style.BorderTop = borderStyle;
 
-    return style;
-  }
-  public static ICellStyle WithBackground(this ICellStyle style, IndexedColors color)
-  {
-    style.FillForegroundColor = color.Index;
-    style.FillPattern = FillPattern.SolidForeground;
+        return style;
+    }
 
-    return style;
-  }
-  public static ICellStyle WithFont(this ICellStyle style, IFont font)
-  {
-    style.SetFont(font);
+    public static ICellStyle BorderColor(this ICellStyle style, IndexedColors borderColor)
+    {
+        style.RightBorderColor = borderColor.Index;
+        style.BottomBorderColor = borderColor.Index;
+        style.LeftBorderColor = borderColor.Index;
+        style.TopBorderColor = borderColor.Index;
 
-    return style;
-  }
+        return style;
+    }
 
-  public static ICellStyle VerticalAlign(this ICellStyle style, VerticalAlignment alignment)
-  {
-    style.VerticalAlignment = alignment;
+    public static ICellStyle WithBackground(this ICellStyle style, IndexedColors color)
+    {
+        style.FillForegroundColor = color.Index;
+        style.FillPattern = FillPattern.SolidForeground;
 
-    return style;
-  }
+        return style;
+    }
 
-  public static IFont FontStyle(this IFont font, string fontFamily, int fontSize)
-  {
-    font.FontName = fontFamily;
-    font.FontHeightInPoints = fontSize;
+    public static ICellStyle WithFont(this ICellStyle style, IFont font)
+    {
+        style.SetFont(font);
 
-    return font;
-  }
+        return style;
+    }
 
-  public static IFont Bold(this IFont font, bool value = true)
-  {
-    font.IsBold = value;
+    public static ICellStyle VerticalAlign(this ICellStyle style, VerticalAlignment alignment)
+    {
+        style.VerticalAlignment = alignment;
 
-    return font;
-  }
-  public static IFont Italic(this IFont font, bool value = true)
-  {
-    font.IsItalic = value;
+        return style;
+    }
 
-    return font;
-  }
-  public static IFont StrikeOut(this IFont font, bool value = true)
-  {
-    font.IsStrikeout = value;
+    public static IFont FontStyle(this IFont font, string fontFamily, int fontSize)
+    {
+        font.FontName = fontFamily;
+        font.FontHeightInPoints = fontSize;
 
-    return font;
-  }
-  public static ICell WithStyle(this ICell cell, ICellStyle style)
-  {
-    cell.CellStyle = style;
+        return font;
+    }
 
-    return cell;
-  }
+    public static IFont Bold(this IFont font, bool value = true)
+    {
+        font.IsBold = value;
 
-  public static CellRangeAddress RegionWithBorderStyle(this ISheet sheet, CellRangeAddress range, BorderStyle borderStyle)
-  {
-    RegionUtil.SetBorderRight(borderStyle, range, sheet);
-    RegionUtil.SetBorderBottom(borderStyle, range, sheet);
-    RegionUtil.SetBorderLeft(borderStyle, range, sheet);
-    RegionUtil.SetBorderTop(borderStyle, range, sheet);
+        return font;
+    }
 
-    return range;
-  }
+    public static IFont Italic(this IFont font, bool value = true)
+    {
+        font.IsItalic = value;
+
+        return font;
+    }
+
+    public static IFont StrikeOut(this IFont font, bool value = true)
+    {
+        font.IsStrikeout = value;
+
+        return font;
+    }
+
+    public static IFont Color(this IFont font, IndexedColors color)
+    {
+        font.Color = color.Index;
+
+        return font;
+    }
+
+    public static ICell WithStyle(this ICell cell, ICellStyle style)
+    {
+        cell.CellStyle = style;
+
+        return cell;
+    }
+
+    public static CellRangeAddress RegionWithBorderStyle(this ISheet sheet, CellRangeAddress range,
+        BorderStyle borderStyle)
+    {
+        RegionUtil.SetBorderRight(borderStyle, range, sheet);
+        RegionUtil.SetBorderBottom(borderStyle, range, sheet);
+        RegionUtil.SetBorderLeft(borderStyle, range, sheet);
+        RegionUtil.SetBorderTop(borderStyle, range, sheet);
+
+        return range;
+    }
+
+    public static int GetMaxColumnIndex(this ISheet sheet)
+    {
+        var maxColIndex = -1;
+
+        for (var r = sheet.FirstRowNum; r <= sheet.LastRowNum; r++)
+        {
+            var row = sheet.GetRow(r);
+            if (row == null) continue;
+
+            if (row.LastCellNum - 1 > maxColIndex)
+                maxColIndex = row.LastCellNum - 1;
+        }
+
+        return maxColIndex;
+    }
+
+    public static ISheet AutoSizeColumns(this ISheet sheet)
+    {
+        var maxColIdx = sheet.GetMaxColumnIndex();
+        for (var i = 0; i <= maxColIdx; i++)
+        {
+            sheet.AutoSizeColumn(i);
+        }
+
+        return sheet;
+    }
 }

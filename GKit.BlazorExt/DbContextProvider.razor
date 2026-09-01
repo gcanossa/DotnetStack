@@ -16,14 +16,14 @@
     Context = await CreateDbContextAsync();
   }
 
-  public void Dispose()
+  public virtual void Dispose()
   {
     Context?.Dispose();
     Context = null!;
     GC.SuppressFinalize(this);
   }
 
-  public async ValueTask DisposeAsync()
+  public virtual async ValueTask DisposeAsync()
   {
     if (Context != null)
     {

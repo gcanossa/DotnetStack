@@ -209,7 +209,7 @@ public partial class EntityGrid<T, TDialog> : ManagedGrid<T>
         var query = QueryFactory?.Invoke(ctx) ?? throw new InvalidOperationException($"{nameof(QueryFactory)} is not set");
 
         query = QueryFilterExtensions.Where(query, Component.FilterDefinitions);
-        query = QuerySortExtensions.OrderBy(query, Component.SortDefinitions.Values);
+        query = GridQueryDataExtensions.OrderBy(query, Component.SortDefinitions.Values);
 
         using var ms = new MemoryStream();
         await query.ToXlsAsync(title, Component, ms);
@@ -235,7 +235,7 @@ public partial class EntityGrid<T, TDialog> : ManagedGrid<T>
           ctx.ChangeTracker.Clear();
 
         query = QueryFilterExtensions.Where(query, gridState.FilterDefinitions);
-        query = QuerySortExtensions.OrderBy(query, gridState.SortDefinitions);
+        query = GridQueryDataExtensions.OrderBy(query, gridState.SortDefinitions);
 
         result.TotalItems = await query.CountAsync(token);
 
