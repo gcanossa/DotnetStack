@@ -33,6 +33,14 @@
                                  }
                                </MudStack>;
 
+    base.NoItemsTemplate = @<MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Style="border-bottom: 1px solid lightgray;">
+                             @if (EditDialog != null)
+                             {
+                               <MudButton Color="Color.Primary" OnClick="NewAsync">Aggiungi</MudButton>
+                             }
+                             <MudText Class="mt-2 mb-2">Nessun elemento trovato</MudText>
+                           </MudStack>;
+
     await base.OnInitializedAsync();
   }
 

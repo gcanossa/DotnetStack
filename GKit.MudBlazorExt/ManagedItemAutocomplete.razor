@@ -9,10 +9,7 @@
 
 <MudAutocomplete @ref="Component" T="T" For="@For" Label="@Label" ToStringFunc="ByValueToStringFunc" SearchFunc="Search"
                  Clearable Value="@Value" ValueChanged="ValueChangedHandler" ShowProgressIndicator Disabled="Disabled"
-                 ResetValueOnEmptyText data-attr-setter="force" BeforeItemsTemplate="BeforeItemsTemplate">
-    <NoItemsTemplate>
-        <MudText>Nessun elemento trovato</MudText>
-    </NoItemsTemplate>
+                 ResetValueOnEmptyText data-attr-setter="force" BeforeItemsTemplate="BeforeItemsTemplate" NoItemsTemplate="NoItemsTemplate">
 </MudAutocomplete>
 
 @code
@@ -35,6 +32,9 @@
     
     [Parameter]
     public RenderFragment? BeforeItemsTemplate { get; set; }
+
+    [Parameter]
+    public RenderFragment? NoItemsTemplate { get; set; } = @<MudText>Nessun elemento trovato</MudText>;
     
     [Parameter, EditorRequired] public Func<string, Task<IQueryable<TItem>>> FetchData { get; set; } = default!;
     [Parameter, EditorRequired] public Func<TItem, T> ToValue { get; set; }
