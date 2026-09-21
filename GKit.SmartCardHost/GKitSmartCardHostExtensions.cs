@@ -6,8 +6,10 @@ public static class GKitSmartCardHostExtensions
 {
     public static IServiceCollection AddGKitSmartCardHost(this IServiceCollection services)
     {
-        services.AddSingleton<SmartCardState>();
-        services.AddHostedService<SmartCardHostedService>();
+        services.AddSingleton<SmartCardStateBroker>();
+        services.AddHostedService<SmartCardManager>();
+
+        services.AddSignalR();
 
         return services;
     }
