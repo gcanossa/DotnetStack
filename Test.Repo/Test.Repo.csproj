@@ -36,8 +36,8 @@
     <ProjectReference Include="..\GKit.Pdf\GKit.Pdf.csproj" />
     <ProjectReference Include="..\GKit.PLC\GKit.PLC.csproj" />
     <ProjectReference Include="..\GKit.RENTRI\GKit.RENTRI.csproj" />
-    <ProjectReference Include="..\Test.Repo.UI\Test.Repo.UI.csproj" />
-    <ProjectReference Include="..\Test.Repo.UI.Radzen\Test.Repo.UI.Radzen.csproj" />
+    <ProjectReference Include="..\Test.Repo.UI.MudBlazorExt\Test.Repo.UI.MudBlazorExt.csproj" />
+    <ProjectReference Include="..\Test.Repo.UI.RadzenExt\Test.Repo.UI.RadzenExt.csproj" />
     <ProjectReference Include="..\Test.Repo.UI.Shared\Test.Repo.UI.Shared.csproj" />
     <ProjectReference Include="..\GKit.UI.RadzenExt\GKit.UI.RadzenExt.csproj" />
     <ProjectReference Include="..\GKit.UI.Abstractions\GKit.UI.Abstractions.csproj" />

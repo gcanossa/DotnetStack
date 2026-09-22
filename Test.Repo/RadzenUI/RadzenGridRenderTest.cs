@@ -2,7 +2,7 @@ using Bunit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Test.Repo.UI.Shared;
-using RadzenWidgetGrid = Test.Repo.UI.Radzen.Components.Grids.WidgetGrid;
+using RadzenWidgetGrid = Test.Repo.UI.RadzenExt.Components.Grids.WidgetGrid;
 
 namespace Test.Repo.RadzenUI;
 

@@ -3,11 +3,11 @@ using GKit.UI.Data;
 using Microsoft.EntityFrameworkCore;
 using Test.Repo.UI.Shared;
 using MudDialog = GKit.UI.MudBlazorExt.EditEntityDialog<Test.Repo.UI.Shared.Widget,
-  Test.Repo.UI.Components.Forms.EditWidgetForm, Test.Repo.UI.Shared.WidgetValidator>;
+  Test.Repo.UI.MudBlazorExt.Components.Forms.EditWidgetForm, Test.Repo.UI.Shared.WidgetValidator>;
 using RadzenDialog = GKit.UI.RadzenExt.EditEntityDialog<Test.Repo.UI.Shared.Widget,
-  Test.Repo.UI.Radzen.Components.Forms.EditWidgetForm, Test.Repo.UI.Shared.WidgetValidator>;
-using MudWidgetDialog = Test.Repo.UI.Components.Dialogs.EditWidgetDialog;
-using RadzenWidgetDialog = Test.Repo.UI.Radzen.Components.Dialogs.EditWidgetDialog;
+  Test.Repo.UI.RadzenExt.Components.Forms.EditWidgetForm, Test.Repo.UI.Shared.WidgetValidator>;
+using MudWidgetDialog = Test.Repo.UI.MudBlazorExt.Components.Dialogs.EditWidgetDialog;
+using RadzenWidgetDialog = Test.Repo.UI.RadzenExt.Components.Dialogs.EditWidgetDialog;
 
 namespace Test.Repo.RadzenUI;
 

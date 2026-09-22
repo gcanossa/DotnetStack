@@ -3,10 +3,10 @@ using GKit.UI.Localization;
 using GKit.UI.RadzenExt;
 using Microsoft.EntityFrameworkCore;
 using Radzen;
-using Test.Repo.UI.Radzen.Components;
+using Test.Repo.UI.RadzenExt.Components;
 using Test.Repo.UI.Shared;
 
-const string DemoDatabaseName = "Test.Repo.UI.Radzen.Demo";
+const string DemoDatabaseName = "Test.Repo.UI.RadzenExt.Demo";
 
 var builder = WebApplication.CreateBuilder(args);
 

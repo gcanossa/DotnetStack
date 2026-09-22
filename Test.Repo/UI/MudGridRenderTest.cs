@@ -1,8 +1,8 @@
 using Bunit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Test.Repo.UI.Components.Grids;
-using Test.Repo.UI.Components.Pages;
+using Test.Repo.UI.MudBlazorExt.Components.Grids;
+using Test.Repo.UI.MudBlazorExt.Components.Pages;
 using Test.Repo.UI.Shared;
 
 namespace Test.Repo.UI;

@@ -1,8 +1,8 @@
 using GKit.UI.MudBlazorExt;
-using Test.Repo.UI.Components.Forms;
+using Test.Repo.UI.MudBlazorExt.Components.Forms;
 using Test.Repo.UI.Shared;
 
-namespace Test.Repo.UI.Components.Dialogs;
+namespace Test.Repo.UI.MudBlazorExt.Components.Dialogs;
 
 /// <summary>
 /// The dialog shell is adapter-bound, but its body is not: only the base type changes between

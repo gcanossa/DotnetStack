@@ -113,16 +113,18 @@ sit closer to the original `GKit.MudBlazorExt` — which also makes the migratio
 naturally. Note that `.cs` files were never affected: they put usings *outside* the namespace
 declaration, which is why the problem only ever showed up in Razor.
 
-The same applies to any project whose own name ends in a dependency's root namespace —
-`Test.Repo.UI.Radzen`, the demo host, still needs `@using global::Radzen` for exactly this reason.
-That one is the host's own naming, not the package's.
+The same applies to any project whose own name ends in a dependency's root namespace. The demo
+host was originally `Test.Repo.UI.Radzen` and needed `@using global::Radzen` for exactly this
+reason; renaming it to `Test.Repo.UI.RadzenExt` (alongside `Test.Repo.UI.MudBlazorExt`) removed the
+last qualifier in the repository. The rule is simply: never name a project after the root
+namespace of something it depends on.
 
 ### Changed / retired
 
 - **`GKit.MudBlazorExt`** — renamed to `GKit.UI.MudBlazorExt` for symmetry with `GKit.UI.RadzenExt`; the old package ID published once more as deprecated, pointing at the new one. (Type-forwarding won't work across the namespace change, so this is a marker, not a compat shim. Confirm in §11.)
 - **`Test.Repo.UI`** — becomes the MudBlazor host.
 - **`Test.Repo.UI.Shared`** (new RCL) — demo domain, validators, forms, dialog subclasses, query factories: the part that must compile against both.
-- **`Test.Repo.UI.Radzen`** (new) — the Radzen host, rendering the same pages from the same shared RCL.
+- **`Test.Repo.UI.RadzenExt`** (new) — the Radzen host, rendering the same pages from the same shared RCL.
 
 ### Unchanged
 
@@ -586,7 +588,7 @@ rendered by each adapter into its own column components — such a grid would th
 |---|---|---|
 | 0 ✅ | Create `GKit.UI.Abstractions`, `GKit.UI.Data`, `GKit.UI.Localization`; move the neutral code out; rewrite the Mud adapter as `GKit.UI.MudBlazorExt`; retire `GKit.MudBlazorExt`. | **Done.** Solution builds with 0 errors and no warnings in any new project; 28 new unit tests pass; the 8 pre-existing integration failures are unchanged. |
 | 1 ✅ | Split `Test.Repo.UI.Shared` out of `Test.Repo.UI` and give it real grids, forms and dialogs. | **Done.** The shared layer is a plain (non-Razor) library referencing neither adapter, so the boundary is compiler-enforced. 11 bUnit tests render the Mud components. |
-| 2 ✅ | Build `GKit.UI.RadzenExt` + `Test.Repo.UI.Radzen` against the same `Test.Repo.UI.Shared`. | **Done.** Two hosts, one domain layer. 6 Radzen render tests + 10 parity tests. |
+| 2 ✅ | Build `GKit.UI.RadzenExt` + `Test.Repo.UI.RadzenExt` against the same `Test.Repo.UI.Shared`. | **Done.** Two hosts, one domain layer. 6 Radzen render tests + 10 parity tests. |
 | 3 ✅ | Harden and document. | **Done.** Zero warnings in any new project; measured sharing figures in §10. |
 | next | Declarative columns (§10), and whichever §9 asymmetry a real migration hits first. | Optional. |
 

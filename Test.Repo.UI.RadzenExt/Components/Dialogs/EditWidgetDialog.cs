@@ -1,8 +1,8 @@
 using GKit.UI.RadzenExt;
-using Test.Repo.UI.Radzen.Components.Forms;
+using Test.Repo.UI.RadzenExt.Components.Forms;
 using Test.Repo.UI.Shared;
 
-namespace Test.Repo.UI.Radzen.Components.Dialogs;
+namespace Test.Repo.UI.RadzenExt.Components.Dialogs;
 
 /// <summary>
 /// Identical to the MudBlazor host's EditWidgetDialog except for the base type's namespace - the

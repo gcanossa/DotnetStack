@@ -5,7 +5,7 @@ using GKit.UI.MudBlazorExt;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor;
 using MudBlazor.Services;
-using Test.Repo.UI.Components;
+using Test.Repo.UI.MudBlazorExt.Components;
 using Test.Repo.UI.Shared;
 
 const string DemoDatabaseName = "Test.Repo.UI.Demo";

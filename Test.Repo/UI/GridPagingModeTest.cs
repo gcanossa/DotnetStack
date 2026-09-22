@@ -89,7 +89,7 @@ public class GridPagingModeTest : MudRenderTestBase
   public void MudGridState_PageIndexBecomesSkipTake()
   {
     // The translation that makes paged MudBlazor state fit the neutral skip/take window.
-    var state = new global::MudBlazor.GridState<Widget> { Page = 3, PageSize = 20 };
+    var state = new MudBlazor.GridState<Widget> { Page = 3, PageSize = 20 };
 
     var query = GKit.UI.MudBlazorExt.MudGridStateExtensions.ToGridQuery(state);
 
