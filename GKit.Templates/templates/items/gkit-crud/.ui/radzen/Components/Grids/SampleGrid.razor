@@ -1,0 +1,28 @@
+@using Microsoft.EntityFrameworkCore
+@using GKIT-SHARED-NS
+@using GKIT-HOST-NS.Dialogs
+
+@inject IDbContextFactory<GKIT-DBCONTEXT> Factory
+
+@*
+  The @code block below is character for character the MudBlazor twin's; only the column markup
+  differs, because Radzen columns take a string path rather than an expression.
+*@
+<EntityGrid @ref="Grid" T="Sample" TDialog="EditSampleDialog" Title="Sample"
+            QueryFactory="SampleQueries.Query"
+            ContextFactory="() => Factory.CreateDbContext()"
+            SharedContext="SharedContext"
+            ToStringFunc="SampleQueries.Describe"
+            Exportable="true" Refreshable="true">
+  <Columns>
+    <RadzenDataGridColumn TItem="Sample" Property="Id" Title="Id" Width="6rem" />
+    <RadzenDataGridColumn TItem="Sample" Property="Name" Title="Name" />
+    <RadzenDataGridColumn TItem="Sample" Property="CreatedAt" Title="Created" />
+  </Columns>
+</EntityGrid>
+
+@code {
+  [Parameter] public DbContext? SharedContext { get; set; }
+
+  public EntityGrid<Sample, EditSampleDialog> Grid { get; set; } = default!;
+}

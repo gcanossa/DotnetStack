@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Gianmaria Canossa",
+  "classifications": [ "Test", "GKit" ],
+  "identity": "GKit.Templates.Test",
+  "name": "GKit test project",
+  "shortName": "gkit-test",
+  "description": "xunit test project following the GKit.Tests conventions: a shared SQLite fixture rather than the EF in-memory provider, and bUnit when the project under test renders components.",
+  "tags": { "language": "C#", "type": "project" },
+  "sourceName": "GKit.Test1",
+  "preferNameDirectory": true,
+
+  "symbols": {
+    "target": {
+      "type": "parameter",
+      "datatype": "text",
+      "defaultValue": "",
+      "replaces": "GKIT-TARGET-PROJECT",
+      "description": "Relative path of the project under test, e.g. ../Acme.Erp/Acme.Erp.csproj."
+    },
+    "bunit": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "true",
+      "description": "Include bUnit for component render tests."
+    },
+    "sqlite": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "true",
+      "description": "Include the SqliteFixture. Real SQLite matters: query filters and relational translation are what the interceptors under test rely on."
+    },
+    "hasTarget": { "type": "computed", "value": "(target != \"\")" }
+  },
+
+  "sources": [
+    {
+      "source": "./",
+      "target": "./",
+      "modifiers": [
+        { "condition": "(!sqlite)", "exclude": [ "Infrastructure/SqliteFixture.cs" ] }
+      ]
+    }
+  ]
+}

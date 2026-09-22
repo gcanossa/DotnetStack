@@ -1,0 +1,20 @@
+@using Microsoft.EntityFrameworkCore
+@using GKIT-SHARED-NS
+
+@implements IEditEntityForm<Sample>
+
+@*
+  The per-adapter layer: markup only. The model, the validator and the query factory come from the
+  shared project and are identical under the Radzen adapter.
+*@
+<div style="min-width: 320px;">
+  <MudTextField For="@(() => Model.Name)" Label="Name" @bind-Value="Model.Name" />
+
+  <MudTextField For="@(() => Model.Notes)" Label="Notes" @bind-Value="Model.Notes" Lines="3" />
+</div>
+
+@code {
+  [Parameter, EditorRequired] public Sample Model { get; set; } = default!;
+
+  [Parameter, EditorRequired] public DbContext Context { get; set; } = default!;
+}

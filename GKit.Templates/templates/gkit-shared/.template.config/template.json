@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Gianmaria Canossa",
+  "classifications": [ "Library", "GKit" ],
+  "identity": "GKit.Templates.Shared",
+  "name": "GKit shared domain library",
+  "shortName": "gkit-shared",
+  "description": "UI neutral domain layer: entities, FluentValidation validators and query factories. References neither UI adapter, so the boundary is enforced by the compiler rather than by convention.",
+  "tags": { "language": "C#", "type": "project" },
+  "sourceName": "GKit.Shared1",
+  "preferNameDirectory": true,
+
+  "symbols": {
+    "db": {
+      "type": "parameter",
+      "datatype": "choice",
+      "defaultValue": "sqlserver",
+      "description": "Only decides whether a DbContext is scaffolded here.",
+      "choices": [
+        { "choice": "sqlserver", "description": "Microsoft SQL Server" },
+        { "choice": "npgsql", "description": "PostgreSQL" },
+        { "choice": "mysql", "description": "MySQL" },
+        { "choice": "sqlite", "description": "SQLite" },
+        { "choice": "none", "description": "No database" }
+      ]
+    },
+    "gkitVersion": {
+      "type": "parameter",
+      "datatype": "text",
+      "defaultValue": "0.1.*",
+      "replaces": "GKIT-VERSION",
+      "description": "Version range for every GKit.* package reference."
+    },
+
+    "db_any": { "type": "computed", "value": "(db != \"none\")" }
+  },
+
+  "sources": [
+    {
+      "source": "./",
+      "target": "./",
+      "modifiers": [
+        { "condition": "(!db_any)", "exclude": [ "Data/**" ] }
+      ]
+    }
+  ]
+}

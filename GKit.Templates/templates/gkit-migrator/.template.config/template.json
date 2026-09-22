@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Gianmaria Canossa",
+  "classifications": [ "Console", "GKit" ],
+  "identity": "GKit.Templates.Migrator",
+  "name": "GKit legacy data migrator",
+  "shortName": "gkit-migrator",
+  "description": "Console host on GKit.DbMigration for moving data out of a legacy schema, with the mapping store on disk so a long migration can be resumed. The shape of Benati.Rifiuti.Migrator.",
+  "tags": { "language": "C#", "type": "project" },
+  "sourceName": "GKit.Migrator1",
+  "preferNameDirectory": true,
+
+  "symbols": {
+    "gkitVersion": {
+      "type": "parameter", "datatype": "text", "defaultValue": "0.1.*", "replaces": "GKIT-VERSION"
+    },
+    "db": {
+      "type": "parameter",
+      "datatype": "choice",
+      "defaultValue": "sqlserver",
+      "choices": [
+        { "choice": "sqlserver", "description": "Microsoft SQL Server" },
+        { "choice": "npgsql", "description": "PostgreSQL" },
+        { "choice": "mysql", "description": "MySQL" },
+        { "choice": "sqlite", "description": "SQLite" }
+      ]
+    },
+    "db_sqlserver": { "type": "computed", "value": "(db == \"sqlserver\")" },
+    "db_npgsql":    { "type": "computed", "value": "(db == \"npgsql\")" },
+    "db_mysql":     { "type": "computed", "value": "(db == \"mysql\")" },
+    "db_sqlite":    { "type": "computed", "value": "(db == \"sqlite\")" }
+  }
+}

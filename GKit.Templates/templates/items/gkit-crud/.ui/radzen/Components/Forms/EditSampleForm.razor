@@ -1,0 +1,30 @@
+@using Microsoft.EntityFrameworkCore
+@using GKIT-SHARED-NS
+
+@implements IEditEntityForm<Sample>
+
+@*
+  Validation messages come from GKitFluentValidator writing into the EditContext, so the standard
+  ValidationMessage component renders them: no Radzen specific validator components needed.
+*@
+<div style="min-width: 320px;">
+  <RadzenFormField Text="Name" Variant="Variant.Outlined" Style="width: 100%;">
+    <ChildContent>
+      <RadzenTextBox @bind-Value="Model.Name" Name="Name" />
+    </ChildContent>
+  </RadzenFormField>
+  <ValidationMessage For="@(() => Model.Name)" />
+
+  <RadzenFormField Text="Notes" Variant="Variant.Outlined" Style="width: 100%;" Class="rz-mt-2">
+    <ChildContent>
+      <RadzenTextArea @bind-Value="Model.Notes" Name="Notes" Rows="3" />
+    </ChildContent>
+  </RadzenFormField>
+  <ValidationMessage For="@(() => Model.Notes)" />
+</div>
+
+@code {
+  [Parameter, EditorRequired] public Sample Model { get; set; } = default!;
+
+  [Parameter, EditorRequired] public DbContext Context { get; set; } = default!;
+}

@@ -1,0 +1,24 @@
+@using Microsoft.EntityFrameworkCore
+@using GKIT-SHARED-NS
+@using GKIT-HOST-NS.Dialogs
+
+@inject IDbContextFactory<GKIT-DBCONTEXT> Factory
+
+<EntityGrid @ref="Grid" T="Sample" TDialog="EditSampleDialog" Title="Sample"
+            QueryFactory="SampleQueries.Query"
+            ContextFactory="() => Factory.CreateDbContext()"
+            SharedContext="SharedContext"
+            ToStringFunc="SampleQueries.Describe"
+            Exportable="true" Refreshable="true">
+  <Columns>
+    <PropertyColumn Property="x => x.Id" Title="Id" />
+    <PropertyColumn Property="x => x.Name" Title="Name" />
+    <PropertyColumn Property="x => x.CreatedAt" Title="Created" />
+  </Columns>
+</EntityGrid>
+
+@code {
+  [Parameter] public DbContext? SharedContext { get; set; }
+
+  public EntityGrid<Sample, EditSampleDialog> Grid { get; set; } = default!;
+}

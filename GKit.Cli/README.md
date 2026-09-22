@@ -23,6 +23,21 @@ repeated flags `dotnet new` expects. When the solution manages package versions 
 emitted by the project template are moved into `Directory.Packages.props` automatically - a
 template cannot see its sibling, so the reconciliation happens here.
 
+## Adding to an existing solution
+
+```sh
+gkit add quartz                       # package + using + AddGKitQuartz() + health check + UseGKitQuartz()
+gkit add crud -n Vehicle --ui mudblazor --part all \
+  --sharedNamespace Acme.Erp.Data --hostNamespace Acme.Erp.Components
+gkit add job -n NightlyJob --schedule "0 0 2 * * ?"
+gkit add clirunner -n SeedCommandLineRunner --flag --seed
+```
+
+A capability is four edits that must stay in step - package reference, `using`, the `Add...` call
+and the health check - so they are applied together from `features.json`. The operation is
+idempotent, and the version comes from whatever the solution already pins GKit at, so adding a
+capability later cannot introduce the drift `doctor` reports as `GKIT003`.
+
 ## Working against a local GKit checkout
 
 ```sh

@@ -1,0 +1,14 @@
+@page "GKIT-ROUTE"
+@using Microsoft.EntityFrameworkCore
+@using GKIT-SHARED-NS
+@using GKIT-HOST-NS.Grids
+
+@inherits DbContextProvider<GKIT-DBCONTEXT>
+
+<PageTitle>Sample</PageTitle>
+
+<RadzenText TextStyle="TextStyle.H6" class="rz-my-4">Sample</RadzenText>
+
+@* The page owns one DbContext and hands it to the grid, so edits and the list share a change
+   tracker rather than fighting over two. *@
+<SampleGrid SharedContext="Context" />

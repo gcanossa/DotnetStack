@@ -1,0 +1,132 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Gianmaria Canossa",
+  "classifications": [
+    "Library",
+    "GKit"
+  ],
+  "identity": "GKit.Templates.Data",
+  "name": "GKit data layer",
+  "shortName": "gkit-data",
+  "description": "Split data layer: a provider neutral X.Data holding the entities and DbContext, and an X.Data.EF.<Provider> sibling owning Migrations and the Manifest type that MigrationsAssembly points at. The shape BFer and FabbriFC use.",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "sourceName": "GKit.Data1",
+  "preferNameDirectory": false,
+  "symbols": {
+    "db": {
+      "type": "parameter",
+      "datatype": "choice",
+      "defaultValue": "sqlserver",
+      "choices": [
+        {
+          "choice": "sqlserver",
+          "description": "Microsoft SQL Server"
+        },
+        {
+          "choice": "npgsql",
+          "description": "PostgreSQL"
+        },
+        {
+          "choice": "mysql",
+          "description": "MySQL"
+        },
+        {
+          "choice": "sqlite",
+          "description": "SQLite"
+        }
+      ]
+    },
+    "gkitVersion": {
+      "type": "parameter",
+      "datatype": "text",
+      "defaultValue": "0.1.*",
+      "replaces": "GKIT-VERSION"
+    },
+    "db_sqlserver": {
+      "type": "computed",
+      "value": "(db == \"sqlserver\")"
+    },
+    "db_npgsql": {
+      "type": "computed",
+      "value": "(db == \"npgsql\")"
+    },
+    "db_mysql": {
+      "type": "computed",
+      "value": "(db == \"mysql\")"
+    },
+    "db_sqlite": {
+      "type": "computed",
+      "value": "(db == \"sqlite\")"
+    },
+    "providerName": {
+      "type": "generated",
+      "generator": "switch",
+      "replaces": "GKIT-PROVIDER",
+      "parameters": {
+        "evaluator": "C++",
+        "datatype": "string",
+        "cases": [
+          {
+            "condition": "(db == 'sqlserver')",
+            "value": "SqlServer"
+          },
+          {
+            "condition": "(db == 'npgsql')",
+            "value": "Npgsql"
+          },
+          {
+            "condition": "(db == 'mysql')",
+            "value": "MySql"
+          },
+          {
+            "condition": "(db == 'sqlite')",
+            "value": "Sqlite"
+          }
+        ]
+      }
+    }
+  },
+  "sources": [
+    {
+      "source": "./",
+      "target": "./",
+      "modifiers": [
+        {
+          "condition": "(db_sqlserver)",
+          "rename": {
+            "GKit.Data1.EF.GKIT-PROVIDER/GKit.Data1.EF.GKIT-PROVIDER.csproj": "GKit.Data1.EF.SqlServer/GKit.Data1.EF.SqlServer.csproj",
+            "GKit.Data1.EF.GKIT-PROVIDER/Manifest.cs": "GKit.Data1.EF.SqlServer/Manifest.cs",
+            "GKit.Data1.EF.GKIT-PROVIDER/Migrations/.gitkeep": "GKit.Data1.EF.SqlServer/Migrations/.gitkeep"
+          }
+        },
+        {
+          "condition": "(db_npgsql)",
+          "rename": {
+            "GKit.Data1.EF.GKIT-PROVIDER/GKit.Data1.EF.GKIT-PROVIDER.csproj": "GKit.Data1.EF.Npgsql/GKit.Data1.EF.Npgsql.csproj",
+            "GKit.Data1.EF.GKIT-PROVIDER/Manifest.cs": "GKit.Data1.EF.Npgsql/Manifest.cs",
+            "GKit.Data1.EF.GKIT-PROVIDER/Migrations/.gitkeep": "GKit.Data1.EF.Npgsql/Migrations/.gitkeep"
+          }
+        },
+        {
+          "condition": "(db_mysql)",
+          "rename": {
+            "GKit.Data1.EF.GKIT-PROVIDER/GKit.Data1.EF.GKIT-PROVIDER.csproj": "GKit.Data1.EF.MySql/GKit.Data1.EF.MySql.csproj",
+            "GKit.Data1.EF.GKIT-PROVIDER/Manifest.cs": "GKit.Data1.EF.MySql/Manifest.cs",
+            "GKit.Data1.EF.GKIT-PROVIDER/Migrations/.gitkeep": "GKit.Data1.EF.MySql/Migrations/.gitkeep"
+          }
+        },
+        {
+          "condition": "(db_sqlite)",
+          "rename": {
+            "GKit.Data1.EF.GKIT-PROVIDER/GKit.Data1.EF.GKIT-PROVIDER.csproj": "GKit.Data1.EF.Sqlite/GKit.Data1.EF.Sqlite.csproj",
+            "GKit.Data1.EF.GKIT-PROVIDER/Manifest.cs": "GKit.Data1.EF.Sqlite/Manifest.cs",
+            "GKit.Data1.EF.GKIT-PROVIDER/Migrations/.gitkeep": "GKit.Data1.EF.Sqlite/Migrations/.gitkeep"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -32,6 +32,29 @@ newCommand.SetAction(parseResult => NewCommand.Run(
   output,
   manifest));
 
+// gkit add <feature|item>
+var whatArgument = new Argument<string>("what")
+{
+  Description = "A capability from features.json, or one of: " + string.Join(", ", AddCommand.Items)
+};
+var addPassThroughArgument = new Argument<string[]>("options")
+{
+  Description = "Options forwarded to dotnet new for item templates.",
+  Arity = ArgumentArity.ZeroOrMore
+};
+
+var addCommand = new Command("add", "Wire a capability into an existing solution, or scaffold an item.");
+addCommand.Arguments.Add(whatArgument);
+addCommand.Arguments.Add(addPassThroughArgument);
+addCommand.TreatUnmatchedTokensAsErrors = false;
+addCommand.SetAction(parseResult => AddCommand.Run(
+  CurrentWorkspace(),
+  manifest,
+  parseResult.GetValue(whatArgument)!,
+  (parseResult.GetValue(addPassThroughArgument) ?? []).Concat(parseResult.UnmatchedTokens).ToList(),
+  Directory.GetCurrentDirectory(),
+  output));
+
 // gkit link / unlink
 var pathOption = new Option<string?>("--path") { Description = "Local GKit checkout. Auto-detected when omitted." };
 var onlyOption = new Option<string?>("--only") { Description = "Comma separated package ids to link. Defaults to all GKit packages." };
@@ -106,6 +129,7 @@ releaseCommand.SetAction(parseResult => ReleaseCommand.Run(
 
 var root = new RootCommand("Command line companion to the GKit suite.");
 root.Subcommands.Add(newCommand);
+root.Subcommands.Add(addCommand);
 root.Subcommands.Add(linkCommand);
 root.Subcommands.Add(unlinkCommand);
 root.Subcommands.Add(doctorCommand);

@@ -1,0 +1,53 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Gianmaria Canossa",
+  "classifications": [ "Worker", "GKit" ],
+  "identity": "GKit.Templates.Worker",
+  "name": "GKit worker service",
+  "shortName": "gkit-worker",
+  "description": "Headless host for scheduled and long running work: Application.Wrap, Serilog and ICommandLineRunner without Blazor. The shape Millesrl's EventManager and Telemetria hosts have.",
+  "tags": { "language": "C#", "type": "project" },
+  "sourceName": "GKit.Worker1",
+  "preferNameDirectory": true,
+
+  "symbols": {
+    "features": {
+      "type": "parameter",
+      "datatype": "choice",
+      "allowMultipleValues": true,
+      "defaultValue": "quartz",
+      "description": "GKit capability packs to wire in.",
+      "choices": [
+        { "choice": "quartz", "description": "GKit.Quartz scheduling" },
+        { "choice": "mqtt", "description": "GKit.Mqtt client" },
+        { "choice": "smtp", "description": "GKit.SmtpHost" },
+        { "choice": "telegram", "description": "GKit.TelegramBotEndpoint" },
+        { "choice": "opcua", "description": "GKit.OpcUa client" },
+        { "choice": "plc", "description": "GKit.PLC" },
+        { "choice": "reporting", "description": "GKit.Reporting" }
+      ]
+    },
+    "host": {
+      "type": "parameter",
+      "datatype": "choice",
+      "defaultValue": "windows-service",
+      "choices": [
+        { "choice": "windows-service", "description": "Windows service" },
+        { "choice": "systemd", "description": "systemd unit" },
+        { "choice": "docker", "description": "Container" }
+      ]
+    },
+    "gkitVersion": {
+      "type": "parameter", "datatype": "text", "defaultValue": "0.1.*", "replaces": "GKIT-VERSION"
+    },
+    "quartz":    { "type": "computed", "value": "(features == \"quartz\")" },
+    "mqtt":      { "type": "computed", "value": "(features == \"mqtt\")" },
+    "smtp":      { "type": "computed", "value": "(features == \"smtp\")" },
+    "telegram":  { "type": "computed", "value": "(features == \"telegram\")" },
+    "opcua":     { "type": "computed", "value": "(features == \"opcua\")" },
+    "plc":       { "type": "computed", "value": "(features == \"plc\")" },
+    "reporting": { "type": "computed", "value": "(features == \"reporting\")" },
+    "host_windows": { "type": "computed", "value": "(host == \"windows-service\")" },
+    "host_systemd": { "type": "computed", "value": "(host == \"systemd\")" }
+  }
+}

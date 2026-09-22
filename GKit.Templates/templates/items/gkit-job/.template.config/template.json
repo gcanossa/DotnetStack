@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Gianmaria Canossa",
+  "classifications": [ "Quartz", "GKit" ],
+  "identity": "GKit.Templates.Item.Job",
+  "name": "GKit Quartz job",
+  "shortName": "gkit-job",
+  "description": "A Quartz IJob discovered by UseGKitQuartz, scheduled by attribute or from the GKit:Quartz configuration section.",
+  "tags": { "language": "C#", "type": "item" },
+  "sourceName": "SampleJob",
+  "defaultName": "SampleJob",
+  "preferNameDirectory": false,
+
+  "symbols": {
+    "namespace": {
+      "type": "parameter", "datatype": "text", "defaultValue": "App.Jobs", "replaces": "GKIT-NAMESPACE",
+      "description": "Namespace of the generated job."
+    },
+    "schedule": {
+      "type": "parameter", "datatype": "text", "defaultValue": "0 0/15 * * * ?", "replaces": "GKIT-SCHEDULE",
+      "description": "Cron expression. Quartz cron has a seconds field, so this is six parts, not five."
+    },
+    "kind": {
+      "type": "parameter",
+      "datatype": "choice",
+      "defaultValue": "cron",
+      "description": "Attribute used to schedule the job.",
+      "choices": [
+        { "choice": "cron", "description": "[CronSchedule]" },
+        { "choice": "interval", "description": "[TimeSpanSchedule]" },
+        { "choice": "config", "description": "No attribute: scheduled from GKit:Quartz:Schedules" }
+      ]
+    },
+    "kind_cron":     { "type": "computed", "value": "(kind == \"cron\")" },
+    "kind_interval": { "type": "computed", "value": "(kind == \"interval\")" },
+    "interval": {
+      "type": "parameter", "datatype": "text", "defaultValue": "00:15:00", "replaces": "GKIT-INTERVAL",
+      "description": "Interval for --kind interval."
+    }
+  }
+}

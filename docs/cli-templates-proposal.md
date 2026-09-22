@@ -1,7 +1,13 @@
 # Proposal — a solution scaffolder for the GKit suite
 
-Status: proposal, rev 2 (branch `dev-cli`)
+Status: **implemented**, rev 2 (branch `dev-cli`)
 Scope: two new projects — `GKit.Templates` and `GKit.Cli`. No changes to existing packages.
+
+> **Implementation notes.** Phases 0–4 of §8 are done. Seven templates
+> (`gkit-sln`, `gkit-app`, `gkit-shared`, `gkit-data`, `gkit-migrator`, `gkit-worker`, `gkit-test`),
+> three item templates (`gkit-crud`, `gkit-job`, `gkit-clirunner`) and eight commands
+> (`new`, `add`, `link`, `unlink`, `doctor`, `update`, `migrate ui`, `release`). What building it
+> changed is recorded in §10.
 
 **Decisions taken**
 
@@ -262,6 +268,45 @@ that exist today and need no templates at all.
 |---|---|
 | Template default culture vs library default | Closed — decision 4: templates default to it-IT *by referencing* `GKit.UI.Localization`; the library default stays neutral English |
 | Local accounts as library or template content | Closed — `GKit.Authentication.Simple`, on this branch |
-| Does `gkit-app` scaffold both UIs at once, or one | Open — the demo hosts prove two hosts over one `.Shared` is viable, but no reference app needs it. Proposed: one host, `gkit add ui radzen` later |
-| `gkit migrate ui` scope | Open — mechanical renames are safe; §9.2 of the UI proposal (method calls in property expressions, e.g. `x => x.MainSite()!.AddressNumber`) cannot be codemodded and should be reported, not rewritten |
-| Whether `Test.Repo` and `GKit.Tests` conventions both need templates | Open — `gkit-test` currently models `GKit.Tests` only |
+| Does `gkit-app` scaffold both UIs at once, or one | Closed — one host. `gkit-crud --part ui` can be re-run against a second host later, which is the same thing without the up-front cost |
+| `gkit migrate ui` scope | Closed as proposed — mechanical renames applied, the four `reportOnly` patterns in `features.json` reported. Verified against BFer: it finds the `CompanyGrid` `MainSite()` columns §9.2 named |
+| Whether `Test.Repo` and `GKit.Tests` conventions both need templates | Closed — `gkit-test` models `GKit.Tests` only |
+
+## 10. What building it changed
+
+Five things the proposal did not anticipate, all found by generating and compiling rather than by
+reading:
+
+1. **The two templates could not agree on package versions.** `gkit-sln` writes
+   `Directory.Packages.props` and `gkit-app` writes the project; neither can see the other, so a
+   generated solution failed to restore with NU1008. `gkit new` now hoists inline versions into the
+   props file after generation — which also gives an existing solution a way to adopt Central
+   Package Management. Two consequences followed: `Nerdbank.GitVersioning` had to become a
+   `GlobalPackageReference`, and floating GKit pins need `CentralPackageFloatingVersionsEnabled`.
+
+2. **`dotnet new` takes one `--features` flag per value.** The comma separated form §4 documents is
+   expanded by the CLI, which is the clearest single justification for the wrapper.
+
+3. **`replaces` substitutes file contents but not file names.** `gkit-data` needs its
+   `X.Data.EF.<Provider>` directory renamed, so the provider suffix is driven twice: a generated
+   `switch` symbol for the contents and an explicit per-provider `rename` map for the path.
+
+4. **`gkit add` under CPM needs both halves.** Adding a versionless `PackageReference` without also
+   writing a `PackageVersion` fails restore with NU1010. Caught by a test, not by a build.
+
+5. **`WithoutDeleted()` is application code, not a GKit API.** The first `gkit-crud` draft copied it
+   out of StuffHR. `WithSoftDelete()` installs a global query filter, so a query factory does not
+   repeat it.
+
+MSBuild XML is written back without reformatting and without inventing an XML declaration the file
+did not have: these files are read by humans in diffs, so a one-line change must show up as one.
+
+### Verified
+
+| | |
+|---|---|
+| Option matrix | mudblazor / radzen / none over sqlite, npgsql, sqlserver and none, with `simple`, `activedirectory` and no auth — each linked against this checkout and built with zero warnings |
+| Full project set | `sln` + `app` + `shared` + `data` + `migrator` + `worker` + `test` in one solution, building together; the generated test project runs |
+| Item templates | `crud` + `job` + `clirunner` into one host, under both adapters, zero warnings |
+| Against the reference repositories | `doctor` reports the `HintPath` in `Benati.Rifiuti.Data`, the retired `GKit.MudBlazorExt` in all three, and the commented-out toggle blocks; `migrate ui` dry-runs clean |
+| Tests | 277 in `GKit.Tests`, of which 60 cover the CLI |

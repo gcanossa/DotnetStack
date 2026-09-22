@@ -1,0 +1,47 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="GKit.Application" Version="GKIT-VERSION" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.12" />
+    <!--#if (host_windows) -->
+    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="10.0.12" />
+    <!--#endif -->
+    <!--#if (host_systemd) -->
+    <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="10.0.12" />
+    <!--#endif -->
+    <!--#if (quartz) -->
+    <PackageReference Include="GKit.Quartz" Version="GKIT-VERSION" />
+    <!--#endif -->
+    <!--#if (mqtt) -->
+    <PackageReference Include="GKit.Mqtt" Version="GKIT-VERSION" />
+    <!--#endif -->
+    <!--#if (smtp) -->
+    <PackageReference Include="GKit.SmtpHost" Version="GKIT-VERSION" />
+    <!--#endif -->
+    <!--#if (telegram) -->
+    <PackageReference Include="GKit.TelegramBotEndpoint" Version="GKIT-VERSION" />
+    <!--#endif -->
+    <!--#if (opcua) -->
+    <PackageReference Include="GKit.OpcUa" Version="GKIT-VERSION" />
+    <!--#endif -->
+    <!--#if (plc) -->
+    <PackageReference Include="GKit.PLC" Version="GKIT-VERSION" />
+    <!--#endif -->
+    <!--#if (reporting) -->
+    <PackageReference Include="GKit.Reporting" Version="GKIT-VERSION" />
+    <!--#endif -->
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="appsettings.json" CopyToOutputDirectory="Always" CopyToPublishDirectory="Always" />
+    <Content Include="appsettings.Development.json" CopyToOutputDirectory="Always" CopyToPublishDirectory="Always" />
+  </ItemGroup>
+
+</Project>

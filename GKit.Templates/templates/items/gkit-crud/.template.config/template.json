@@ -1,0 +1,64 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Gianmaria Canossa",
+  "classifications": [ "CRUD", "GKit" ],
+  "identity": "GKit.Templates.Item.Crud",
+  "name": "GKit CRUD entity",
+  "shortName": "gkit-crud",
+  "description": "The Grid + Form + Dialog + Validator + Page quintuple the reference applications repeat per entity, split along the boundary the UI abstraction enforces: model, validator and query factory are UI neutral; grid, form, dialog and page are per adapter.",
+  "tags": { "language": "C#", "type": "item" },
+  "sourceName": "Sample",
+  "defaultName": "Sample",
+  "preferNameDirectory": false,
+
+  "symbols": {
+    "ui": {
+      "type": "parameter",
+      "datatype": "choice",
+      "defaultValue": "mudblazor",
+      "description": "Which adapter the grid, form and page markup target.",
+      "choices": [
+        { "choice": "mudblazor", "description": "GKit.UI.MudBlazorExt" },
+        { "choice": "radzen", "description": "GKit.UI.RadzenExt" }
+      ]
+    },
+    "part": {
+      "type": "parameter",
+      "datatype": "choice",
+      "defaultValue": "all",
+      "description": "Which half to emit. 'gkit add crud' runs the template twice, once per project.",
+      "choices": [
+        { "choice": "all", "description": "Both halves, for a single project solution" },
+        { "choice": "shared", "description": "Model, validator and query factory only" },
+        { "choice": "ui", "description": "Grid, form, dialog and page only" }
+      ]
+    },
+    "sharedNamespace": {
+      "type": "parameter", "datatype": "text", "defaultValue": "App.Shared", "replaces": "GKIT-SHARED-NS",
+      "description": "Namespace holding the model, validator and query factory."
+    },
+    "hostNamespace": {
+      "type": "parameter", "datatype": "text", "defaultValue": "App.Components", "replaces": "GKIT-HOST-NS",
+      "description": "Root namespace of the host project's Components folder."
+    },
+    "dbContext": {
+      "type": "parameter", "datatype": "text", "defaultValue": "ApplicationDbContext", "replaces": "GKIT-DBCONTEXT",
+      "description": "DbContext the grid resolves through IDbContextFactory."
+    },
+    "route": {
+      "type": "parameter", "datatype": "text", "defaultValue": "/samples", "replaces": "GKIT-ROUTE",
+      "description": "Route of the generated page."
+    },
+
+    "ui_mudblazor": { "type": "computed", "value": "(ui == \"mudblazor\")" },
+    "ui_radzen": { "type": "computed", "value": "(ui == \"radzen\")" },
+    "want_shared": { "type": "computed", "value": "(part == \"all\" || part == \"shared\")" },
+    "want_ui": { "type": "computed", "value": "(part == \"all\" || part == \"ui\")" }
+  },
+
+  "sources": [
+    { "source": "./.shared/", "target": "./", "condition": "(want_shared)" },
+    { "source": "./.ui/mudblazor/", "target": "./", "condition": "(want_ui && ui_mudblazor)" },
+    { "source": "./.ui/radzen/", "target": "./", "condition": "(want_ui && ui_radzen)" }
+  ]
+}

@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.12" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.12">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <!--#if (db_sqlserver) -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.12" />
+    <!--#endif -->
+    <!--#if (db_npgsql) -->
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
+    <!--#endif -->
+    <!--#if (db_mysql) -->
+    <PackageReference Include="MySql.EntityFrameworkCore" Version="10.0.7" />
+    <!--#endif -->
+    <!--#if (db_sqlite) -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.12" />
+    <!--#endif -->
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GKit.Data1\GKit.Data1.csproj" />
+  </ItemGroup>
+
+</Project>

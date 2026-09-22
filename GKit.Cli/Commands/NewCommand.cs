@@ -95,10 +95,10 @@ public static class NewCommand
     var gkitPackages = manifest.GKitPackages.ToHashSet(StringComparer.OrdinalIgnoreCase);
     var moved = 0;
 
+    // Every project carrying an inline version, not just the one named on the command line: a
+    // template may emit siblings, as gkit-data does with its .EF.<Provider> project.
     foreach (var projectPath in workspace.ProjectPaths)
     {
-      if (!Path.GetFileNameWithoutExtension(projectPath).Equals(name, StringComparison.OrdinalIgnoreCase)) continue;
-
       var project = ProjectFile.Load(projectPath);
       var hoisted = central.Hoist(project, gkitPackages);
       if (hoisted.Count == 0) continue;

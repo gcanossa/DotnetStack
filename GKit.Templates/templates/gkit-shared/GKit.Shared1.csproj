@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <!--
+    Deliberately not a Razor library and deliberately without a reference to GKit.UI.MudBlazorExt
+    or GKit.UI.RadzenExt: anything that compiles here renders under either adapter.
+  -->
+  <ItemGroup>
+    <PackageReference Include="GKit.UI.Abstractions" Version="GKIT-VERSION" />
+    <PackageReference Include="FluentValidation" Version="11.12.0" />
+    <!--#if (db_any) -->
+    <PackageReference Include="GKit.EntityFramework" Version="GKIT-VERSION" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.12" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.12" />
+    <!--#endif -->
+  </ItemGroup>
+
+</Project>
