@@ -29,7 +29,7 @@ namespace GKit.TelegramHost
 
         public async ValueTask<TL.IObject> DequeueAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
-            return await Reader.ReadAsync();
+            return await Reader.ReadAsync(cancellationToken);
         }
 
         public async IAsyncEnumerable<TL.IObject> ProcessAllAsync([EnumeratorCancellation]CancellationToken cancellationToken = default(CancellationToken))

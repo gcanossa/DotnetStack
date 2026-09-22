@@ -27,7 +27,8 @@ public static class QuartzHealthCheckExtensions
 
   public static IHealthChecksBuilder AddQuartzCheck(this IHealthChecksBuilder ext, string name)
   {
-    ext.Services.AddSingleton<QuartzProbe>();
+    // QuartzProbe is registered by AddGKitQuartz: the probe job is scheduled unconditionally,
+    // so its dependency cannot be owned by an optional health check.
     var builder = ext.AddCheck<QuartzHealthCheck>(name);
     
     return builder;

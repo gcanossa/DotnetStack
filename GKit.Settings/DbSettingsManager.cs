@@ -13,6 +13,13 @@ public class DbSettingsManager<TOptions, TContext>(
 
     protected string BaseKey => typeof(TOptions).Name;
 
+    /// <summary>
+    /// The key prefix including its separator. Matching on <see cref="BaseKey"/> alone also
+    /// matched every options type whose name merely starts with it ("AppOptions" vs
+    /// "AppOptionsAdvanced").
+    /// </summary>
+    private string KeyPrefix => $"{BaseKey}:";
+
     protected TOptions Options => options.Value;
     protected IDbContextFactory<TContext> DbContextFactory => dbContextFactory;
 
@@ -22,32 +29,35 @@ public class DbSettingsManager<TOptions, TContext>(
     {
         await using var context = await DbContextFactory.CreateDbContextAsync(ct);
 
-        var props = await context.Set<Setting>().Where(p => p.Key.StartsWith(BaseKey)).ToListAsync(ct);
+        var props = await context.Set<Setting>().Where(p => p.Key.StartsWith(KeyPrefix)).ToListAsync(ct);
 
         var newOptions = new TOptions();
-        foreach (var prop in typeof(TOptions).GetProperties())
+
+        // Computed / get-only properties have no setter; copying them would throw.
+        foreach (var prop in WritableProperties())
         {
             prop.SetValue(newOptions, prop.GetValue(Options), null);
         }
 
         foreach (var item in props)
         {
-            var prop = typeof(TOptions).GetProperty(item.Key.Replace($"{BaseKey}:", string.Empty));
-            if (prop is null) continue;
+            var prop = typeof(TOptions).GetProperty(item.Key[KeyPrefix.Length..]);
+            if (prop is null || !prop.CanWrite) continue;
 
             if (item.Value != null)
-                prop.SetValue(newOptions,
-                    prop.PropertyType == typeof(TimeSpan)
-                        ? TimeSpan.Parse(item.Value)
-                        : Convert.ChangeType(item.Value, prop.PropertyType));
+                prop.SetValue(newOptions, SettingValueConverter.FromStorage(item.Value, prop.PropertyType));
         }
 
         return newOptions;
     }
 
+    private static IEnumerable<PropertyInfo> WritableProperties() =>
+        typeof(TOptions).GetProperties()
+            .Where(p => p.CanRead && p.CanWrite && p.GetIndexParameters().Length == 0);
+
     protected virtual IEnumerable<PropertyInfo> SelectProperties()
     {
-        return typeof(TOptions).GetProperties();
+        return WritableProperties();
     }
 
     protected override async Task SaveOptionsAsync(TOptions savingOptions, CancellationToken ct = default)
@@ -56,11 +66,11 @@ public class DbSettingsManager<TOptions, TContext>(
 
         foreach (var prop in SelectProperties())
         {
-            var key = $"{BaseKey}:{prop.Name}";
+            var key = $"{KeyPrefix}{prop.Name}";
             var entity = await context.Set<Setting>().FirstOrDefaultAsync(p => p.Key == key, ct) ?? (await context.AddAsync(
                 new Setting() { Key = key, TypeName = prop.PropertyType.AssemblyQualifiedName! }, ct)).Entity;
 
-            entity.Value = prop.GetValue(savingOptions)?.ToString() ?? "";
+            entity.Value = SettingValueConverter.ToStorage(prop.GetValue(savingOptions));
         }
 
         await context.SaveChangesAsync(ct);

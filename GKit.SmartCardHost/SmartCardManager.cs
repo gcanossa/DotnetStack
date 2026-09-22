@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -29,7 +28,7 @@ public class SmartCardManager(SmartCardStateBroker broker, ILogger<SmartCardMana
             Array.Sort(readers);
 
             if (!(monitor?.Monitoring ?? false) ||
-                JsonSerializer.Serialize(readers) != JsonSerializer.Serialize(availableReaders))
+                !readers.SequenceEqual(availableReaders, StringComparer.Ordinal))
             {
                 availableReaders = readers;
 
@@ -73,7 +72,11 @@ public class SmartCardManager(SmartCardStateBroker broker, ILogger<SmartCardMana
                 using var card = new SCardReader(context);
                 var error = card.Connect(evt.ReaderName, SCardShareMode.Shared, SCardProtocol.Any);
                 error.ThrowIfNotSuccess();
-                OnCard(card);
+
+                // OnCard used to be `async void`: the handler returned at its first await and
+                // disposed `card` while OnCard was still using it. Block here instead — the
+                // PCSC monitor raises this on its own thread, not on a request thread.
+                OnCard(card).ConfigureAwait(false).GetAwaiter().GetResult();
             }
             catch (Exception e)
             {
@@ -84,7 +87,7 @@ public class SmartCardManager(SmartCardStateBroker broker, ILogger<SmartCardMana
         return monitor;
     }
 
-    protected async void OnCard(ISCardReader card)
+    protected async Task OnCard(ISCardReader card)
     {
         try
         {

@@ -7,12 +7,14 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <!-- Log formatting and level mapping are internal but are where the defects were. -->
+        <InternalsVisibleTo Include="GKit.Tests" />
+    </ItemGroup>
+
+    <ItemGroup>
         <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.12" />
         <PackageReference Include="MQTTnet" Version="5.2.0.1603" />
         <PackageReference Include="MQTTnet.AspNetCore" Version="5.2.0.1603" />
-        <PackageReference Update="Nerdbank.GitVersioning">
-          <Version>3.10.94</Version>
-        </PackageReference>
     </ItemGroup>
 
 </Project>

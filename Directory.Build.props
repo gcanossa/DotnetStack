@@ -1,9 +1,41 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+
+  <!--
+    Shared package metadata. Previously only 5 of 20 packages carried Authors/licence/readme and
+    only 5 enabled package validation, which is how AddSmartCardHostCheck could vanish from a
+    published package without anything failing.
+  -->
+  <PropertyGroup>
+    <Authors>Gianmaria Canossa</Authors>
+    <PackageProjectUrl>https://github.com/gcanossa/DotnetStack</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/gcanossa/DotnetStack</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+
+  <!--
+    Applies to every GKit.* package. Sample and test projects opt out with IsPackable=false.
+  -->
+  <PropertyGroup Condition="'$(IsPackable)' != 'false' AND $(MSBuildProjectName.StartsWith('GKit.'))">
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+
+    <!--
+      Catches accidental removals from the public surface. Baseline validation additionally needs
+      PackageValidationBaselineVersion set to the last published version, which requires the
+      package to be restorable at build time — set it in CI rather than here so local and
+      offline builds keep working:
+        dotnet build -p:PackageValidationBaselineVersion=0.0.24
+    -->
+    <EnablePackageValidation>true</EnablePackageValidation>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Nerdbank.GitVersioning" Condition="!Exists('packages.config')">
       <PrivateAssets>all</PrivateAssets>
-      <Version>3.7.115</Version>
+      <Version>3.10.85</Version>
     </PackageReference>
   </ItemGroup>
+
 </Project>

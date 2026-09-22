@@ -10,9 +10,6 @@
         <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.12" />
         <PackageReference Include="Microsoft.Extensions.Localization" Version="10.0.12" />
         <PackageReference Include="Telegram.Bot" Version="22.10.3" />
-        <PackageReference Update="Nerdbank.GitVersioning">
-          <Version>3.10.94</Version>
-        </PackageReference>
     </ItemGroup>
 
     <ItemGroup>

@@ -18,7 +18,7 @@ namespace GKit.UI.Data;
 /// renderer.
 /// </para>
 /// </remarks>
-public sealed class EntityGridEngine<T> where T : class
+public sealed class EntityGridEngine<T> : IDisposable where T : class
 {
   private readonly SemaphoreSlim _contextLock = new(1, 1);
 
@@ -34,6 +34,17 @@ public sealed class EntityGridEngine<T> where T : class
   /// <summary>Invoked after every load attempt, successful or not.</summary>
   public Func<GridQuery<T>, Task>? OnLoaded { get; set; }
 
+  /// <summary>
+  /// Strip EF global query filters from the grid's query. Off by default.
+  /// </summary>
+  /// <remarks>
+  /// This used to be applied unconditionally, which defeated <c>WithSoftDelete()</c>: every grid
+  /// showed deleted rows and superseded revisions, and callers had to re-filter by hand in each
+  /// QueryFactory. Export did not apply it, so the spreadsheet and the screen disagreed. It is now
+  /// opt-in and applies to both.
+  /// </remarks>
+  public bool IgnoreQueryFilters { get; set; }
+
   public bool IsSharedContext => SharedContext is not null;
 
   private DbContext GetDbContext()
@@ -44,32 +55,38 @@ public sealed class EntityGridEngine<T> where T : class
              $"Neither {nameof(SharedContext)} nor {nameof(ContextFactory)} is set");
   }
 
-  private async Task PreambleAsync(DbContext ctx, bool shared, object[] entities)
+  /// <summary>
+  /// Prepares the context and reports whether the lock was taken.
+  /// </summary>
+  /// <remarks>
+  /// The lock is taken first. Acquiring it last meant an attach failure sent the epilogue on to
+  /// release a semaphore that was never acquired, turning one error into a SemaphoreFullException.
+  /// </remarks>
+  private async Task<bool> PreambleAsync(DbContext ctx, bool shared, object[] entities)
   {
+    if (shared)
+      await _contextLock.WaitAsync();
+
     if (!shared && entities.Length > 0)
     {
-      try
+      // An already-tracked instance is the real cause of the attach failure this used to catch
+      // and then retry with the identical call, which could only throw again.
+      foreach (var entity in entities)
       {
-        ctx.AttachRange(entities);
-      }
-      catch (InvalidOperationException)
-      {
-        ctx.AttachRange(entities);
+        if (ctx.Entry(entity).State == EntityState.Detached)
+          ctx.Attach(entity);
       }
     }
 
-    if (shared)
-      await _contextLock.WaitAsync();
+    return shared;
   }
 
-  private async Task EpilogueAsync(DbContext? ctx, bool shared)
+  private async Task EpilogueAsync(DbContext? ctx, bool lockTaken)
   {
-    if (ctx is null)
-      return;
-
-    if (shared)
+    if (lockTaken)
       _contextLock.Release();
-    else
+
+    if (ctx is not null && !IsSharedContext)
       await ctx.DisposeAsync();
   }
 
@@ -80,18 +97,18 @@ public sealed class EntityGridEngine<T> where T : class
   public async Task WithDbContextAsync(Func<DbContext, Task> action, params object[] entities)
   {
     DbContext? ctx = null;
-    var shared = IsSharedContext;
+    var lockTaken = false;
 
     try
     {
       ctx = GetDbContext();
-      await PreambleAsync(ctx, shared, entities);
+      lockTaken = await PreambleAsync(ctx, IsSharedContext, entities);
 
       await action(ctx);
     }
     finally
     {
-      await EpilogueAsync(ctx, shared);
+      await EpilogueAsync(ctx, lockTaken);
     }
   }
 
@@ -99,18 +116,18 @@ public sealed class EntityGridEngine<T> where T : class
   public async Task<TResult> WithDbContextAsync<TResult>(Func<DbContext, Task<TResult>> action, params object[] entities)
   {
     DbContext? ctx = null;
-    var shared = IsSharedContext;
+    var lockTaken = false;
 
     try
     {
       ctx = GetDbContext();
-      await PreambleAsync(ctx, shared, entities);
+      lockTaken = await PreambleAsync(ctx, IsSharedContext, entities);
 
       return await action(ctx);
     }
     finally
     {
-      await EpilogueAsync(ctx, shared);
+      await EpilogueAsync(ctx, lockTaken);
     }
   }
 
@@ -136,12 +153,9 @@ public sealed class EntityGridEngine<T> where T : class
     {
       try
       {
-        var source = QueryFactory?.Invoke(ctx)?.IgnoreQueryFilters()
-                     ?? throw new InvalidOperationException($"{nameof(QueryFactory)} is not set");
+        var source = BuildQuery(ctx);
 
-        if (!IsSharedContext)
-          source = source.AsNoTracking();
-        else
+        if (IsSharedContext)
           ctx.ChangeTracker.Clear();
 
         source = query.ApplyFilters(source);
@@ -171,16 +185,34 @@ public sealed class EntityGridEngine<T> where T : class
   }
 
   /// <summary>
-  /// Builds the export query: the same base query with the grid's current filters and sorts, but
-  /// unpaged. Global query filters are left in place, unlike <see cref="LoadAsync"/>.
+  /// The grid's base query, with <see cref="IgnoreQueryFilters"/> and tracking applied.
   /// </summary>
-  public IQueryable<T> BuildExportQuery(DbContext ctx, GridQuery<T> query)
+  /// <remarks>
+  /// Shared by the grid and the export so the spreadsheet and the screen cannot disagree about
+  /// which rows exist.
+  /// </remarks>
+  public IQueryable<T> BuildQuery(DbContext ctx)
   {
     var source = QueryFactory?.Invoke(ctx)
                  ?? throw new InvalidOperationException($"{nameof(QueryFactory)} is not set");
 
-    return query.Apply(source);
+    if (IgnoreQueryFilters)
+      source = source.IgnoreQueryFilters();
+
+    // AsNoTracking is a pure function; its result used to be discarded, so every scroll grew the
+    // change tracker without bound.
+    if (!IsSharedContext)
+      source = source.AsNoTracking();
+
+    return source;
   }
+
+  /// <summary>
+  /// Builds the export query: the same base query with the grid's current filters and sorts, but
+  /// unpaged.
+  /// </summary>
+  public IQueryable<T> BuildExportQuery(DbContext ctx, GridQuery<T> query) =>
+    query.Apply(BuildQuery(ctx));
 
   /// <summary>
   /// Whether a provider exception represents a cancelled command rather than a real failure.
@@ -188,4 +220,10 @@ public sealed class EntityGridEngine<T> where T : class
   internal static bool IsCancellation(DbException e) =>
     e.Message.Contains("aborted", StringComparison.InvariantCultureIgnoreCase) ||
     e.Message.Contains("cancelled", StringComparison.InvariantCultureIgnoreCase);
+
+  public void Dispose()
+  {
+    _contextLock.Dispose();
+    GC.SuppressFinalize(this);
+  }
 }

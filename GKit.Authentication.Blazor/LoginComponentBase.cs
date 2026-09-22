@@ -20,7 +20,9 @@ public abstract class LoginComponentBase<T> : ComponentBase where T : new()
 
     if (result)
     {
-      NavigationManager.NavigateTo(ReturnUrl);
+      // ReturnUrl comes straight from the query string; never hand a just-authenticated user
+      // to an off-application address.
+      NavigationManager.NavigateTo(LocalUrl.EnsureLocal(ReturnUrl));
     }
     else
     {

@@ -11,8 +11,5 @@
         <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.12" />
         <PackageReference Include="Quartz" Version="3.20.0" />
         <PackageReference Include="Quartz.Extensions.Hosting" Version="3.20.0" />
-        <PackageReference Update="Nerdbank.GitVersioning">
-          <Version>3.10.94</Version>
-        </PackageReference>
     </ItemGroup>
 </Project>

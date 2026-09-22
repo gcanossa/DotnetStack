@@ -34,6 +34,16 @@ public partial class EntityGrid<T, TDialog> : ManagedGrid<T>
 
   [Parameter] public DbContext? SharedContext { get; set; }
 
+  /// <summary>
+  /// Strip EF global query filters from the grid's query. Off by default, and applied to the
+  /// export as well so both show the same rows.
+  /// </summary>
+  /// <remarks>
+  /// This used to be unconditional, which defeated <c>WithSoftDelete()</c>: deleted rows and
+  /// superseded revisions appeared in every grid.
+  /// </remarks>
+  [Parameter] public bool IgnoreQueryFilters { get; set; }
+
   [Parameter] public Func<RowContext<T>, bool>? EditRowDisable { get; set; }
   [Parameter] public Func<RowContext<T>, bool>? DeleteRowDisable { get; set; }
 
@@ -46,6 +56,7 @@ public partial class EntityGrid<T, TDialog> : ManagedGrid<T>
       ContextFactory = ContextFactory,
       QueryFactory = QueryFactory,
       SharedContext = SharedContext,
+      IgnoreQueryFilters = IgnoreQueryFilters,
       OnLoaded = query => OnLoadedServerData.InvokeAsync(query)
     };
 
@@ -91,6 +102,7 @@ public partial class EntityGrid<T, TDialog> : ManagedGrid<T>
     Engine.ContextFactory = ContextFactory;
     Engine.QueryFactory = QueryFactory;
     Engine.SharedContext = SharedContext;
+    Engine.IgnoreQueryFilters = IgnoreQueryFilters;
 
     Crud.NewValueFactory = NewValueFactory;
     Crud.ToStringFunc = ToStringFunc;
@@ -131,7 +143,7 @@ public partial class EntityGrid<T, TDialog> : ManagedGrid<T>
         using var ms = new MemoryStream();
         await query.ToXlsAsync(title, Component.ToExportColumns(Strings), ms);
         ms.Position = 0;
-        await DownloadFileService.DownloadFileFromStream(ms, $"{title}.xls");
+        await DownloadFileService.DownloadFileFromStream(ms, $"{title}.xlsx");
       });
     });
   }

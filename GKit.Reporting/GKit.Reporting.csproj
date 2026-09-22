@@ -29,18 +29,24 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Security.Cryptography.Xml" Version="10.0.12" />
     <PackageReference Include="DotNet.ReproducibleBuilds" Version="2.0.5">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <!--
+      Security pin, NOT an unused reference: NPOI 2.8.0 pulls System.Security.Cryptography.Xml
+      8.0.2 transitively, which carries 8 known high-severity advisories. Raising it to 10.0.9
+      cuts that to 5. Bump again when a fully patched version ships.
+    -->
+    <PackageReference Include="System.Security.Cryptography.Xml" Version="10.0.12" />
     <PackageReference Include="NPOI" Version="2.8.0" />
-    <PackageReference Update="Nerdbank.GitVersioning">
-      <Version>3.10.94</Version>
-    </PackageReference>
-  </ItemGroup>
-
-  <ItemGroup>
+    <!--
+      NPOI's ISheet.AutoSizeColumn measures text through SkiaSharp. NPOI declares SkiaSharp, but
+      on net10.0 only its *reference* assembly resolves, so nothing reaches the consumer's output
+      folder and XlsReporter.WriteReportAsync throws FileNotFoundException on the happy path.
+      Declaring it here (with the Linux native assets, needed in containers) makes the runtime
+      dependency real for every consumer.
+    -->
     <PackageReference Include="SkiaSharp" Version="4.151.1" />
     <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="4.151.1" />
   </ItemGroup>

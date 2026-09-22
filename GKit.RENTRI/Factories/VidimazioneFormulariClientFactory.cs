@@ -1,10 +1,18 @@
+using Microsoft.Extensions.Options;
+
 namespace GKit.RENTRI;
 
-public class VidimazioneFormulariClientFactory(ApiStatusProvider apiStatusProvider)
-    : BaseClientFactory<VidimazioneFormulariClient>(apiStatusProvider)
+public class VidimazioneFormulariClientFactory(
+    ApiStatusProvider apiStatusProvider,
+    IOptions<RentriOptions> rentriOptions,
+    IHttpClientFactory httpClientFactory)
+    : BaseClientFactory<VidimazioneFormulariClient>(apiStatusProvider, rentriOptions)
 {
-    protected override VidimazioneFormulariClient BuildClient(ClientOptions options)
+    protected override RentriApi Api => RentriApi.VidimazioneFormulari;
+
+    protected override VidimazioneFormulariClient BuildClient(ClientOptions? options, string? anonymousBaseUrl)
     {
-        return new VidimazioneFormulariClient(RentriHttpClientFactory.Create(), options);
+        return new VidimazioneFormulariClient(
+            httpClientFactory.CreateClient(RentriHttpClientFactory.ClientName), options, anonymousBaseUrl);
     }
 }

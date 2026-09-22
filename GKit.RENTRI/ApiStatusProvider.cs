@@ -62,7 +62,26 @@ public class ApiStatusProvider
         }
     } = ApiStatus.Unavailable;
 
-    public event Action<ApiStatus> StatusChanged;
+    public event Action<ApiStatus>? StatusChanged;
+
+    /// <summary>
+    /// Routes a status onto the right slot. Replaces reflection over
+    /// <c>typeof(T).Name.Replace("Client", "")</c>, which turned any rename into a runtime
+    /// null-dereference instead of a compile error.
+    /// </summary>
+    internal void Set(RentriApi api, ApiStatus status)
+    {
+        switch (api)
+        {
+            case RentriApi.Anagrafiche: Anagrafiche = status; break;
+            case RentriApi.CaRentri: CaRentri = status; break;
+            case RentriApi.Codifiche: Codifiche = status; break;
+            case RentriApi.DatiRegistri: DatiRegistri = status; break;
+            case RentriApi.Formulari: Formulari = status; break;
+            case RentriApi.VidimazioneFormulari: VidimazioneFormulari = status; break;
+            default: throw new ArgumentOutOfRangeException(nameof(api), api, null);
+        }
+    }
 
     public ApiStatus Status
     {
@@ -95,6 +114,16 @@ public class ApiStatusProvider
             _ => ApiStatus.Unavailable
         };
     }
+}
+
+public enum RentriApi
+{
+    Anagrafiche,
+    CaRentri,
+    Codifiche,
+    DatiRegistri,
+    Formulari,
+    VidimazioneFormulari
 }
 
 public enum ApiStatus

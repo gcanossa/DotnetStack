@@ -4,12 +4,10 @@ namespace GKit.RENTRI;
 
 public class AnagraficheClient : AnagraficheStub
 {
-    public AnagraficheClient(HttpClient httpClient, ClientOptions options) : base(httpClient)
+    public AnagraficheClient(HttpClient httpClient, ClientOptions? options, string? anonymousBaseUrl = null)
+        : base(httpClient)
     {
         Options = options;
-        if(Options is not null)
-        {
-            BaseUrl = BaseUrl.Replace("https://api.rentri.gov.it", Options.BaseUrl.TrimEnd('/'));
-        }
+        BaseUrl = ResolveBaseUrl(BaseUrl, options, anonymousBaseUrl);
     }
 }

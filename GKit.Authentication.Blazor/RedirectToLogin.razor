@@ -6,7 +6,10 @@
 
   protected override void OnInitialized()
   {
-    NavigationManager.NavigateTo($"{Options.LoginPath}?returnUrl={Uri.EscapeDataString(NavigationManager.Uri)}", forceLoad:
-    true);
+    // A relative path, not NavigationManager.Uri: the absolute form is rejected by the
+    // open-redirect guard in LoginComponentBase and the user would lose their place.
+    var returnUrl = Uri.EscapeDataString(LocalUrl.CurrentPath(NavigationManager));
+
+    NavigationManager.NavigateTo($"{Options.LoginPath}?returnUrl={returnUrl}", forceLoad: true);
   }
 }

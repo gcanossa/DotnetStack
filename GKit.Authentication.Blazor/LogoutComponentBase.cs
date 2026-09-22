@@ -13,7 +13,7 @@ public abstract class LogoutComponentBase : ComponentBase
   protected override async Task OnInitializedAsync()
   {
     await SignOutAsync();
-    NavigationManager.NavigateTo(ReturnUrl, forceLoad: true);
+    NavigationManager.NavigateTo(LocalUrl.EnsureLocal(ReturnUrl), forceLoad: true);
   }
 
   protected abstract Task SignOutAsync();

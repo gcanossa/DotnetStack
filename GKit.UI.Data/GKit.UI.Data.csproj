@@ -32,6 +32,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!--
+      Security pin, NOT an unused reference: NPOI 2.8.0 pulls System.Security.Cryptography.Xml
+      8.0.2 transitively, which carries 8 known high-severity advisories. Raising it to 10.0.12
+      cuts that to 5. Bump again when a fully patched version ships.
+    -->
+    <PackageReference Include="System.Security.Cryptography.Xml" Version="10.0.12" />
     <PackageReference Include="DotNet.ReproducibleBuilds" Version="2.0.5">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
@@ -39,9 +45,6 @@
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.12" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.12" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.12" />
-    <PackageReference Update="Nerdbank.GitVersioning">
-      <Version>3.10.94</Version>
-    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>

@@ -18,7 +18,7 @@ public class RevisionInfo
   {
     var rev = Clone();
     rev.Revision++;
-    rev.CreatedAt = DateTime.Now;
+    rev.CreatedAt = DateTime.UtcNow;
     rev.IsCurrent = current;
 
     return rev;
@@ -40,7 +40,7 @@ public class RevisionInfo
     return new RevisionInfo
     {
       IsCurrent = true,
-      CreatedAt = DateTime.Now,
+      CreatedAt = DateTime.UtcNow,
       Revision = 0
     };
   }

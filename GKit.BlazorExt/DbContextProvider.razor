@@ -1,35 +1,39 @@
 @using Microsoft.EntityFrameworkCore
 @inherits DbContextFactoryProvider<T>
-@implements IDisposable
 @implements IAsyncDisposable
 
 @typeparam T where T : DbContext
 
-@ChildContent
+@*
+  The base renders <CascadingValue Value="this">; overriding the markup with a bare @ChildContent
+  discarded it, so a child declaring [CascadingParameter] DbContextProvider<T> never received one.
+  Children are held back until Context exists — it is created in OnInitializedAsync, so the first
+  render previously handed them a null.
+*@
+<CascadingValue Value="this" TValue="DbContextProvider<T>">
+  @if (Context is not null)
+  {
+    @ChildContent
+  }
+</CascadingValue>
 
 @code {
 
-  public T Context { get; protected set; } = default!;
+  public T? Context { get; protected set; }
 
   protected override async Task OnInitializedAsync()
   {
     Context = await CreateDbContextAsync();
   }
 
-  public virtual void Dispose()
+  public async ValueTask DisposeAsync()
   {
-    Context?.Dispose();
-    Context = null!;
-    GC.SuppressFinalize(this);
-  }
-
-  public virtual async ValueTask DisposeAsync()
-  {
-    if (Context != null)
+    if (Context is not null)
     {
       await Context.DisposeAsync();
-      Context = null!;
-      GC.SuppressFinalize(this);
+      Context = null;
     }
+
+    GC.SuppressFinalize(this);
   }
 }

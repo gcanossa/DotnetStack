@@ -19,8 +19,19 @@ public class OpcUaContextHealthCheck<T>(IOpcUaContextFactory<T> factory) : IHeal
 {
     public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
     {
-        using var opcUaContext = await factory.CreateContextAsync(cancellationToken);
-        
-        return !opcUaContext.Connection.Connected ? HealthCheckResult.Unhealthy() : HealthCheckResult.Healthy();
+        try
+        {
+            using var opcUaContext = await factory.CreateContextAsync(cancellationToken);
+
+            return opcUaContext.Connection.Connected
+                ? HealthCheckResult.Healthy()
+                : HealthCheckResult.Unhealthy("OPC UA session is not connected");
+        }
+        catch (Exception e)
+        {
+            // A probe must report, not throw: an unhandled exception here surfaces as an
+            // opaque 500 from the health endpoint rather than an Unhealthy entry.
+            return HealthCheckResult.Unhealthy("OPC UA connection failed", e);
+        }
     }
 }

@@ -137,7 +137,12 @@ public sealed class OpcUaContextOptionsBuilder<T> where T : OpcUaContext
     {
         Options.ServerUrl = serverUrl;
         
-        ClientApplicationBuilder = new ApplicationInstance()
+        // The ITelemetryContext overload, not the obsolete parameterless one: the builder
+        // already has the service provider, so the logger factory is reachable here.
+        ClientApplicationBuilder = new ApplicationInstance(
+            new InjectableTelemetryContext(
+                (ILoggerFactory?)ServiceProvider.GetService(typeof(ILoggerFactory))
+                ?? LoggerFactory.Create(_ => { })))
         {
             ApplicationType = ApplicationType.Client,
             ApplicationName = applicationName ?? this.DefaultApplicationName(),

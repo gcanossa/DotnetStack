@@ -67,7 +67,8 @@ public static class ApplicationExtensions
     where T : DbContext
   {
     using var scope = ext.Services.CreateScope();
-    await using var ctx = scope.ServiceProvider.GetRequiredService<T>();
+    // Resolved from the scope, so the scope disposes it — do not dispose it here as well.
+    var ctx = scope.ServiceProvider.GetRequiredService<T>();
 
     var migrationsCount = (await ctx.Database.GetPendingMigrationsAsync(ct)).Count();
     
@@ -83,9 +84,6 @@ public static class ApplicationExtensions
   public static IHost ApplyPendingMigrations<T>(this IHost ext)
     where T : DbContext
   {
-    var environment = ext.Services.GetRequiredService<IHostEnvironment>();
-    if (environment.IsDevelopment()) return ext;
-
     ext.ExecuteApplyPendingMigrations<T>().ConfigureAwait(false).GetAwaiter().GetResult();
 
     return ext;

@@ -160,7 +160,7 @@ public partial class ManagedGrid<T> : ComponentBase
       using var ms = new MemoryStream();
       await query.ToXlsAsync(title, Component.ToExportColumns(Strings), ms);
       ms.Position = 0;
-      await DownloadFileService.DownloadFileFromStream(ms, $"{title}.xls");
+      await DownloadFileService.DownloadFileFromStream(ms, $"{title}.xlsx");
     });
   }
 

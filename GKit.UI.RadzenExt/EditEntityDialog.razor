@@ -18,8 +18,13 @@
     <DynamicComponent @ref="_dynamicComponent" Type="typeof(TForm)" Parameters="_formParameters" />
 
     <div class="rz-mt-4 rz-display-flex rz-gap-2">
+      @*
+        Not gated on IsModified: EntityGrid.NewAsync can hand the dialog a model pre-filled by
+        NewValueFactory, and accepting those defaults without editing a field left Save disabled
+        forever. Validation decides correctness; the button only guards double submission.
+      *@
       <RadzenButton ButtonStyle="ButtonStyle.Primary" Text="@Strings.Save"
-                    Disabled="@(!(_form?.EditContext?.IsModified() ?? false))"
+                    Disabled="_submitting"
                     Click="@(_ => SubmitAsync())" />
       <RadzenButton ButtonStyle="ButtonStyle.Danger" Variant="Variant.Flat" Text="@Strings.Cancel"
                     Click="@(_ => CancelAsync())" />
@@ -65,14 +70,30 @@
   protected override async Task OnAfterRenderAsync(bool firstRender)
   {
     // Browsers ignore autocomplete="off" on many fields; a nonsense token reliably suppresses it.
-    await setter.SetAttributes(container, new Dictionary<string, object>() { { "autocomplete", "--off" } }, "input");
+    // Once only - this used to make a JS interop round trip on every re-render, i.e. on every
+    // keystroke that re-rendered the form.
+    if (firstRender)
+      await setter.SetAttributes(container, new Dictionary<string, object>() { { "autocomplete", "--off" } }, "input");
 
     await base.OnAfterRenderAsync(firstRender);
   }
 
+  protected bool _submitting;
+
   protected async Task SubmitAsync()
   {
-    await Engine.SubmitAsync(new RadzenUiFormHandle(_form!.EditContext!), FormInstance, Host, Model);
+    if (_submitting)
+      return;
+
+    _submitting = true;
+    try
+    {
+      await Engine.SubmitAsync(new RadzenUiFormHandle(_form!.EditContext!), FormInstance, Host, Model);
+    }
+    finally
+    {
+      _submitting = false;
+    }
   }
 
   protected async Task CancelAsync()

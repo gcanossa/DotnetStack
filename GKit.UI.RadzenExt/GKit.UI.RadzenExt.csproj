@@ -41,9 +41,6 @@
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.12" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.12" />
     <PackageReference Include="Radzen.Blazor" Version="11.4.1" />
-    <PackageReference Update="Nerdbank.GitVersioning">
-      <Version>3.10.94</Version>
-    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
