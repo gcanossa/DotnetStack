@@ -41,6 +41,7 @@
         <ProjectReference Include="..\GKit.SmtpHost\GKit.SmtpHost.csproj" />
         <ProjectReference Include="..\GKit.Authentication.ActiveDirectory\GKit.Authentication.ActiveDirectory.csproj" />
         <ProjectReference Include="..\GKit.Authentication.Blazor\GKit.Authentication.Blazor.csproj" />
+        <ProjectReference Include="..\GKit.Authentication.Simple\GKit.Authentication.Simple.csproj" />
         <ProjectReference Include="..\GKit.RENTRI\GKit.RENTRI.csproj" />
     </ItemGroup>
 

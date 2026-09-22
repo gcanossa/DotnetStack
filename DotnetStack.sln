@@ -63,6 +63,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.Repo.UI.MudBlazorExt",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.Repo.UI.RadzenExt", "Test.Repo.UI.RadzenExt\Test.Repo.UI.RadzenExt.csproj", "{65752A0E-C1C8-46B2-B014-8D63CEDC52E9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GKit.Authentication.Simple", "GKit.Authentication.Simple\GKit.Authentication.Simple.csproj", "{123D9466-240C-4EC5-8EAE-F35EEBE5FDB6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -433,6 +435,18 @@ Global
 		{65752A0E-C1C8-46B2-B014-8D63CEDC52E9}.Release|x64.Build.0 = Release|Any CPU
 		{65752A0E-C1C8-46B2-B014-8D63CEDC52E9}.Release|x86.ActiveCfg = Release|Any CPU
 		{65752A0E-C1C8-46B2-B014-8D63CEDC52E9}.Release|x86.Build.0 = Release|Any CPU
+		{123D9466-240C-4EC5-8EAE-F35EEBE5FDB6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{123D9466-240C-4EC5-8EAE-F35EEBE5FDB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{123D9466-240C-4EC5-8EAE-F35EEBE5FDB6}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{123D9466-240C-4EC5-8EAE-F35EEBE5FDB6}.Debug|x64.Build.0 = Debug|Any CPU
+		{123D9466-240C-4EC5-8EAE-F35EEBE5FDB6}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{123D9466-240C-4EC5-8EAE-F35EEBE5FDB6}.Debug|x86.Build.0 = Debug|Any CPU
+		{123D9466-240C-4EC5-8EAE-F35EEBE5FDB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{123D9466-240C-4EC5-8EAE-F35EEBE5FDB6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{123D9466-240C-4EC5-8EAE-F35EEBE5FDB6}.Release|x64.ActiveCfg = Release|Any CPU
+		{123D9466-240C-4EC5-8EAE-F35EEBE5FDB6}.Release|x64.Build.0 = Release|Any CPU
+		{123D9466-240C-4EC5-8EAE-F35EEBE5FDB6}.Release|x86.ActiveCfg = Release|Any CPU
+		{123D9466-240C-4EC5-8EAE-F35EEBE5FDB6}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
