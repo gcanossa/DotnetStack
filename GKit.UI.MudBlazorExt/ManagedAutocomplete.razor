@@ -1,0 +1,22 @@
+@typeparam T
+
+@inherits ManagedItemAutocomplete<T, T>
+
+@{
+  base.BuildRenderTree(__builder);
+}
+
+@code
+{
+  protected override void OnInitialized()
+  {
+    // The value and the searched item are the same type here.
+    base.ToItem = p => p;
+    base.ToValue = p => p;
+
+    base.OnInitialized();
+  }
+
+  protected new Func<T, T> ToValue { get; set; } = null!;
+  protected new Func<T, T> ToItem { get; set; } = null!;
+}

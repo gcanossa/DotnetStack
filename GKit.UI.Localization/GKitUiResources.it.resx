@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Edit" xml:space="preserve">
+    <value>Modifica</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Elimina</value>
+  </data>
+  <data name="Add" xml:space="preserve">
+    <value>Aggiungi</value>
+  </data>
+  <data name="Refresh" xml:space="preserve">
+    <value>Aggiorna</value>
+  </data>
+  <data name="ExportXlsx" xml:space="preserve">
+    <value>Esporta XLSX</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Salva</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Annulla</value>
+  </data>
+  <data name="Ok" xml:space="preserve">
+    <value>Ok</value>
+  </data>
+  <data name="OpenRegistry" xml:space="preserve">
+    <value>Apri Anagrafica</value>
+  </data>
+  <data name="RowActionsMenu" xml:space="preserve">
+    <value>Azioni riga</value>
+    <comment>Accessible label for the per-row actions menu.</comment>
+  </data>
+  <data name="CreateItemTitle" xml:space="preserve">
+    <value>Crea Elemento</value>
+  </data>
+  <data name="EditItemTitle" xml:space="preserve">
+    <value>Modifica Elemento</value>
+  </data>
+  <data name="ConfirmTitle" xml:space="preserve">
+    <value>Conferma Operazione</value>
+  </data>
+  <data name="ConfirmGeneric" xml:space="preserve">
+    <value>Confermi l'operazione?</value>
+  </data>
+  <data name="ConfirmDelete" xml:space="preserve">
+    <value>Confermi di voler eliminare &lt;strong&gt;{0}&lt;/strong&gt;?</value>
+    <comment>{0} is the entity description and is HTML-encoded before formatting.</comment>
+  </data>
+  <data name="ItemAdded" xml:space="preserve">
+    <value>Elemento aggiunto con successo</value>
+  </data>
+  <data name="ItemAddFailed" xml:space="preserve">
+    <value>Impossibile aggiungere l'elemento</value>
+  </data>
+  <data name="ItemUpdated" xml:space="preserve">
+    <value>Elemento modificato con successo</value>
+  </data>
+  <data name="ItemUpdateFailed" xml:space="preserve">
+    <value>Impossibile modificare l'elemento</value>
+  </data>
+  <data name="ItemDeleted" xml:space="preserve">
+    <value>Elemento eliminato con successo</value>
+  </data>
+  <data name="ItemDeleteFailed" xml:space="preserve">
+    <value>Impossibile eliminare l'elemento</value>
+  </data>
+  <data name="FetchValuesFailed" xml:space="preserve">
+    <value>Impossibile recuperare i valori</value>
+  </data>
+  <data name="NoRecords" xml:space="preserve">
+    <value>Nessun elemento presente</value>
+  </data>
+  <data name="NoResults" xml:space="preserve">
+    <value>Nessun elemento trovato</value>
+  </data>
+  <data name="ColumnFallback" xml:space="preserve">
+    <value>Colonna {0}</value>
+    <comment>{0} is the 1-based column index, used when a column has no title.</comment>
+  </data>
+</root>

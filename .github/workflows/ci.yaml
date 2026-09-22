@@ -1,0 +1,84 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+
+name: ci
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "main"
+      - "dev*"
+  pull_request:
+    branches:
+      - "*"
+
+env:
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+  DOTNET_NOLOGO: true
+  # Must stay false: CultureInfo.GetCultureInfo("it-IT") silently returns the invariant culture
+  # under globalization-invariant mode, which would make the culture round-trip tests vacuous.
+  DOTNET_SYSTEM_GLOBALIZATION_INVARIANT: false
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        # Windows matters here: DateTime handling, PEM certificate loading and the SkiaSharp
+        # native assets all behave differently from Linux.
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            10.x
+
+      - name: Test
+        run: >
+          dotnet test GKit.Tests/GKit.Tests.csproj
+          --configuration Release
+          --filter "Category!=Integration"
+          --collect:"XPlat Code Coverage"
+          --logger "trx;LogFileName=test-results.trx"
+
+      - name: Test (Blazor components)
+        run: >
+          dotnet test GKit.Tests.Blazor/GKit.Tests.Blazor.csproj
+          --configuration Release
+          --filter "Category!=Integration"
+          --collect:"XPlat Code Coverage"
+          --logger "trx;LogFileName=blazor-test-results.trx"
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.os }}
+          path: "**/TestResults/**"
+          retention-days: 7
+
+  pack:
+    # Proves every GKit.* package still packs, and runs package validation.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            10.x
+
+      # Set PackageValidationBaselineVersion here (not in Directory.Build.props) so local and
+      # offline builds keep working: baseline validation has to restore the published package.
+      # Raise it to the last released version to make an API removal fail the build — which is
+      # what would have caught AddSmartCardHostCheck disappearing.
+      - name: Pack
+        run: dotnet pack --configuration Release /p:PublicRelease=false --output ${{ github.workspace }}/nuget

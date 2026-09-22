@@ -1,6 +1,6 @@
-using System.Text.Json;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace GKit.RENTRI;
 
@@ -16,6 +16,7 @@ public class ApiStatusService : BackgroundService
     private readonly VidimazioneFormulariClientFactory vidimazioneFormulariClientFactory;
 
     private readonly ApiStatusProvider apiStatusProvider;
+    private readonly IOptions<RentriOptions> rentriOptions;
 
     public ApiStatusService(ILogger<ApiStatusService> logger,
         AnagraficheClientFactory anagraficheClientFactory,
@@ -24,9 +25,11 @@ public class ApiStatusService : BackgroundService
         DatiRegistriClientFactory datiRegistriClientFactory,
         FormulariClientFactory formulariClientFactory,
         VidimazioneFormulariClientFactory vidimazioneFormulariClientFactory,
-        ApiStatusProvider apiStatusProvider)
+        ApiStatusProvider apiStatusProvider,
+        IOptions<RentriOptions> rentriOptions)
     {
         this.logger = logger;
+        this.rentriOptions = rentriOptions;
         this.anagraficheClientFactory = anagraficheClientFactory;
         this.caRentriClientFactory = caRentriClientFactory;
         this.codificheClientFactory = codificheClientFactory;
@@ -47,55 +50,88 @@ public class ApiStatusService : BackgroundService
         }
         catch (ApiException e)
         {
+            // 401/403 used to be rethrown. Escaping ExecuteAsync trips the default
+            // BackgroundServiceExceptionBehavior.StopHost, so an expired RENTRI certificate
+            // took the whole application down instead of just marking the API unavailable.
             if (e.StatusCode is 401 or 403)
-                throw;
+                logger.LogError(e, "RENTRI rejected the status probe with {StatusCode}", e.StatusCode);
 
             return ApiStatusProvider.GetApiStatusFromHttpStatusCode(e.StatusCode);
+        }
+        catch (Exception e)
+        {
+            logger.LogWarning(e, "RENTRI status probe failed");
+
+            return ApiStatus.Unavailable;
         }
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        while (!stoppingToken.IsCancellationRequested)
+        var interval = rentriOptions.Value.StatusPollInterval;
+
+        if (interval is null || interval <= TimeSpan.Zero)
+        {
+            logger.LogInformation("RENTRI status polling is disabled");
+            return;
+        }
+
+        using var timer = new PeriodicTimer(interval.Value);
+
+        do
         {
             try
             {
-                using var anagraficheClient = anagraficheClientFactory.CreateAnonymousClient();
-                using var caRentriClient = caRentriClientFactory.CreateAnonymousClient();
-                using var codificheClient = codificheClientFactory.CreateAnonymousClient();
-                using var datiRegistriClient = datiRegistriClientFactory.CreateAnonymousClient();
-                using var formulariClient = formulariClientFactory.CreateAnonymousClient();
-                using var vidimazioneFormulariClient = vidimazioneFormulariClientFactory.CreateAnonymousClient();
-
-                var source = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
-
-                apiStatusProvider.Anagrafiche = await GetStatus(() => anagraficheClient.StatusAsync(source.Token));
-                apiStatusProvider.CaRentri = await GetStatus(() => caRentriClient.Status2Async(source.Token));
-                apiStatusProvider.Codifiche = await GetStatus(() => codificheClient.StatusAsync(source.Token));
-                apiStatusProvider.DatiRegistri = await GetStatus(() => datiRegistriClient.Status2Async(source.Token));
-                apiStatusProvider.Formulari = await GetStatus(() => formulariClient.Status2Async(source.Token));
-                apiStatusProvider.VidimazioneFormulari =
-                    await GetStatus(() => vidimazioneFormulariClient.Status2Async(source.Token));
-
-                await Task.Delay(5 * 60 * 1000, stoppingToken);
+                await ProbeAllAsync(stoppingToken);
             }
-            catch (ApiException e)
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
             {
-                logger.LogError(e, "Authentication failed. Stopping service.");
-
-                apiStatusProvider.Anagrafiche = ApiStatusProvider.GetApiStatusFromHttpStatusCode(e.StatusCode);
-                apiStatusProvider.CaRentri = ApiStatusProvider.GetApiStatusFromHttpStatusCode(e.StatusCode);
-                apiStatusProvider.Codifiche = ApiStatusProvider.GetApiStatusFromHttpStatusCode(e.StatusCode);
-                apiStatusProvider.DatiRegistri = ApiStatusProvider.GetApiStatusFromHttpStatusCode(e.StatusCode);
-                apiStatusProvider.Formulari = ApiStatusProvider.GetApiStatusFromHttpStatusCode(e.StatusCode);
-                apiStatusProvider.VidimazioneFormulari = ApiStatusProvider.GetApiStatusFromHttpStatusCode(e.StatusCode);
-
-                throw;
+                return;
             }
             catch (Exception e)
             {
+                // Never let this escape: BackgroundService's default behaviour on an unhandled
+                // exception is to stop the entire host.
                 logger.LogWarning(e, "Unable to check RENTRI api status");
             }
+        } while (await SafeWaitAsync(timer, stoppingToken));
+    }
+
+    private static async Task<bool> SafeWaitAsync(PeriodicTimer timer, CancellationToken stoppingToken)
+    {
+        try
+        {
+            return await timer.WaitForNextTickAsync(stoppingToken);
         }
+        catch (OperationCanceledException)
+        {
+            return false;
+        }
+    }
+
+    private async Task ProbeAllAsync(CancellationToken stoppingToken)
+    {
+        using var anagraficheClient = anagraficheClientFactory.CreateAnonymousClient();
+        using var caRentriClient = caRentriClientFactory.CreateAnonymousClient();
+        using var codificheClient = codificheClientFactory.CreateAnonymousClient();
+        using var datiRegistriClient = datiRegistriClientFactory.CreateAnonymousClient();
+        using var formulariClient = formulariClientFactory.CreateAnonymousClient();
+        using var vidimazioneFormulariClient = vidimazioneFormulariClientFactory.CreateAnonymousClient();
+
+        using var source = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
+        source.CancelAfter(rentriOptions.Value.StatusProbeTimeout);
+
+        apiStatusProvider.Set(RentriApi.Anagrafiche,
+            await GetStatus(() => anagraficheClient.StatusAsync(source.Token)));
+        apiStatusProvider.Set(RentriApi.CaRentri,
+            await GetStatus(() => caRentriClient.Status2Async(source.Token)));
+        apiStatusProvider.Set(RentriApi.Codifiche,
+            await GetStatus(() => codificheClient.StatusAsync(source.Token)));
+        apiStatusProvider.Set(RentriApi.DatiRegistri,
+            await GetStatus(() => datiRegistriClient.Status2Async(source.Token)));
+        apiStatusProvider.Set(RentriApi.Formulari,
+            await GetStatus(() => formulariClient.Status2Async(source.Token)));
+        apiStatusProvider.Set(RentriApi.VidimazioneFormulari,
+            await GetStatus(() => vidimazioneFormulariClient.Status2Async(source.Token)));
     }
 }

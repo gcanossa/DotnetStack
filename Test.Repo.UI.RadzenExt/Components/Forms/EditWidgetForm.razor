@@ -1,0 +1,48 @@
+@using Microsoft.EntityFrameworkCore
+
+@implements IEditEntityForm<Widget>
+
+@*
+  The Radzen twin of Test.Repo.UI's EditWidgetForm. Markup differs; the model, the validator and
+  the lookup query are the same objects from Test.Repo.UI.Shared.
+
+  Validation messages come from GKitFluentValidator writing into the EditContext, so the standard
+  ValidationMessage component renders them - no Radzen-specific validator components needed.
+*@
+<div style="min-width: 320px;">
+  <RadzenFormField Text="Name" Variant="Variant.Outlined" Style="width: 100%;">
+    <ChildContent>
+      <RadzenTextBox @bind-Value="Model.Name" Name="Name" />
+    </ChildContent>
+  </RadzenFormField>
+  <ValidationMessage For="@(() => Model.Name)" />
+
+  <RadzenFormField Text="Quantity" Variant="Variant.Outlined" Style="width: 100%;" Class="rz-mt-2">
+    <ChildContent>
+      <RadzenNumeric @bind-Value="Model.Quantity" Name="Quantity" />
+    </ChildContent>
+  </RadzenFormField>
+  <ValidationMessage For="@(() => Model.Quantity)" />
+
+  <div class="rz-mt-2">
+    <EntityAutocomplete T="Category" Label="Category" Name="Category"
+                        @bind-Value="Model.Category"
+                        Context="Context"
+                        QueryFactory="DemoQueries.Categories"
+                        SearchExp="DemoQueries.CategorySearch"
+                        ToStringFunc="@(c => c?.Name ?? "")" />
+  </div>
+
+  <RadzenFormField Text="Notes" Variant="Variant.Outlined" Style="width: 100%;" Class="rz-mt-2">
+    <ChildContent>
+      <RadzenTextArea @bind-Value="Model.Notes" Name="Notes" Rows="3" />
+    </ChildContent>
+  </RadzenFormField>
+  <ValidationMessage For="@(() => Model.Notes)" />
+</div>
+
+@code {
+  [Parameter, EditorRequired] public Widget Model { get; set; } = default!;
+
+  [Parameter, EditorRequired] public DbContext Context { get; set; } = default!;
+}

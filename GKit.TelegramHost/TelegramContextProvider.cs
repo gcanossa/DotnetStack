@@ -5,7 +5,8 @@ public class TelegramContextProvider
     private readonly object _sync = new object();
 
     private WTelegram.Client? _client = null;
-    private TaskCompletionSource<WTelegram.Client> _clientReady = new TaskCompletionSource<WTelegram.Client>();
+    private TaskCompletionSource<WTelegram.Client> _clientReady =
+        new(TaskCreationOptions.RunContinuationsAsynchronously);
 
     internal void UpdateClient(WTelegram.Client client)
     {
@@ -26,7 +27,9 @@ public class TelegramContextProvider
     {
         lock(_sync)
         {
-            _clientReady.SetResult(_client!);
+            // TrySetResult: SetResult throws if the TCS already completed, which happens on
+            // any reconnect.
+            _clientReady.TrySetResult(_client!);
         }
     }
 
@@ -36,11 +39,11 @@ public class TelegramContextProvider
         {
             var tmp = _clientReady;
             
-            _clientReady = new TaskCompletionSource<WTelegram.Client>();
+            _clientReady = new TaskCompletionSource<WTelegram.Client>(TaskCreationOptions.RunContinuationsAsynchronously);
             
             if(!tmp.Task.IsCompleted)
             {
-                tmp.SetCanceled();
+                tmp.TrySetCanceled();
             }
         }
     }

@@ -13,6 +13,8 @@ public abstract partial class OpcUaContext : IDisposable
     public OpcUaConnection Connection => OpcUaConnectionPool.Connections.GetValueOrDefault(Options)
                                          ?? throw new InvalidOperationException("Connection not found");
 
+    private OpcUaConnection GetOrCreateConnection() => OpcUaConnectionPool.GetOrCreate(Options);
+
     public OpcUaContext(IOpcUaContextOptions options)
     {
         Options = options;
@@ -45,7 +47,11 @@ public abstract partial class OpcUaContext : IDisposable
 
     public async Task EnsureConnected(CancellationToken ct = default)
     {
-        var connected = await Connection.ConnectAsync(ct).ConfigureAwait(false);
+        // GetOrAdd rather than the Connection property: the pool may legitimately be empty on
+        // the first call, and ConnectAsync is a no-op when the session is already up.
+        var connection = GetOrCreateConnection();
+
+        var connected = await connection.ConnectAsync(ct).ConfigureAwait(false);
         if (!connected) throw new InvalidOperationException("Connection failed");
     }
 
@@ -65,17 +71,18 @@ public abstract partial class OpcUaContext : IDisposable
     
     public async Task OpenConnectionAsync(CancellationToken ct = default)
     {
-        var connection = new OpcUaConnection(Options);
-        if(OpcUaConnectionPool.Connections.TryAdd(Options, connection))
-        {
-            await connection.ConnectAsync(ct).ConfigureAwait(false);
-        }
+        // TryAdd previously dropped the losing instance on the floor undisposed whenever two
+        // callers raced. GetOrAdd keeps exactly one and never constructs an orphan.
+        var connection = GetOrCreateConnection();
+
+        await connection.ConnectAsync(ct).ConfigureAwait(false);
     }
     
     public async Task CloseConnectionAsync(CancellationToken ct = default)
     {
-        OpcUaConnectionPool.Connections.Remove(Options, out var connection);
-        if(connection != null)
+        var connection = OpcUaConnectionPool.Remove(Options);
+
+        if (connection != null)
         {
             await connection.DisconnectAsync(false, ct).ConfigureAwait(false);
             connection.Dispose();

@@ -1,11 +1,18 @@
-using GKit.RENTRI.Stubs.Codifiche;
+using Microsoft.Extensions.Options;
 
 namespace GKit.RENTRI;
 
-public class CodificheClientFactory(ApiStatusProvider apiStatusProvider) : BaseClientFactory<CodificheClient>(apiStatusProvider)
+public class CodificheClientFactory(
+    ApiStatusProvider apiStatusProvider,
+    IOptions<RentriOptions> rentriOptions,
+    IHttpClientFactory httpClientFactory)
+    : BaseClientFactory<CodificheClient>(apiStatusProvider, rentriOptions)
 {
-    protected override CodificheClient BuildClient(ClientOptions options)
+    protected override RentriApi Api => RentriApi.Codifiche;
+
+    protected override CodificheClient BuildClient(ClientOptions? options, string? anonymousBaseUrl)
     {
-        return new CodificheClient(RentriHttpClientFactory.Create(), options);
+        return new CodificheClient(
+            httpClientFactory.CreateClient(RentriHttpClientFactory.ClientName), options, anonymousBaseUrl);
     }
 }

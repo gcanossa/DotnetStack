@@ -10,6 +10,11 @@ public abstract partial class PlcContext : IDisposable, IAsyncDisposable
 
     public Plc? Connection { get; protected set; }
 
+    // EnsureConnected had no mutual exclusion: two concurrent reads both saw IsConnected false,
+    // both assigned Connection, and one socket was leaked per race. S7-300/400 CPUs allow only
+    // a handful of concurrent PG/OP connections, so leaks lock out the engineering station.
+    private readonly SemaphoreSlim _connectionLock = new(1, 1);
+
     public PlcContext(IPlcContextOptions options)
     {
         Options = options;
@@ -21,6 +26,7 @@ public abstract partial class PlcContext : IDisposable, IAsyncDisposable
     {
         var modelBuilder = new ModelBuilder();
         OnModelCreating(modelBuilder);
+        modelBuilder.Validate();
         return modelBuilder.EntityModels;
     }
 
@@ -32,58 +38,102 @@ public abstract partial class PlcContext : IDisposable, IAsyncDisposable
 
     public void Dispose()
     {
-        DisposeAsync().GetAwaiter().GetResult();
-    }
-
-    public async ValueTask DisposeAsync()
-    {
+        // Was DisposeAsync().GetAwaiter().GetResult(): a deadlock shape under a synchronisation
+        // context. Closing the socket is synchronous anyway.
         if (_disposed) return;
 
         EntityModels.Clear();
+        CloseConnectionCore();
+        _connectionLock.Dispose();
 
-        await CloseConnectionAsync(CancellationToken.None);
-        
         _disposed = true;
 
         GC.SuppressFinalize(this);
     }
 
+    public ValueTask DisposeAsync()
+    {
+        Dispose();
+
+        return ValueTask.CompletedTask;
+    }
+
     public async Task EnsureConnected(CancellationToken ct = default)
     {
-        if(Connection is not { IsConnected: true })
-            await OpenConnectionAsync(ct).ConfigureAwait(false);
-        
-        if (!Connection!.IsConnected) throw new InvalidOperationException("Connection failed");
+        if (Connection is { IsConnected: true }) return;
+
+        await _connectionLock.WaitAsync(ct).ConfigureAwait(false);
+        try
+        {
+            if (Connection is { IsConnected: true }) return;
+
+            await OpenConnectionCoreAsync(ct).ConfigureAwait(false);
+
+            if (!Connection!.IsConnected) throw new InvalidOperationException("Connection failed");
+        }
+        finally
+        {
+            _connectionLock.Release();
+        }
     }
 
     public async Task RenewConnection(CancellationToken ct = default)
     {
+        await _connectionLock.WaitAsync(ct).ConfigureAwait(false);
         try
         {
-            await CloseConnectionAsync(ct);
+            CloseConnectionCore();
+            await OpenConnectionCoreAsync(ct).ConfigureAwait(false);
         }
-        catch
+        finally
         {
-            // ignored
+            _connectionLock.Release();
         }
-
-        await OpenConnectionAsync(ct);
     }
 
     public async Task OpenConnectionAsync(CancellationToken ct = default)
     {
-        Connection = new Plc(Options.CpuType, Options.Address.ToString(), Options.Port, Options.Rack, Options.Slot);
-        await Connection.OpenAsync(ct);
+        await _connectionLock.WaitAsync(ct).ConfigureAwait(false);
+        try
+        {
+            await OpenConnectionCoreAsync(ct).ConfigureAwait(false);
+        }
+        finally
+        {
+            _connectionLock.Release();
+        }
     }
 
-    public async Task CloseConnectionAsync(CancellationToken ct = default)
+    private async Task OpenConnectionCoreAsync(CancellationToken ct)
     {
-        if (Connection != null)
+        // Close the previous socket first: assigning over a live Plc orphaned it.
+        CloseConnectionCore();
+
+        Connection = new Plc(Options.CpuType, Options.Address.ToString(), Options.Port, Options.Rack, Options.Slot);
+        await Connection.OpenAsync(ct).ConfigureAwait(false);
+    }
+
+    public Task CloseConnectionAsync(CancellationToken ct = default)
+    {
+        CloseConnectionCore();
+
+        return Task.CompletedTask;
+    }
+
+    private void CloseConnectionCore()
+    {
+        if (Connection is null) return;
+
+        try
         {
-            if(Connection.IsConnected)
-                Connection.Close();
-            Connection = null;
+            if (Connection.IsConnected) Connection.Close();
         }
+        catch
+        {
+            // Closing a socket that is already gone must not mask the caller's intent.
+        }
+
+        Connection = null;
     }
 
     protected async Task<T> GuardRequestAsync<T>(Func<Task<T>> request, CancellationToken ct = default)

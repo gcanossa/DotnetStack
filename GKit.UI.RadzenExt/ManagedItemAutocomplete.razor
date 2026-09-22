@@ -1,0 +1,114 @@
+@using System.Linq.Expressions
+@using Microsoft.Extensions.Logging
+
+@typeparam T
+@typeparam TItem
+
+@inject IUiNotifier Notifier
+@inject IGKitUiStrings Strings
+@inject ILogger<ManagedItemAutocomplete<T, TItem>> Logger
+
+<RadzenFormField Text="@Label" Variant="Variant.Outlined" Style="width: 100%;">
+  <ChildContent>
+    <RadzenDropDown @ref="Component" TValue="TItem" Data="@_items" LoadData="@OnLoadData"
+                    AllowFiltering="true" FilterAsYouType="true" AllowClear="true"
+                    Disabled="@Disabled" Name="@Name"
+                    Value="@SelectedItem" ValueChanged="@OnSelectedItemChanged"
+                    HeaderTemplate="@HeaderTemplate">
+      <Template Context="item">
+        @Engine.ToStringFunc((TItem)item)
+      </Template>
+      <ValueTemplate Context="item">
+        @Engine.ToStringFunc((TItem)item)
+      </ValueTemplate>
+    </RadzenDropDown>
+  </ChildContent>
+</RadzenFormField>
+
+@code
+{
+  protected RadzenDropDown<TItem> Component = null!;
+
+  private IEnumerable<TItem> _items = [];
+
+  private EntityLookupEngine<T, TItem> _engine = null!;
+
+  /// <summary>The search and projection logic, shared with the MudBlazor adapter.</summary>
+  protected EntityLookupEngine<T, TItem> Engine => _engine;
+
+  /// <summary>
+  /// Rendered above the option list. Radzen's dropdown does have a header slot, which is where
+  /// the entity variant puts its "add" and "open registry" affordances.
+  /// </summary>
+  [Parameter] public RenderFragment? HeaderTemplate { get; set; }
+
+  @* Not EditorRequired: the entity-backed variants override FetchAsync and never use this, and
+     the attribute is inherited, so it would warn on every EntityAutocomplete usage. *@
+  [Parameter] public Func<string, Task<IQueryable<TItem>>> FetchData { get; set; } = default!;
+  [Parameter, EditorRequired] public Func<TItem, T> ToValue { get; set; } = default!;
+  [Parameter, EditorRequired] public Func<T, TItem> ToItem { get; set; } = default!;
+
+  [Parameter] public bool Disabled { get; set; }
+  [Parameter] public T Value { get; set; } = default!;
+
+  [Parameter] public EventCallback<T> ValueChanged { get; set; }
+
+  [Parameter] public string Label { get; set; } = "";
+
+  /// <summary>
+  /// Field name for validation. The MudBlazor adapter takes a <c>For</c> expression instead;
+  /// Radzen identifies fields by name on the EditContext.
+  /// </summary>
+  [Parameter] public string? Name { get; set; }
+
+  [Parameter] public Func<TItem?, string> ToStringFunc { get; set; } = p => p?.ToString() ?? "";
+
+  protected TItem? SelectedItem => _engine.GetByValue(Value);
+
+  protected override void OnInitialized()
+  {
+    base.OnInitialized();
+
+    _engine = new EntityLookupEngine<T, TItem>(Notifier, Strings, Logger)
+    {
+      Fetch = FetchAsync,
+      ToValue = ToValue,
+      ToItem = ToItem,
+      ToStringFunc = ToStringFunc
+    };
+  }
+
+  protected override void OnParametersSet()
+  {
+    base.OnParametersSet();
+
+    _engine.ToValue = ToValue;
+    _engine.ToItem = ToItem;
+    _engine.ToStringFunc = ToStringFunc;
+  }
+
+  /// <summary>
+  /// Overridden by the entity-backed variants to search a DbContext directly.
+  /// </summary>
+  protected virtual async Task<IReadOnlyList<TItem>> FetchAsync(string searchText, CancellationToken token)
+  {
+    if (FetchData is null)
+      throw new InvalidOperationException(
+        $"{nameof(FetchData)} must be set, or {nameof(FetchAsync)} overridden.");
+
+    return [.. await FetchData(searchText)];
+  }
+
+  protected async Task OnLoadData(LoadDataArgs args)
+  {
+    // The engine reports failures to the user and returns empty rather than faulting the form.
+    _items = await _engine.SearchItemsAsync(args.Filter ?? "", CancellationToken.None);
+
+    await InvokeAsync(StateHasChanged);
+  }
+
+  protected async Task OnSelectedItemChanged(TItem item)
+  {
+    await ValueChanged.InvokeAsync(item is null ? default : _engine.ToValue!(item));
+  }
+}

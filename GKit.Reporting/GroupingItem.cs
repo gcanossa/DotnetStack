@@ -1,16 +1,26 @@
-﻿namespace GKit.Reporting;
+namespace GKit.Reporting;
 
 public class GroupingItem<T>
 {
-  public IEnumerable<T> Items { get; internal set; } = [];
-  public IEnumerable<GroupingItem<T>> Children { get; internal set; } = [];
+  /// <summary>
+  /// Materialised deliberately: the XLS grouping reporter reads Items.Count() and AllSubNodes
+  /// several times per node, so a lazy sequence was re-enumerated on every access.
+  /// </summary>
+  public IReadOnlyList<T> Items { get; internal set; } = [];
 
-  public GroupingItem<T>? Parent { get; internal set; } //TODO: use to avoid AllSubNodes and Depth operations
+  public IReadOnlyList<GroupingItem<T>> Children { get; internal set; } = [];
+
+  public GroupingItem<T>? Parent { get; internal set; }
 
   public string Label { get; internal set; } = default!;
   public object Value { get; internal set; } = default!;
 
-  public IEnumerable<GroupingItem<T>> AllSubNodes => Children.Union(Children.SelectMany(p => p.AllSubNodes));
+  private IReadOnlyList<GroupingItem<T>>? _allSubNodes;
+  private int? _depth;
 
-  public int Depth => 1 + Children.Select(p => p.Depth).Union([0]).Max();
+  /// <summary>Every descendant, computed once. Was recursive and recomputed per access.</summary>
+  public IReadOnlyList<GroupingItem<T>> AllSubNodes =>
+    _allSubNodes ??= [.. Children, .. Children.SelectMany(p => p.AllSubNodes)];
+
+  public int Depth => _depth ??= 1 + Children.Select(p => p.Depth).Append(0).Max();
 }

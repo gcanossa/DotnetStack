@@ -1,6 +1,5 @@
 using System.Linq.Expressions;
 using System.Reflection;
-using NPOI.SS.Formula.Functions;
 
 namespace GKit.Reporting;
 

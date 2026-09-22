@@ -1,0 +1,49 @@
+@inject IJSRuntime JSRuntime
+@inject IUiIconSet IconSet
+
+<div style="display: flex;">
+  <MudText style="width: 100%;">@(Visible ? Text : new string(HiddenCharacter, SecureHiddenLength))</MudText>
+
+  @if (Secure)
+  {
+    <MudIconButton Icon="@IconSet.Resolve(Visible ? UiIcon.VisibilityOff : UiIcon.Visibility)"
+      Size="Size.Small" @onclick="ToggleVisible"></MudIconButton>
+  }
+  <MudIconButton Icon="@IconSet.Resolve(UiIcon.ContentCopy)" @onclick="CopyText" Size="Size.Small"></MudIconButton>
+</div>
+
+@code {
+  [Parameter] public bool Visible { get; set; } = true;
+
+  [Parameter] public string Text { get; set; } = "";
+
+  [Parameter] public bool Secure { get; set; }
+
+  [Parameter] public int SecureHiddenLength { get; set; } = 8;
+
+  [Parameter] public char HiddenCharacter { get; set; } = '*';
+
+  [Parameter] public EventCallback OnCopy { get; set; }
+
+  protected override Task OnInitializedAsync()
+  {
+    if (Secure)
+    {
+      Visible = false;
+      StateHasChanged();
+    }
+
+    return base.OnInitializedAsync();
+  }
+
+  public void ToggleVisible()
+  {
+    Visible = !Visible;
+  }
+
+  public async Task CopyText()
+  {
+    await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", Text);
+    await OnCopy.InvokeAsync();
+  }
+}

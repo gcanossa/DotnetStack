@@ -1,0 +1,108 @@
+@using GKit.BlazorExt
+@using Microsoft.EntityFrameworkCore
+
+@typeparam T where T : class
+@typeparam TForm where TForm : IComponent, IEditEntityForm<T>
+@typeparam TValidator where TValidator : AbstractValidatorBase<T>
+
+@inject HtmlAttrSetterService setter
+@inject TValidator validator
+@inject IGKitUiStrings Strings
+@inject EditEntityDialogEngine<T> Engine
+
+<MudDialog>
+  <TitleContent>
+    <MudText Typo="Typo.h6">@Title</MudText>
+  </TitleContent>
+  <DialogContent>
+    <div @ref="container">
+      <MudForm @ref="_form" Model="@Model" Validation="@((object?)validator.ValidateValueAsync)" ValidationDelay="0"
+               IsValidChanged="p => { }" IsTouchedChanged="p => { }">
+        <DynamicComponent @ref="_dynamicComponent" Type="typeof(TForm)" Parameters="_formParameters"/>
+      </MudForm>
+    </div>
+  </DialogContent>
+  <DialogActions>
+    <MudStack Row>
+      @*
+        Not gated on IsTouched: EntityGrid.NewAsync can hand the dialog a model pre-filled by
+        NewValueFactory, and accepting those defaults without editing a field left Save disabled
+        forever. Validation decides correctness; the button only guards double submission.
+      *@
+      <MudButton Color="Color.Primary" OnClick="SubmitAsync" Disabled="_submitting">@Strings.Save</MudButton>
+      <MudButton Color="Color.Error" OnClick="CancelAsync">@Strings.Cancel</MudButton>
+    </MudStack>
+  </DialogActions>
+</MudDialog>
+
+@code {
+  protected MudForm? _form;
+  protected DynamicComponent? _dynamicComponent;
+
+  ElementReference container;
+
+  [CascadingParameter] protected IMudDialogInstance _mudDialog { get; set; } = default!;
+
+  [Parameter] public string Title { get; set; } = "";
+
+  [Parameter] public T Model { get; set; } = default!;
+
+  [Parameter] public DbContext Context { get; set; } = default!;
+
+  protected Dictionary<string, object> _formParameters = new();
+
+  protected IEditEntityForm<T>? FormInstance => _dynamicComponent?.Instance as IEditEntityForm<T>;
+
+  protected override void OnInitialized()
+  {
+    base.OnInitialized();
+
+    if (string.IsNullOrEmpty(Title))
+      Title = Strings.EditItemTitle;
+  }
+
+  protected override void OnParametersSet()
+  {
+    Model = Model ?? EmptyValueFactory();
+
+    _formParameters = new Dictionary<string, object>()
+    {
+      { nameof(IEditEntityForm<T>.Model), Model },
+      { nameof(IEditEntityForm<T>.Context), Context }
+    };
+  }
+
+  protected override async Task OnAfterRenderAsync(bool firstRender)
+  {
+    // Browsers ignore autocomplete="off" on many fields; a nonsense token reliably suppresses it.
+    // Once only - this used to make a JS interop round trip on every re-render, i.e. on every
+    // keystroke that re-rendered the form.
+    if (firstRender)
+      await setter.SetAttributes(container, new Dictionary<string, object>() { { "autocomplete", "--off" } }, "input");
+
+    await base.OnAfterRenderAsync(firstRender);
+  }
+
+  protected bool _submitting;
+
+  protected async Task SubmitAsync()
+  {
+    if (_submitting)
+      return;
+
+    _submitting = true;
+    try
+    {
+      await Engine.SubmitAsync(new MudUiFormHandle(_form!), FormInstance, new MudUiDialogHost(_mudDialog), Model);
+    }
+    finally
+    {
+      _submitting = false;
+    }
+  }
+
+  protected async Task CancelAsync()
+  {
+    await Engine.CancelAsync(new MudUiFormHandle(_form!), new MudUiDialogHost(_mudDialog));
+  }
+}

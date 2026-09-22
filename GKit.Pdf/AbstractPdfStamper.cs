@@ -14,24 +14,40 @@ public abstract class AbstractPdfStamper<T> where T : class
         _ = outputPdf ??  throw new ArgumentNullException(nameof(outputPdf));
         _ = formatProvider ??  throw new ArgumentNullException(nameof(formatProvider));
 
-        var pdfDocument = PdfReader.Open(pdfStream);
+        using var pdfDocument = PdfReader.Open(pdfStream);
 
         var fonts = new List<XFont>();
         var pages = new Dictionary<int, XTextFormatter>();
+        var graphics = new List<XGraphics>();
+
         foreach (var spec in GetFields())
         {
+            if (spec.PageNumber < 1 || spec.PageNumber > pdfDocument.PageCount)
+                throw new ArgumentOutOfRangeException(nameof(spec.PageNumber),
+                    $"Field targets page {spec.PageNumber}, but the document has " +
+                    $"{pdfDocument.PageCount} page(s).");
+
             var font = fonts.FirstOrDefault(p => p.FontFamily.Name == spec.FontName && Math.Abs(p.Size - spec.FontSize) < 0.01);
             if (font == null)
                 fonts.Add(font = new XFont(spec.FontName, spec.FontSize));
             
-            if(!pages.ContainsKey(spec.PageNumber))
-                pages.Add(spec.PageNumber, new XTextFormatter(XGraphics.FromPdfPage(pdfDocument.Pages[spec.PageNumber - 1])));
+            if (!pages.ContainsKey(spec.PageNumber))
+            {
+                // Tracked so they can be disposed; previously they were dropped on the floor.
+                var pageGraphics = XGraphics.FromPdfPage(pdfDocument.Pages[spec.PageNumber - 1]);
+                graphics.Add(pageGraphics);
+                pages.Add(spec.PageNumber, new XTextFormatter(pageGraphics));
+            }
+
             
             var page =  pages[spec.PageNumber];
 
             var propertyValue = spec.SelectValue(model);
-            var isNumber = propertyValue is int or long or double or float or decimal;
-            var text = propertyValue is null ? string.Empty : string.Format(formatProvider, isNumber ? "{0:N}" : "{0}", propertyValue);
+            // Honour the field's own format. "{0:N}" was applied to every number, which adds
+            // group separators and two decimals to values that never wanted them.
+            var text = propertyValue is null
+                ? string.Empty
+                : string.Format(formatProvider, spec.Format, propertyValue);
 
             page.DrawString(
                 text, 
@@ -46,6 +62,9 @@ public abstract class AbstractPdfStamper<T> where T : class
         }
 
         await pdfDocument.SaveAsync(outputPdf, false);
+
+        foreach (var pageGraphics in graphics)
+            pageGraphics.Dispose();
     }
 
     protected abstract IEnumerable<PdfStamperField<T>> GetFields();

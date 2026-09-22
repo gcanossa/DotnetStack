@@ -1,0 +1,22 @@
+@using Microsoft.EntityFrameworkCore
+
+@typeparam T where T : class
+@typeparam TDialog where TDialog : IEditEntityDialog<T>, IComponent
+
+@inherits ManagedGrid<T>
+
+@{
+  base.BuildRenderTree(__builder);
+}
+
+@code {
+
+  protected override void OnInitialized()
+  {
+    base.OnInitialized();
+
+    DefaultHeaderControls = @<RadzenButton Icon="@IconSet.Resolve(UiIcon.Add)" ButtonStyle="ButtonStyle.Primary"
+                                           Size="ButtonSize.Small" Class="rz-ml-2" title="@Strings.Add"
+                                           Click="@(_ => NewAsync())" />;
+  }
+}

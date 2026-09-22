@@ -1,32 +1,36 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.Json;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using MimeKit;
 using SmtpServer;
 
 namespace GKit.SmtpHost
-{    
-    internal class FileDeadLetterMessageHandler : IDeadLetterMessageHandler
+{
+    /// <summary>
+    /// Writes unhandled messages to disk as <c>.eml</c>.
+    /// <para>
+    /// Previously serialised only From/To/Subject/TextBody to JSON, discarding HTML bodies and
+    /// every attachment — the one thing a dead letter exists for is being able to reprocess it.
+    /// Filenames also collided: <c>DateTime.UtcNow.ToFileTimeUtc()</c> has 100 ns resolution, so
+    /// two messages arriving together overwrote one another.
+    /// </para>
+    /// </summary>
+    internal class FileDeadLetterMessageHandler(IOptions<SmtpHostOptions> options) : IDeadLetterMessageHandler
     {
-        private readonly IOptions<SmtpHostOptions> _options;
-        public FileDeadLetterMessageHandler(IOptions<SmtpHostOptions> options)
-        {
-            _options = options;
-        }
+        private readonly IOptions<SmtpHostOptions> _options = options;
+
+        internal static string BuildFileName(DateTimeOffset timestamp, Guid discriminator) =>
+            $"{timestamp:yyyyMMdd-HHmmss-fff}-{discriminator:N}.eml";
+
         public async Task Handle(IServiceProvider provider, MimeMessage message, ISessionContext context)
         {
-            if(!Directory.Exists(_options.Value.DeadLettersPath))
-                Directory.CreateDirectory(_options.Value.DeadLettersPath);
+            var path = _options.Value.DeadLettersPath;
 
-            await File.WriteAllTextAsync(
-                Path.Combine(_options.Value.DeadLettersPath, $"{DateTime.UtcNow.ToFileTimeUtc()}.json"), 
-                JsonSerializer.Serialize(new {
-                    From = message.From.ToString(), To = message.To.ToString(), message.Subject, message.TextBody
-                })
-            );
+            if (!Directory.Exists(path))
+                Directory.CreateDirectory(path);
+
+            var file = Path.Combine(path, BuildFileName(DateTimeOffset.UtcNow, Guid.NewGuid()));
+
+            // The complete RFC 5322 message: headers, all bodies, all attachments.
+            await message.WriteToAsync(file);
         }
     }
 }

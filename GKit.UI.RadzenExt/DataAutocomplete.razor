@@ -1,0 +1,27 @@
+@using System.Linq.Expressions
+
+@typeparam T where T : class
+
+@inherits ManagedAutocomplete<T>
+
+@{
+  base.BuildRenderTree(__builder);
+}
+
+@code
+{
+  @* Searches a pre-built query rather than a DbContext. *@
+  [Parameter, EditorRequired] public Func<Task<IQueryable<T>>> QueryFactory { get; set; } = default!;
+
+  [Parameter, EditorRequired] public Func<string, Expression<Func<T, bool>>> SearchExp { get; set; } = default!;
+
+  protected override async Task<IReadOnlyList<T>> FetchAsync(string searchText, CancellationToken token)
+  {
+    var query = await QueryFactory();
+
+    if (string.IsNullOrEmpty(searchText))
+      return [.. query];
+
+    return [.. query.Where(SearchExp(searchText))];
+  }
+}

@@ -6,7 +6,7 @@ namespace GKit.PLC;
 public interface IPlcContextOptionsSpecBuilder<T> where T : PlcContext
 {
     public IPlcContextOptionsSpecBuilder<T> Address(IPAddress address);
-    public IPlcContextOptionsSpecBuilder<T> Port(short port);
+    public IPlcContextOptionsSpecBuilder<T> Port(int port);
     public IPlcContextOptionsSpecBuilder<T> Rack(short rack);
     public IPlcContextOptionsSpecBuilder<T> Slot(short slot);
 
@@ -22,7 +22,7 @@ internal class PlcContextOptionsSpecBuilder<T>(PlcContextOptionsBuilder<T> build
         return this;
     }
 
-    public IPlcContextOptionsSpecBuilder<T> Port(short port)
+    public IPlcContextOptionsSpecBuilder<T> Port(int port)
     {
         builder.Options.Port = port;
         return this;

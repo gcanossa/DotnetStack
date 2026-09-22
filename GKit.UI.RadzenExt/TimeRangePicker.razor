@@ -1,0 +1,46 @@
+@using System.Globalization
+
+<div class="rz-display-flex rz-align-items-center rz-gap-2">
+    <RadzenFormField Text="@StartLabel" Variant="Variant.Outlined">
+        <ChildContent>
+            <RadzenDatePicker TValue="DateTime?" ShowTime="true" TimeOnly="true" DateFormat="HH:mm"
+                              Value="@ToDateTime(Value?.Start)" Change="@OnStartChanged" Disabled="@Disabled" />
+        </ChildContent>
+    </RadzenFormField>
+    <RadzenText>–</RadzenText>
+    <RadzenFormField Text="@EndLabel" Variant="Variant.Outlined">
+        <ChildContent>
+            <RadzenDatePicker TValue="DateTime?" ShowTime="true" TimeOnly="true" DateFormat="HH:mm"
+                              Value="@ToDateTime(Value?.End)" Change="@OnEndChanged" Disabled="@Disabled" />
+        </ChildContent>
+    </RadzenFormField>
+</div>
+
+@code {
+    [Parameter] public TimeRange? Value { get; set; }
+    [Parameter] public EventCallback<TimeRange> ValueChanged { get; set; }
+
+    [Parameter] public string StartLabel { get; set; } = "Start";
+    [Parameter] public string EndLabel { get; set; } = "End";
+
+    [Parameter] public bool Disabled { get; set; }
+
+    // Radzen's picker binds DateTime rather than TimeSpan, so the time-of-day is carried on an
+    // arbitrary date and stripped again on the way out.
+    private static DateTime? ToDateTime(TimeSpan? value) =>
+        value is null ? null : DateTime.Today.Add(value.Value);
+
+    private async Task OnStartChanged(DateTime? value)
+    {
+        Value ??= new TimeRange();
+        Value.Start = value?.TimeOfDay;
+        await ValueChanged.InvokeAsync(Value);
+    }
+
+    private async Task OnEndChanged(DateTime? value)
+    {
+        Value ??= new TimeRange();
+        Value.End = value?.TimeOfDay;
+        await ValueChanged.InvokeAsync(Value);
+    }
+}

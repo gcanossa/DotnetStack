@@ -1,0 +1,56 @@
+@using Microsoft.EntityFrameworkCore
+
+@inject IDbContextFactory<DemoDbContext> Factory
+
+@*
+  Compare with Test.Repo.UI/Components/Grids/WidgetGrid.razor. The @code block below is character
+  for character the same; only the column markup and the resize parameter differ.
+*@
+<EntityGrid @ref="Grid" T="Widget" TDialog="EditWidgetDialog" Title="Widgets"
+            QueryFactory="DemoQueries.Widgets"
+            ContextFactory="() => Factory.CreateDbContext()"
+            SharedContext="SharedContext"
+            ToStringFunc="DemoQueries.DescribeWidget"
+            Exportable="true" Refreshable="true"
+            RowControls="@_extraControls"
+            DragDropColumnReordering="true"
+            AllowColumnResize="true">
+  <Columns>
+    <RadzenDataGridColumn TItem="Widget" Property="Id" Title="Id" Width="6rem" />
+    <RadzenDataGridColumn TItem="Widget" Property="Name" Title="Name" />
+    <RadzenDataGridColumn TItem="Widget" Property="Quantity" Title="Quantity" />
+    @* Radzen takes a string path; the nullable navigation still exercises null-safe ordering. *@
+    <RadzenDataGridColumn TItem="Widget" Property="Category.Name" Title="Category" />
+    <RadzenDataGridColumn TItem="Widget" Property="CreatedAt" Title="Created" />
+    <RadzenDataGridColumn TItem="Widget" Title="Has notes" Sortable="false" Filterable="false">
+      <Template Context="item">
+        @(string.IsNullOrEmpty(item.Notes) ? "-" : "yes")
+      </Template>
+    </RadzenDataGridColumn>
+  </Columns>
+</EntityGrid>
+
+@code {
+  [Parameter] public DbContext? SharedContext { get; set; }
+
+  [Parameter] public EventCallback<Widget> OnDuplicate { get; set; }
+
+  public EntityGrid<Widget, EditWidgetDialog> Grid { get; set; } = default!;
+
+  private ICollection<GridRowControl<Widget>> _extraControls = [];
+
+  protected override void OnInitialized()
+  {
+    base.OnInitialized();
+
+    // A caller-supplied row control, in the neutral shape both adapters accept.
+    _extraControls.Add(new GridRowControl<Widget>
+    {
+      Text = "Duplicate",
+      Icon = UiIcon.ContentCopy,
+      Color = UiColor.Primary,
+      Action = ctx => OnDuplicate.InvokeAsync(ctx.Item),
+      Disabled = ctx => ctx.Item.Quantity == 0
+    });
+  }
+}

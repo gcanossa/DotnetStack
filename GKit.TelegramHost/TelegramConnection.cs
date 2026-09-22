@@ -71,7 +71,7 @@ public class TelegramConnection
         {
             if(cancellationToken.IsCancellationRequested)
             {
-                _source.SetCanceled(cancellationToken);
+                _source.TrySetCanceled(cancellationToken);
                 break;
             }
         }
@@ -93,10 +93,12 @@ public class TelegramConnection
     {
         if(!_stopped)
         {
+            // Unsubscribe before disposing, and TrySetResult because StartAsync may already
+            // have cancelled the TCS on shutdown.
+            _client.OnUpdates -= OnUpdate;
             _client.Dispose();
             _contextProvider.InvalidateClient();
-            _client.OnUpdates-=OnUpdate;
-            _source.SetResult();
+            _source.TrySetResult();
 
             _stopped = true;
         }

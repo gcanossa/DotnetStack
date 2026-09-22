@@ -14,16 +14,15 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.11" />
+    <PackageReference Include="bunit" Version="2.11.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.12" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.12" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.9.0" />
     <PackageReference Include="S7netplus" Version="0.20.0" />
     <PackageReference Include="xunit" Version="2.9.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="4.0.0">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-    <PackageReference Update="Nerdbank.GitVersioning">
-      <Version>3.10.94</Version>
     </PackageReference>
   </ItemGroup>
 
@@ -37,7 +36,13 @@
     <ProjectReference Include="..\GKit.Pdf\GKit.Pdf.csproj" />
     <ProjectReference Include="..\GKit.PLC\GKit.PLC.csproj" />
     <ProjectReference Include="..\GKit.RENTRI\GKit.RENTRI.csproj" />
-    <ProjectReference Include="..\Test.Repo.UI\Test.Repo.UI.csproj" />
+    <ProjectReference Include="..\Test.Repo.UI.MudBlazorExt\Test.Repo.UI.MudBlazorExt.csproj" />
+    <ProjectReference Include="..\Test.Repo.UI.RadzenExt\Test.Repo.UI.RadzenExt.csproj" />
+    <ProjectReference Include="..\Test.Repo.UI.Shared\Test.Repo.UI.Shared.csproj" />
+    <ProjectReference Include="..\GKit.UI.RadzenExt\GKit.UI.RadzenExt.csproj" />
+    <ProjectReference Include="..\GKit.UI.Abstractions\GKit.UI.Abstractions.csproj" />
+    <ProjectReference Include="..\GKit.UI.Data\GKit.UI.Data.csproj" />
+    <ProjectReference Include="..\GKit.UI.Localization\GKit.UI.Localization.csproj" />
     <ProjectReference Include="..\GKit.Reporting\GKit.Reporting.csproj" />
     <ProjectReference Include="..\GKit.EntityFramework\GKit.EntityFramework.csproj" />
   </ItemGroup>

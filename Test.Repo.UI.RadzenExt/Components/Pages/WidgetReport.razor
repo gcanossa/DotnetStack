@@ -1,0 +1,48 @@
+@page "/widget-report"
+@using Microsoft.EntityFrameworkCore
+
+@inject IDbContextFactory<DemoDbContext> Factory
+
+<PageTitle>Widget report</PageTitle>
+
+<RadzenText TextStyle="TextStyle.H6" Class="rz-my-4">Widgets (ManagedGrid, hand-written loader)</RadzenText>
+
+<ManagedGrid @ref="_grid" T="Widget" LoadServerData="LoadAsync" ExportServerData="ExportAsync"
+             Title="Widget report" ToStringFunc="DemoQueries.DescribeWidget"
+             Exportable="true" Refreshable="true">
+  <Columns>
+    <RadzenDataGridColumn TItem="Widget" Property="Name" Title="Name" />
+    <RadzenDataGridColumn TItem="Widget" Property="Quantity" Title="Quantity" />
+    <RadzenDataGridColumn TItem="Widget" Property="Category.Name" Title="Category" />
+  </Columns>
+</ManagedGrid>
+
+@code {
+  private ManagedGrid<Widget> _grid = default!;
+
+  @*
+    Byte for byte the same loader as the MudBlazor host's WidgetReport: GridQuery in, GridPage
+    out, no component-library type in the signature.
+  *@
+  private async Task<GridPage<Widget>> LoadAsync(GridQuery<Widget> state, CancellationToken token)
+  {
+    await using var ctx = await Factory.CreateDbContextAsync(token);
+
+    var query = state.ApplyFilters(DemoQueries.Widgets(ctx).AsNoTracking());
+
+    var total = await query.CountAsync(token);
+
+    var items = await state.ApplySorts(query)
+      .Skip(state.StartIndex)
+      .Take(state.Count)
+      .ToListAsync(token);
+
+    return new GridPage<Widget> { Items = items, TotalItems = total };
+  }
+
+  private async Task<IQueryable<Widget>> ExportAsync(CancellationToken token)
+  {
+    var ctx = await Factory.CreateDbContextAsync(token);
+    return DemoQueries.Widgets(ctx).AsNoTracking();
+  }
+}

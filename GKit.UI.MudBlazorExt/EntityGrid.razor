@@ -1,0 +1,24 @@
+@using Microsoft.EntityFrameworkCore
+
+@attribute [CascadingTypeParameter(nameof(T))]
+@typeparam T where T : class
+@typeparam TDialog where TDialog : IEditEntityDialog<T>, IComponent
+
+@inherits ManagedGrid<T>
+
+@{
+  base.BuildRenderTree(__builder);
+}
+
+@code {
+
+  protected override void OnInitialized()
+  {
+    base.OnInitialized();
+
+    DefaultHeaderControls = @<MudTooltip Text="@Strings.Add">
+                              <MudFab StartIcon="@IconSet.Resolve(UiIcon.Add)" Size="Size.Small" Color="Color.Primary"
+                                      OnClick="() => NewAsync()" Class="mx-2" />
+                            </MudTooltip>;
+  }
+}

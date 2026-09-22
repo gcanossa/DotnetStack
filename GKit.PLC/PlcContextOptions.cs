@@ -9,7 +9,7 @@ public interface IPlcContextOptions
 {
     public CpuType CpuType { get; set; }
     public IPAddress Address { get; set; }
-    public short Port { get; set; }
+    public int Port { get; set; }
     public short Rack { get; set; }
     public short Slot { get; set; }
 }
@@ -18,7 +18,7 @@ internal class PlcContextOptions : IPlcContextOptions
 {
     public CpuType CpuType { get; set; } = CpuType.S7300;
     public IPAddress Address { get; set; } = IPAddress.Loopback;
-    public short Port { get; set; } = 102;
+    public int Port { get; set; } = 102;
     public short Rack { get; set; } = 0;
     public short Slot { get; set; } = 1;
 
@@ -32,7 +32,7 @@ internal class PlcContextOptions : IPlcContextOptions
             options.Address = IPAddress.Parse(match.Groups[1].Value);
 
         if (match.Groups[3].Success)
-            options.Port = short.Parse(match.Groups[3].Value);
+            options.Port = int.Parse(match.Groups[3].Value);   // TCP ports exceed short.MaxValue
 
         if (match.Groups[5].Success)
             options.Rack = short.Parse(match.Groups[5].Value);

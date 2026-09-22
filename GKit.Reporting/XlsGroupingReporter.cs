@@ -1,5 +1,4 @@
-﻿using NPOI.SS.Formula.Functions;
-using NPOI.SS.UserModel;
+﻿using NPOI.SS.UserModel;
 using NPOI.SS.Util;
 using NPOI.XSSF.UserModel;
 
@@ -127,6 +126,8 @@ public abstract class XlsGroupingReporter<T> : XlsReporter<T>
 
   public override async Task WriteReportAsync(IEnumerable<T> data, Stream output)
   {
+    ResetStyles();
+
     XSSFWorkbook workbook = new();
 
     ISheet sheet = workbook.CreateSheet("Report");

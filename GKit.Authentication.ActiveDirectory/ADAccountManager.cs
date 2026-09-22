@@ -30,6 +30,12 @@ public class ADAccountManager(
       // username = OperatingSystem.IsWindows() ? username : @$"{_options.Value.Domain}\{username}";
       var authType = OperatingSystem.IsWindows() ? AuthType.Negotiate : AuthType.Basic;
 
+      // Basic sends the password in the clear; refuse rather than leak it by default.
+      if (authType == AuthType.Basic && !_options.Value.IsSecure && !_options.Value.AllowUnencryptedCredentials)
+        throw new InvalidOperationException(
+          "Refusing an unencrypted LDAP bind: set ADAccountManagerOptions.IsSecure (recommended) " +
+          "or AllowUnencryptedCredentials to acknowledge the risk.");
+
       var connection = new LdapConnection(new(_options.Value.Host, _options.Value.Port), new(username, password), authType);
 
       connection.SessionOptions.ProtocolVersion = 3;
@@ -74,7 +80,10 @@ public class ADAccountManager(
     {
       using var connection = Connect(username, password);
 
-      var query = $"(&(objectCategory=person)(objectClass=user)(sAMAccountName={username})(!(userAccountControl:1.2.840.113556.1.4.803:=2)))";
+      // Escaped per RFC 4515: a search filter must never be assembled from unescaped input.
+      var query = $"(&(objectCategory=person)(objectClass=user)" +
+                  $"(sAMAccountName={LdapFilter.Escape(username)})" +
+                  $"(!(userAccountControl:1.2.840.113556.1.4.803:=2)))";
       var request = new SearchRequest(
         _options.Value.QueryBase,
         query,
@@ -100,8 +109,11 @@ public class ADAccountManager(
         GetAttribute(resultsEntry.Attributes, "sAMAccountName")?[0].ToString()!,
         GetAttribute(resultsEntry.Attributes, "displayName")?[0].ToString()!,
         GetAttribute(resultsEntry.Attributes, "mail")?[0].ToString()!,
+        // UTF-8, not Encoding.Default: LDAP returns UTF-8 and the intent should be explicit.
+        // ToLowerInvariant, not ToLower: under tr-TR "I" lowercases to "ı" and group matching
+        // silently stops working.
         GetAttribute(resultsEntry.Attributes, "memberOf")?.GetValues(typeof(byte[]))
-          .Select(p => Encoding.Default.GetString((byte[])p).ToLower())
+          .Select(p => Encoding.UTF8.GetString((byte[])p).ToLowerInvariant())
           .ToArray() ?? []
       );
 

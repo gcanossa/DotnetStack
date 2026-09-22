@@ -22,11 +22,13 @@ namespace GKit.SmtpHost
 
         ISmtpHostBuilder ISmtpHostBuilder.AddControllersWithRoutes()
         {
+            var routes = SmtpRouteTable.FromAppDomain();
+
+            // Discovered once at startup and shared, rather than re-scanned per message.
+            _services.AddSingleton(routes);
             _services.AddScoped<IMessageHandler, ControllerRouteMessageHandler>();
 
-
-            foreach(var type in AppDomain.CurrentDomain.GetAssemblies().SelectMany(p => p.GetTypes())
-                .Where(p => p.IsAssignableTo(typeof(SmtpControllerBase)) && !p.IsAbstract))
+            foreach (var type in routes.ControllerTypes)
             {
                 _services.AddScoped(type);
             }
@@ -57,7 +59,9 @@ namespace GKit.SmtpHost
         {
             services.AddSingleton<ISmtpHostBroker, SmtpHostBroker>();
 
-            services.AddTransient<ISmtpIdentityStore, ConfigurationSmtpIdentityStore>();
+            // Fail closed. WithIdentityStore<T>() appends after this and therefore wins, because
+            // GetRequiredService resolves the last registration for a service type.
+            services.AddTransient<ISmtpIdentityStore, DenyAllSmtpIdentityStore>();
             services.AddTransient<IMessageStore, SmtpMessageStore>();
             services.AddTransient<IUserAuthenticator, SmtpAuthenticator>();
 
