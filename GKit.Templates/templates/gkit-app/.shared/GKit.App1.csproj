@@ -1,0 +1,120 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="GKit.Application" Version="GKIT-VERSION" />
+    <PackageReference Include="GKit.BlazorExt" Version="GKIT-VERSION" />
+    <!--#if (ui_any) -->
+    <PackageReference Include="GKit.UI.Localization" Version="GKIT-VERSION" />
+    <!--#endif -->
+    <!--#if (ui_mudblazor) -->
+    <PackageReference Include="GKit.UI.MudBlazorExt" Version="GKIT-VERSION" />
+    <PackageReference Include="MudBlazor" Version="9.9.0" />
+    <!--#endif -->
+    <!--#if (ui_radzen) -->
+    <PackageReference Include="GKit.UI.RadzenExt" Version="GKIT-VERSION" />
+    <PackageReference Include="Radzen.Blazor" Version="11.4.1" />
+    <!--#endif -->
+  </ItemGroup>
+
+  <!--#if (db_any) -->
+  <ItemGroup>
+    <PackageReference Include="GKit.EntityFramework" Version="GKIT-VERSION" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.12" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.12">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <!--#if (db_sqlserver) -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.12" />
+    <!--#endif -->
+    <!--#if (db_npgsql) -->
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
+    <!--#endif -->
+    <!--#if (db_mysql) -->
+    <PackageReference Include="MySql.EntityFrameworkCore" Version="10.0.7" />
+    <!--#endif -->
+    <!--#if (db_sqlite) -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.12" />
+    <!--#endif -->
+    <!--#if (health) -->
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="10.0.12" />
+    <!--#endif -->
+  </ItemGroup>
+  <!--#endif -->
+
+  <ItemGroup>
+    <!--#if (auth_simple) -->
+    <PackageReference Include="GKit.Authentication.Simple" Version="GKIT-VERSION" />
+    <!--#endif -->
+    <!--#if (auth_ad) -->
+    <PackageReference Include="GKit.Authentication.ActiveDirectory" Version="GKIT-VERSION" />
+    <!--#endif -->
+    <!--#if (auth_entra) -->
+    <PackageReference Include="Microsoft.Identity.Web" Version="3.16.0" />
+    <!--#endif -->
+    <!--#if (auth_cookie) -->
+    <PackageReference Include="GKit.Authentication.Blazor" Version="GKIT-VERSION" />
+    <!--#endif -->
+  </ItemGroup>
+
+  <ItemGroup>
+    <!--#if (host_windows) -->
+    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="10.0.12" />
+    <!--#endif -->
+    <!--#if (host_systemd) -->
+    <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="10.0.12" />
+    <!--#endif -->
+  </ItemGroup>
+
+  <ItemGroup>
+    <!--#if (quartz) -->
+    <PackageReference Include="GKit.Quartz" Version="GKIT-VERSION" />
+    <!--#endif -->
+    <!--#if (opcua) -->
+    <PackageReference Include="GKit.OpcUa" Version="GKIT-VERSION" />
+    <!--#endif -->
+    <!--#if (plc) -->
+    <PackageReference Include="GKit.PLC" Version="GKIT-VERSION" />
+    <!--#endif -->
+    <!--#if (mqtt) -->
+    <PackageReference Include="GKit.Mqtt" Version="GKIT-VERSION" />
+    <!--#endif -->
+    <!--#if (pdf) -->
+    <PackageReference Include="GKit.Pdf" Version="GKIT-VERSION" />
+    <!--#endif -->
+    <!--#if (rentri) -->
+    <PackageReference Include="GKit.RENTRI" Version="GKIT-VERSION" />
+    <!--#endif -->
+    <!--#if (reporting) -->
+    <PackageReference Include="GKit.Reporting" Version="GKIT-VERSION" />
+    <!--#endif -->
+    <!--#if (settings) -->
+    <PackageReference Include="GKit.Settings" Version="GKIT-VERSION" />
+    <!--#endif -->
+    <!--#if (smartcard) -->
+    <PackageReference Include="GKit.SmartCardHost" Version="GKIT-VERSION" />
+    <!--#endif -->
+    <!--#if (smtp) -->
+    <PackageReference Include="GKit.SmtpHost" Version="GKIT-VERSION" />
+    <!--#endif -->
+    <!--#if (telegram) -->
+    <PackageReference Include="GKit.TelegramBotEndpoint" Version="GKIT-VERSION" />
+    <!--#endif -->
+  </ItemGroup>
+
+  <!--#if (httpsCerts) -->
+  <ItemGroup>
+    <Content Include="certs/*" Condition="'$(Configuration)'!='Release'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <!--#endif -->
+
+</Project>

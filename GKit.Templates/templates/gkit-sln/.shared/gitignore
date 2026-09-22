@@ -1,0 +1,33 @@
+## Build output
+[Bb]in/
+[Oo]bj/
+build/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+.idea/
+.vscode/
+
+## Rider / ReSharper
+*.DotSettings.user
+
+## Test results
+[Tt]est[Rr]esult*/
+*.coverage
+coverage*.json
+coverage*.xml
+
+## Local secrets and certificates - never commit these
+certs/*.pfx
+certs/*.key
+certs/*.crt
+appsettings.Local.json
+*.db
+*.db-shm
+*.db-wal
+
+## OS noise
+.DS_Store
+Thumbs.db

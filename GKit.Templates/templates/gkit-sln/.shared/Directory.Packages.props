@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Central Package Management. Every project references packages without a Version attribute and
+  the versions live here, so a solution cannot end up with two different GKit.* versions in two
+  projects - which is what happened across the reference applications before this existed.
+
+  'gkit update' rewrites the GKit.* entries in this file; 'gkit new <project>' adds to them.
+-->
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+    <!--
+      The GKit packages are pinned with a floating patch ("0.1.*") so a solution picks up fixes
+      without a commit. Central Package Management rejects floating versions unless this is set.
+    -->
+    <CentralPackageFloatingVersionsEnabled>true</CentralPackageFloatingVersionsEnabled>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!--
+      Versioning applies to every project in the solution, so it is a global reference rather than
+      a per-project one. Under CPM this replaces the PackageReference in Directory.Build.props.
+    -->
+    <GlobalPackageReference Include="Nerdbank.GitVersioning" Version="3.10.94" />
+  </ItemGroup>
+
+  <ItemGroup Label="GKit">
+  </ItemGroup>
+
+  <ItemGroup Label="Third party">
+  </ItemGroup>
+</Project>

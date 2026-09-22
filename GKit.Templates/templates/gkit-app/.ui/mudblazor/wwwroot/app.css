@@ -1,0 +1,5 @@
+/* Application specific styles. MudBlazor supplies the rest through MudBlazor.min.css. */
+
+.validation-message {
+    color: var(--mud-palette-error);
+}

@@ -1,0 +1,43 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+
+name: ci
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "main"
+      - "dev*"
+  pull_request:
+    branches:
+      - "*"
+
+env:
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+  DOTNET_NOLOGO: true
+  # Must stay false: CultureInfo.GetCultureInfo("it-IT") silently returns the invariant culture
+  # under globalization-invariant mode, which would make culture dependent tests vacuous.
+  DOTNET_SYSTEM_GLOBALIZATION_INVARIANT: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Nerdbank.GitVersioning needs the full history to compute the version height.
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            10.x
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --no-restore --configuration Release
+
+      - name: Test
+        run: dotnet test --no-build --configuration Release --verbosity normal

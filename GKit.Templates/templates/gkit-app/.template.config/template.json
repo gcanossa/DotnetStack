@@ -1,0 +1,224 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Gianmaria Canossa",
+  "classifications": [ "Blazor", "Web", "GKit" ],
+  "identity": "GKit.Templates.App",
+  "name": "GKit Blazor application",
+  "shortName": "gkit-app",
+  "description": "Blazor Server host wired the way the GKit reference applications are: Application.Wrap, Serilog, health checks, localization, an EF DbContext factory and an optional UI adapter.",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "sourceName": "GKit.App1",
+  "preferNameDirectory": true,
+
+  "symbols": {
+    "ui": {
+      "type": "parameter",
+      "datatype": "choice",
+      "defaultValue": "mudblazor",
+      "description": "Which GKit UI adapter to wire up. An application picks exactly one.",
+      "choices": [
+        { "choice": "mudblazor", "description": "GKit.UI.MudBlazorExt over MudBlazor" },
+        { "choice": "radzen", "description": "GKit.UI.RadzenExt over Radzen.Blazor" },
+        { "choice": "none", "description": "Plain Blazor, no component library" }
+      ]
+    },
+    "db": {
+      "type": "parameter",
+      "datatype": "choice",
+      "defaultValue": "sqlserver",
+      "description": "EF Core provider for the application DbContext.",
+      "choices": [
+        { "choice": "sqlserver", "description": "Microsoft SQL Server" },
+        { "choice": "npgsql", "description": "PostgreSQL" },
+        { "choice": "mysql", "description": "MySQL" },
+        { "choice": "sqlite", "description": "SQLite" },
+        { "choice": "none", "description": "No database" }
+      ]
+    },
+    "auth": {
+      "type": "parameter",
+      "datatype": "choice",
+      "defaultValue": "none",
+      "description": "Authentication mode.",
+      "choices": [
+        { "choice": "none", "description": "Anonymous" },
+        { "choice": "simple", "description": "Local accounts via GKit.Authentication.Simple" },
+        { "choice": "activedirectory", "description": "LDAP via GKit.Authentication.ActiveDirectory" },
+        { "choice": "entra", "description": "Microsoft Entra ID" }
+      ]
+    },
+    "host": {
+      "type": "parameter",
+      "datatype": "choice",
+      "defaultValue": "windows-service",
+      "description": "Deployment shape.",
+      "choices": [
+        { "choice": "windows-service", "description": "Windows service (AddWindowsService)" },
+        { "choice": "systemd", "description": "systemd unit (AddSystemd)" },
+        { "choice": "docker", "description": "Container, no host integration" }
+      ]
+    },
+    "features": {
+      "type": "parameter",
+      "datatype": "choice",
+      "allowMultipleValues": true,
+      "defaultValue": "",
+      "description": "GKit capability packs to wire in.",
+      "choices": [
+        { "choice": "quartz", "description": "GKit.Quartz scheduling" },
+        { "choice": "opcua", "description": "GKit.OpcUa client" },
+        { "choice": "plc", "description": "GKit.PLC (Siemens S7)" },
+        { "choice": "mqtt", "description": "GKit.Mqtt client" },
+        { "choice": "pdf", "description": "GKit.Pdf" },
+        { "choice": "rentri", "description": "GKit.RENTRI" },
+        { "choice": "reporting", "description": "GKit.Reporting" },
+        { "choice": "settings", "description": "GKit.Settings" },
+        { "choice": "smartcard", "description": "GKit.SmartCardHost" },
+        { "choice": "smtp", "description": "GKit.SmtpHost" },
+        { "choice": "telegram", "description": "GKit.TelegramBotEndpoint" }
+      ]
+    },
+    "culture": {
+      "type": "parameter",
+      "datatype": "text",
+      "defaultValue": "it-IT",
+      "replaces": "GKIT-DEFAULT-CULTURE",
+      "description": "Default thread culture. it-IT matches every reference application; the GKit libraries themselves default to neutral English."
+    },
+    "cultures": {
+      "type": "parameter",
+      "datatype": "text",
+      "defaultValue": "\"en-US\", \"it-IT\"",
+      "replaces": "GKIT-SUPPORTED-CULTURES",
+      "description": "Supported request cultures, as a C# argument list."
+    },
+    "health": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "true",
+      "description": "Map /api/health through MapHealthChecksJson."
+    },
+    "httpsCerts": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "true",
+      "description": "Kestrel HTTPS endpoint backed by certs/certificate.pfx, plus a cert_renew script."
+    },
+    "cliRunners": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "true",
+      "description": "Emit CliRunners/CommandLineRunnerBase.cs for ICommandLineRunner commands."
+    },
+    "gkitVersion": {
+      "type": "parameter",
+      "datatype": "text",
+      "defaultValue": "0.1.*",
+      "replaces": "GKIT-VERSION",
+      "description": "Version range for every GKit.* package reference."
+    },
+
+    "ui_mudblazor": { "type": "computed", "value": "(ui == \"mudblazor\")" },
+    "ui_radzen": { "type": "computed", "value": "(ui == \"radzen\")" },
+    "ui_none": { "type": "computed", "value": "(ui == \"none\")" },
+    "ui_any": { "type": "computed", "value": "(ui != \"none\")" },
+
+    "db_sqlserver": { "type": "computed", "value": "(db == \"sqlserver\")" },
+    "db_npgsql": { "type": "computed", "value": "(db == \"npgsql\")" },
+    "db_mysql": { "type": "computed", "value": "(db == \"mysql\")" },
+    "db_sqlite": { "type": "computed", "value": "(db == \"sqlite\")" },
+    "db_any": { "type": "computed", "value": "(db != \"none\")" },
+
+    "auth_simple": { "type": "computed", "value": "(auth == \"simple\")" },
+    "auth_ad": { "type": "computed", "value": "(auth == \"activedirectory\")" },
+    "auth_entra": { "type": "computed", "value": "(auth == \"entra\")" },
+    "auth_any": { "type": "computed", "value": "(auth != \"none\")" },
+    "auth_cookie": { "type": "computed", "value": "(auth == \"simple\" || auth == \"activedirectory\")" },
+
+    "host_windows": { "type": "computed", "value": "(host == \"windows-service\")" },
+    "host_systemd": { "type": "computed", "value": "(host == \"systemd\")" },
+
+    "quartz": { "type": "computed", "value": "(features == \"quartz\")" },
+    "opcua": { "type": "computed", "value": "(features == \"opcua\")" },
+    "plc": { "type": "computed", "value": "(features == \"plc\")" },
+    "mqtt": { "type": "computed", "value": "(features == \"mqtt\")" },
+    "pdf": { "type": "computed", "value": "(features == \"pdf\")" },
+    "rentri": { "type": "computed", "value": "(features == \"rentri\")" },
+    "reporting": { "type": "computed", "value": "(features == \"reporting\")" },
+    "settings": { "type": "computed", "value": "(features == \"settings\")" },
+    "smartcard": { "type": "computed", "value": "(features == \"smartcard\")" },
+    "smtp": { "type": "computed", "value": "(features == \"smtp\")" },
+    "telegram": { "type": "computed", "value": "(features == \"telegram\")" }
+  },
+
+  "sources": [
+    {
+      "source": "./.shared/",
+      "target": "./",
+      "modifiers": [
+        { "condition": "(!cliRunners)", "exclude": [ "CliRunners/**" ] },
+        { "condition": "(!httpsCerts)", "exclude": [ "certs/**", "cert_renew.sh" ] },
+        { "condition": "(!db_any)", "exclude": [ "Data/**" ] },
+        { "condition": "(!auth_simple)", "exclude": [ "Data/ApplicationUser.cs" ] }
+      ]
+    },
+    {
+      "source": "./.ui/mudblazor/",
+      "target": "./",
+      "condition": "(ui_mudblazor)",
+      "modifiers": [
+        {
+          "condition": "(auth_cookie)",
+          "exclude": [ "Components/Routes.razor" ],
+          "rename": { "Components/Routes.Auth.razor": "Components/Routes.razor" }
+        },
+        { "condition": "(!auth_cookie)", "exclude": [ "Components/Routes.Auth.razor" ] }
+      ]
+    },
+    {
+      "source": "./.ui/radzen/",
+      "target": "./",
+      "condition": "(ui_radzen)",
+      "modifiers": [
+        {
+          "condition": "(auth_cookie)",
+          "exclude": [ "Components/Routes.razor" ],
+          "rename": { "Components/Routes.Auth.razor": "Components/Routes.razor" }
+        },
+        { "condition": "(!auth_cookie)", "exclude": [ "Components/Routes.Auth.razor" ] }
+      ]
+    },
+    {
+      "source": "./.ui/none/",
+      "target": "./",
+      "condition": "(ui_none)",
+      "modifiers": [
+        {
+          "condition": "(auth_cookie)",
+          "exclude": [ "Components/Routes.razor" ],
+          "rename": { "Components/Routes.Auth.razor": "Components/Routes.razor" }
+        },
+        { "condition": "(!auth_cookie)", "exclude": [ "Components/Routes.Auth.razor" ] }
+      ]
+    },
+    {
+      "source": "./.auth/",
+      "target": "./",
+      "condition": "(auth_cookie)"
+    }
+  ],
+
+  "primaryOutputs": [ { "path": "GKit.App1.csproj" } ],
+
+  "postActions": [
+    {
+      "description": "Restore NuGet packages",
+      "manualInstructions": [ { "text": "Run 'dotnet restore'" } ],
+      "actionId": "210D431B-A78B-4D2F-B762-4ED3E3EA9025",
+      "continueOnError": true
+    }
+  ]
+}

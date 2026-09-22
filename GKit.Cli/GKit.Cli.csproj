@@ -1,0 +1,45 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>GKit.Cli</RootNamespace>
+
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>gkit</ToolCommandName>
+    <IsPackable>true</IsPackable>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Authors>Gianmaria Canossa</Authors>
+    <Description>Command line companion to the GKit suite: scaffolds solutions from GKit.Templates and handles the lifecycle work dotnet new cannot express - swapping package and project references, aligning versions, diagnosing drift and running the UI migration codemod.</Description>
+    <PackageProjectUrl>https://github.com/gcanossa/DotnetStack</PackageProjectUrl>
+    <PackageTags>gkit;cli;dotnet-tool;scaffolding;templates</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- One source of truth: the manifest the templates document is the manifest the tool reads. -->
+    <EmbeddedResource Include="..\GKit.Templates\features.json" LogicalName="GKit.Cli.features.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.CommandLine" Version="2.0.12" />
+    <PackageReference Update="Nerdbank.GitVersioning">
+      <Version>3.10.94</Version>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="GKit.Tests" />
+  </ItemGroup>
+
+</Project>

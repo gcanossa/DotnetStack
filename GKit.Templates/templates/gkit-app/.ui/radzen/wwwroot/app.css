@@ -1,0 +1,5 @@
+/* Application specific styles. Radzen supplies the rest through material-base.css. */
+
+.validation-message {
+    color: var(--rz-danger);
+}

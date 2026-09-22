@@ -1,0 +1,21 @@
+﻿@page "/Error"
+@using System.Diagnostics
+
+<PageTitle>Error</PageTitle>
+
+<RadzenText TextStyle="TextStyle.H4">Something went wrong</RadzenText>
+
+@if (ShowRequestId)
+{
+    <RadzenText><strong>Request:</strong> <code>@RequestId</code></RadzenText>
+}
+
+@code {
+    [CascadingParameter] private HttpContext? HttpContext { get; set; }
+
+    private string? RequestId { get; set; }
+    private bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
+
+    protected override void OnInitialized() =>
+        RequestId = Activity.Current?.Id ?? HttpContext?.TraceIdentifier;
+}

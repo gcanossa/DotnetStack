@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageType>Template</PackageType>
+    <TargetFramework>net10.0</TargetFramework>
+
+    <!-- A template pack ships content, not assemblies. -->
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <IncludeContentInPack>true</IncludeContentInPack>
+    <ContentTargetFolders>content</ContentTargetFolders>
+    <NoWarn>$(NoWarn);NU5128</NoWarn>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <IsPackable>true</IsPackable>
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Authors>Gianmaria Canossa</Authors>
+    <Title>GKit solution templates</Title>
+    <Description>dotnet new templates scaffolding a GKit solution: Blazor host, shared domain layer, data layer, migrator, worker and test projects</Description>
+    <PackageProjectUrl>https://github.com/gcanossa/DotnetStack</PackageProjectUrl>
+    <PackageTags>dotnet-new;templates;gkit;blazor;scaffolding</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="templates\**\*" Exclude="templates\**\bin\**;templates\**\obj\**" />
+    <Content Include="features.json" />
+    <None Include="README.md" Pack="true" PackagePath="" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="Nerdbank.GitVersioning">
+      <Version>3.10.94</Version>
+    </PackageReference>
+  </ItemGroup>
+
+</Project>

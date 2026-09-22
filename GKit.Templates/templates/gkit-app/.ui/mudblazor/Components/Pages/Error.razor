@@ -1,0 +1,21 @@
+﻿@page "/Error"
+@using System.Diagnostics
+
+<PageTitle>Error</PageTitle>
+
+<MudText Typo="Typo.h4" Color="Color.Error" GutterBottom="true">Something went wrong</MudText>
+
+@if (ShowRequestId)
+{
+    <MudText><strong>Request:</strong> <code>@RequestId</code></MudText>
+}
+
+@code {
+    [CascadingParameter] private HttpContext? HttpContext { get; set; }
+
+    private string? RequestId { get; set; }
+    private bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
+
+    protected override void OnInitialized() =>
+        RequestId = Activity.Current?.Id ?? HttpContext?.TraceIdentifier;
+}

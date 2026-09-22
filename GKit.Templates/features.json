@@ -1,0 +1,340 @@
+{
+  "$comment": [
+    "Declarative manifest shared by the templates and GKit.Cli.",
+    "GKit.Cli holds no hard-coded knowledge of UI adapters, capabilities, database providers",
+    "or authentication modes: adding one is a row here, not a change to a command.",
+    "",
+    "Each capability entry carries the four edits that must stay in step — package reference,",
+    "using directive, the Add... call in Program.cs and the Add...Check in the health-check",
+    "chain — because getting three of the four right is the usual way a new project ends up",
+    "half-wired."
+  ],
+  "schema": 1,
+
+  "frameworkVersion": "10.0.12",
+  "defaultGKitVersion": "0.1.*",
+
+  "ui": {
+    "mudblazor": {
+      "displayName": "MudBlazor",
+      "packages": [
+        { "id": "GKit.UI.MudBlazorExt", "version": "$(GKitVersion)" },
+        { "id": "MudBlazor", "version": "9.9.0" }
+      ],
+      "usings": [ "GKit.UI.MudBlazorExt", "MudBlazor", "MudBlazor.Services" ],
+      "razorUsings": [ "GKit.UI", "GKit.UI.Data", "GKit.UI.MudBlazorExt", "MudBlazor" ],
+      "services": [
+        "builder.Services.AddMudServices(options =>",
+        "{",
+        "    options.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.BottomLeft;",
+        "});",
+        "builder.Services.AddGKitMudBlazorUi();"
+      ],
+      "hostComponent": "<MudThemeProvider /><MudPopoverProvider /><MudDialogProvider /><MudSnackbarProvider />"
+    },
+    "radzen": {
+      "displayName": "Radzen",
+      "packages": [
+        { "id": "GKit.UI.RadzenExt", "version": "$(GKitVersion)" },
+        { "id": "Radzen.Blazor", "version": "11.4.1" }
+      ],
+      "usings": [ "GKit.UI.RadzenExt", "Radzen" ],
+      "razorUsings": [ "GKit.UI", "GKit.UI.Data", "GKit.UI.RadzenExt", "Radzen", "Radzen.Blazor" ],
+      "services": [
+        "builder.Services.AddRadzenComponents();",
+        "builder.Services.AddGKitRadzenUi();"
+      ],
+      "hostComponent": "<RadzenComponents />"
+    },
+    "none": {
+      "displayName": "no UI adapter",
+      "packages": [],
+      "usings": [],
+      "razorUsings": [],
+      "services": [],
+      "hostComponent": ""
+    }
+  },
+
+  "db": {
+    "sqlserver": {
+      "displayName": "SQL Server",
+      "packages": [ { "id": "Microsoft.EntityFrameworkCore.SqlServer", "version": "$(FrameworkVersion)" } ],
+      "useMethod": "UseSqlServer",
+      "extraOptions": ".EnableRetryOnFailure()",
+      "connectionString": "Server=localhost;Database=$(AppName);User Id=sa;Password=development;Encrypt=True;TrustServerCertificate=True",
+      "compose": {
+        "image": "mcr.microsoft.com/mssql/server:2022-latest",
+        "port": "1433:1433",
+        "environment": { "ACCEPT_EULA": "Y", "MSSQL_SA_PASSWORD": "development" }
+      }
+    },
+    "npgsql": {
+      "displayName": "PostgreSQL",
+      "packages": [ { "id": "Npgsql.EntityFrameworkCore.PostgreSQL", "version": "10.0.3" } ],
+      "useMethod": "UseNpgsql",
+      "extraOptions": "",
+      "connectionString": "Server=localhost;Port=5432;Database=$(AppName);User Id=postgres;Password=development;",
+      "compose": {
+        "image": "postgres:18-alpine",
+        "port": "5432:5432",
+        "environment": { "POSTGRES_PASSWORD": "development" }
+      }
+    },
+    "mysql": {
+      "displayName": "MySQL",
+      "packages": [ { "id": "MySql.EntityFrameworkCore", "version": "10.0.7" } ],
+      "useMethod": "UseMySQL",
+      "extraOptions": "",
+      "connectionString": "Server=localhost;Port=3306;Database=$(AppName);User Id=root;Password=development;",
+      "compose": {
+        "image": "mysql:8",
+        "port": "3306:3306",
+        "environment": { "MYSQL_ROOT_PASSWORD": "development" }
+      }
+    },
+    "sqlite": {
+      "displayName": "SQLite",
+      "packages": [ { "id": "Microsoft.EntityFrameworkCore.Sqlite", "version": "$(FrameworkVersion)" } ],
+      "useMethod": "UseSqlite",
+      "extraOptions": "",
+      "connectionString": "DataSource=$(AppName).db",
+      "compose": null
+    },
+    "none": {
+      "displayName": "no database",
+      "packages": [],
+      "useMethod": null,
+      "extraOptions": "",
+      "connectionString": null,
+      "compose": null
+    }
+  },
+
+  "auth": {
+    "none": {
+      "displayName": "no authentication",
+      "packages": [],
+      "usings": [],
+      "services": [],
+      "configurationSection": null
+    },
+    "simple": {
+      "displayName": "local accounts (cookie)",
+      "packages": [ { "id": "GKit.Authentication.Simple", "version": "$(GKitVersion)" } ],
+      "usings": [ "GKit.Authentication.Simple" ],
+      "services": [
+        "builder.Services.AddCascadingAuthenticationState();",
+        "builder.Services.AddSimpleAuthentication<ApplicationDbContext, ApplicationUser>();"
+      ],
+      "configurationSection": "GKit:SimpleAuthentication"
+    },
+    "activedirectory": {
+      "displayName": "Active Directory (LDAP)",
+      "packages": [ { "id": "GKit.Authentication.ActiveDirectory", "version": "$(GKitVersion)" } ],
+      "usings": [ "GKit.Authentication.ActiveDirectory" ],
+      "services": [
+        "builder.Services.AddCascadingAuthenticationState();",
+        "builder.Services.AddActiveDirectoryAuthentication();"
+      ],
+      "configurationSection": "GKit:ActiveDirectory"
+    },
+    "entra": {
+      "displayName": "Microsoft Entra ID",
+      "packages": [ { "id": "Microsoft.Identity.Web", "version": "3.16.0" } ],
+      "usings": [ "Microsoft.Identity.Web", "Microsoft.Identity.Web.UI" ],
+      "services": [
+        "builder.Services.AddCascadingAuthenticationState();",
+        "builder.Services.AddMicrosoftIdentityWebAppAuthentication(builder.Configuration, \"AzureAd\");"
+      ],
+      "configurationSection": "AzureAd"
+    }
+  },
+
+  "features": {
+    "quartz": {
+      "displayName": "Quartz scheduling",
+      "packages": [ { "id": "GKit.Quartz", "version": "$(GKitVersion)" } ],
+      "using": "GKit.Quartz",
+      "services": [ "builder.Services.AddGKitQuartz();" ],
+      "healthCheck": ".AddQuartzCheck(\"SCHEDULER\")",
+      "appCalls": [ "app.UseGKitQuartz();" ],
+      "configurationSection": "GKit:Quartz"
+    },
+    "opcua": {
+      "displayName": "OPC UA client",
+      "packages": [ { "id": "GKit.OpcUa", "version": "$(GKitVersion)" } ],
+      "using": "GKit.OpcUa",
+      "services": [],
+      "healthCheck": ".AddOpcUaContextCheck<AppOpcUaContext>(\"OPCUA\")",
+      "appCalls": [],
+      "configurationSection": null,
+      "note": "Needs an OpcUaContext: scaffold one with 'gkit add opcua-context'."
+    },
+    "plc": {
+      "displayName": "Siemens S7 PLC",
+      "packages": [ { "id": "GKit.PLC", "version": "$(GKitVersion)" } ],
+      "using": "GKit.PLC",
+      "services": [],
+      "healthCheck": ".AddPlcContextCheck<AppPlcContext>(\"PLC\")",
+      "appCalls": [],
+      "configurationSection": null,
+      "note": "Needs a PlcContext: scaffold one with 'gkit add plc-context'."
+    },
+    "mqtt": {
+      "displayName": "MQTT client",
+      "packages": [ { "id": "GKit.Mqtt", "version": "$(GKitVersion)" } ],
+      "using": "GKit.Mqtt",
+      "services": [],
+      "healthCheck": null,
+      "appCalls": [],
+      "configurationSection": "GKit:Mqtt"
+    },
+    "pdf": {
+      "displayName": "PDF stamping and reading",
+      "packages": [ { "id": "GKit.Pdf", "version": "$(GKitVersion)" } ],
+      "using": "GKit.Pdf",
+      "services": [ "builder.Services.AddGKitPdfServices();" ],
+      "healthCheck": null,
+      "appCalls": [],
+      "configurationSection": null
+    },
+    "rentri": {
+      "displayName": "RENTRI API",
+      "packages": [ { "id": "GKit.RENTRI", "version": "$(GKitVersion)" } ],
+      "using": "GKit.RENTRI",
+      "services": [ "builder.Services.AddRentriServices();" ],
+      "healthCheck": ".AddRentriCheck(\"RENTRI_API\")",
+      "appCalls": [],
+      "configurationSection": "GKit:Rentri"
+    },
+    "reporting": {
+      "displayName": "CSV and XLSX reporting",
+      "packages": [ { "id": "GKit.Reporting", "version": "$(GKitVersion)" } ],
+      "using": "GKit.Reporting",
+      "services": [],
+      "healthCheck": null,
+      "appCalls": [],
+      "configurationSection": null
+    },
+    "settings": {
+      "displayName": "database backed settings",
+      "packages": [ { "id": "GKit.Settings", "version": "$(GKitVersion)" } ],
+      "using": "GKit.Settings",
+      "services": [],
+      "healthCheck": null,
+      "configurationSection": null,
+      "appCalls": []
+    },
+    "smartcard": {
+      "displayName": "smart card reader host",
+      "packages": [ { "id": "GKit.SmartCardHost", "version": "$(GKitVersion)" } ],
+      "using": "GKit.SmartCardHost",
+      "services": [ "builder.Services.AddGKitSmartCardHost();" ],
+      "healthCheck": ".AddSmartCardHostCheck(\"SMART_CARD\")",
+      "appCalls": [ "app.MapGKitSmartCardHost();" ],
+      "configurationSection": null
+    },
+    "smtp": {
+      "displayName": "embedded SMTP server",
+      "packages": [ { "id": "GKit.SmtpHost", "version": "$(GKitVersion)" } ],
+      "using": "GKit.SmtpHost",
+      "services": [],
+      "healthCheck": null,
+      "appCalls": [],
+      "configurationSection": "GKit:Smtp"
+    },
+    "telegram": {
+      "displayName": "Telegram bot endpoint",
+      "packages": [ { "id": "GKit.TelegramBotEndpoint", "version": "$(GKitVersion)" } ],
+      "using": "GKit.TelegramBotEndpoint",
+      "services": [],
+      "healthCheck": null,
+      "appCalls": [],
+      "configurationSection": "GKit:Telegram"
+    },
+    "dbmigration": {
+      "displayName": "legacy database migration",
+      "packages": [ { "id": "GKit.DbMigration", "version": "$(GKitVersion)" } ],
+      "using": "GKit.DbMigration",
+      "services": [],
+      "healthCheck": null,
+      "appCalls": [],
+      "configurationSection": null
+    }
+  },
+
+  "retiredPackages": {
+    "GKit.MudBlazorExt": {
+      "replacement": "GKit.UI.MudBlazorExt",
+      "reason": "renamed for symmetry with GKit.UI.RadzenExt; see docs/ui-abstraction-proposal.md section 4"
+    }
+  },
+
+  "gkitPackages": [
+    "GKit.Application",
+    "GKit.Authentication.ActiveDirectory",
+    "GKit.Authentication.Blazor",
+    "GKit.Authentication.Simple",
+    "GKit.BlazorExt",
+    "GKit.DbMigration",
+    "GKit.EntityFramework",
+    "GKit.Mqtt",
+    "GKit.OpcUa",
+    "GKit.Pdf",
+    "GKit.PLC",
+    "GKit.Quartz",
+    "GKit.RENTRI",
+    "GKit.Reporting",
+    "GKit.Settings",
+    "GKit.SmartCardHost",
+    "GKit.SmartCardHost.Blazor",
+    "GKit.SmtpHost",
+    "GKit.TelegramBotEndpoint",
+    "GKit.TelegramHost",
+    "GKit.UI.Abstractions",
+    "GKit.UI.Data",
+    "GKit.UI.Localization",
+    "GKit.UI.MudBlazorExt",
+    "GKit.UI.RadzenExt"
+  ],
+
+  "uiMigration": {
+    "$comment": "Backs 'gkit migrate ui'. Section 9 of docs/ui-abstraction-proposal.md.",
+    "renames": [
+      { "from": "GKit.MudBlazorExt", "to": "GKit.UI.MudBlazorExt", "kind": "namespaceOrPackage" },
+      { "from": "CellContext<", "to": "RowContext<", "kind": "type" },
+      { "from": "GridStateVirtualize<", "to": "GridQuery<", "kind": "type" },
+      { "from": "GridData<", "to": "GridPage<", "kind": "type" },
+      { "from": "Color.Error", "to": "UiColor.Error", "kind": "member" },
+      { "from": "Color.Primary", "to": "UiColor.Primary", "kind": "member" },
+      { "from": "Color.Secondary", "to": "UiColor.Secondary", "kind": "member" },
+      { "from": "Color.Success", "to": "UiColor.Success", "kind": "member" },
+      { "from": "Color.Warning", "to": "UiColor.Warning", "kind": "member" },
+      { "from": "Color.Info", "to": "UiColor.Info", "kind": "member" },
+      { "from": "Icons.Material.Filled.Edit", "to": "UiIcon.Edit", "kind": "member" },
+      { "from": "Icons.Material.Filled.Delete", "to": "UiIcon.Delete", "kind": "member" },
+      { "from": "Icons.Material.Filled.Add", "to": "UiIcon.Add", "kind": "member" },
+      { "from": "Icons.Material.Filled.Search", "to": "UiIcon.Search", "kind": "member" },
+      { "from": "Icons.Material.Filled.Refresh", "to": "UiIcon.Refresh", "kind": "member" }
+    ],
+    "reportOnly": [
+      {
+        "pattern": "(?<attr>Property|SortBy|FilterProperty)\\s*=\\s*\"?@?\\(?\\s*x\\s*=>[^\"]*\\(\\)",
+        "message": "Method call inside a grid property expression. Radzen columns take a string path and its Dynamic LINQ sorter cannot invoke methods: add SortProperty/FilterProperty overrides or a mapped shadow property. See section 9.2 of the UI proposal."
+      },
+      {
+        "pattern": "IEnumerable<IFilterDefinition<",
+        "message": "IEnumerable<IFilterDefinition<T>> parameters become GridFilterSet<T>. The replacement is not a rename: the call sites also change from QueryFilterExtensions.Where(q, defs) to defs.ApplyFilters(q)."
+      },
+      {
+        "pattern": "QueryFilterExtensions\\.Where\\s*\\(",
+        "message": "Replace QueryFilterExtensions.Where(query, state.FilterDefinitions) with state.ApplyFilters(query)."
+      },
+      {
+        "pattern": "<MudForm",
+        "message": "A nested MudForm per collection item has no Radzen analogue. Collapse to one form with RuleForEach(x => x.Items).SetValidator(...). Only relevant when migrating to the Radzen adapter."
+      }
+    ]
+  }
+}

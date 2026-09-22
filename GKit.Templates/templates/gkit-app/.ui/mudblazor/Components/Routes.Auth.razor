@@ -1,0 +1,12 @@
+﻿<Router AppAssembly="@typeof(Program).Assembly">
+    <Found Context="routeData">
+        <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(Layout.MainLayout)">
+            <NotAuthorized>
+                @* Fully qualified on purpose: an @using for GKit.Authentication.Blazor in the
+                   shared _Imports would not compile when the template is generated without auth. *@
+                <GKit.Authentication.Blazor.RedirectToLogin />
+            </NotAuthorized>
+        </AuthorizeRouteView>
+        <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+    </Found>
+</Router>

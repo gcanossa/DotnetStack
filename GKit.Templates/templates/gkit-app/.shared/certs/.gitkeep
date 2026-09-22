@@ -1,0 +1,1 @@
+Generated certificates land here. Run ../cert_renew.sh <servername> to create certificate.pfx.
