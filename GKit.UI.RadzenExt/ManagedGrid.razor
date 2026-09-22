@@ -1,0 +1,78 @@
+@typeparam T where T : class
+
+<div class="rz-mb-2 rz-display-flex rz-align-items-center">
+  <RadzenText TextStyle="TextStyle.H6" Class="rz-mr-auto">@Title</RadzenText>
+
+  @if (HeaderControls != null)
+  {
+    @HeaderControls
+  }
+  @if (Exportable)
+  {
+    <RadzenButton Icon="@IconSet.Resolve(UiIcon.Download)" ButtonStyle="ButtonStyle.Base"
+                  Size="ButtonSize.Small" Class="rz-ml-2" title="@Strings.ExportXlsx"
+                  Click="@(_ => ExportXlsAsync())" />
+  }
+  @if (Refreshable)
+  {
+    <RadzenButton Icon="@IconSet.Resolve(UiIcon.Refresh)" ButtonStyle="ButtonStyle.Base"
+                  Size="ButtonSize.Small" Class="rz-ml-2" title="@Strings.Refresh"
+                  Click="@(_ => RefreshDataAsync())" />
+  }
+  @if (DefaultHeaderControls != null)
+  {
+    @DefaultHeaderControls
+  }
+</div>
+
+<RadzenDataGrid @ref="Component" TItem="T" Data="@Data" Count="@Count" LoadData="@ManagedLoadServerData"
+                AllowVirtualization="@Virtualize" AllowPaging="@(!Virtualize)" AllowSorting="true"
+                AllowMultiColumnSorting="true" AllowFiltering="true"
+                FilterMode="FilterMode.Advanced" IsLoading="@Loading"
+                AllowColumnReorder="@DragDropColumnReordering" AllowColumnResize="@AllowColumnResize"
+                AllowColumnPicking="true" Density="Density.Compact"
+                EmptyText="@Strings.NoRecords" Style="@(Virtualize ? "height: 75vh" : null)"
+                PageSize="@PageSize"
+                SelectionMode="@(MultiSelection ? DataGridSelectionMode.Multiple : DataGridSelectionMode.Single)"
+                Value="@SelectedItems" ValueChanged="@SelectedItemsChanged"
+                RowSelect="@RowSelect">
+  <Columns>
+    @if (EffectiveRowControls.Any())
+    {
+      <RadzenDataGridColumn TItem="T" Title="" Sortable="false" Filterable="false" Frozen="true"
+                            Width="@($"{ControlHeaderWidth}rem")">
+        <Template Context="item">
+          @switch (RowControlsVariant)
+          {
+            case GridRowControlsVariant.Expanded:
+              <div class="rz-display-flex rz-gap-1">
+                @foreach (var control in EffectiveRowControls)
+                {
+                  <RadzenButton Icon="@ResolveIcon(control)" Size="ButtonSize.ExtraSmall"
+                                ButtonStyle="@control.Color.ToButtonStyle()" Variant="Variant.Text"
+                                title="@control.Text"
+                                Disabled="@(control.Disabled?.Invoke(new RowContext<T>(item, 0)) ?? false)"
+                                Click="@(_ => OnRowControlClick(control, item, 0))" />
+                }
+              </div>
+              break;
+            case GridRowControlsVariant.Menu:
+              <RadzenProfileMenu Icon="@IconSet.Resolve(UiIcon.More)" aria-label="@Strings.RowActionsMenu">
+                <ChildContent>
+                  @foreach (var control in EffectiveRowControls)
+                  {
+                    <RadzenProfileMenuItem Text="@control.Text" Icon="@ResolveIcon(control)"
+                                           Click="@(() => OnRowControlClick(control, item, 0))" />
+                  }
+                </ChildContent>
+              </RadzenProfileMenu>
+              break;
+            default:
+              break;
+          }
+        </Template>
+      </RadzenDataGridColumn>
+    }
+    @Columns
+  </Columns>
+</RadzenDataGrid>

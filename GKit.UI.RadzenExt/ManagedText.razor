@@ -1,0 +1,51 @@
+@inject IJSRuntime JSRuntime
+@inject IUiIconSet IconSet
+
+<div style="display: flex; align-items: center;">
+  <RadzenText Style="width: 100%;">@(Visible ? Text : new string(HiddenCharacter, SecureHiddenLength))</RadzenText>
+
+  @if (Secure)
+  {
+    <RadzenButton Icon="@IconSet.Resolve(Visible ? UiIcon.VisibilityOff : UiIcon.Visibility)"
+                  ButtonStyle="ButtonStyle.Base" Variant="Variant.Text" Size="ButtonSize.Small"
+                  Click="@(_ => ToggleVisible())" />
+  }
+  <RadzenButton Icon="@IconSet.Resolve(UiIcon.ContentCopy)" ButtonStyle="ButtonStyle.Base"
+                Variant="Variant.Text" Size="ButtonSize.Small" Click="@(_ => CopyText())" />
+</div>
+
+@code {
+  [Parameter] public bool Visible { get; set; } = true;
+
+  [Parameter] public string Text { get; set; } = "";
+
+  [Parameter] public bool Secure { get; set; }
+
+  [Parameter] public int SecureHiddenLength { get; set; } = 8;
+
+  [Parameter] public char HiddenCharacter { get; set; } = '*';
+
+  [Parameter] public EventCallback OnCopy { get; set; }
+
+  protected override Task OnInitializedAsync()
+  {
+    if (Secure)
+    {
+      Visible = false;
+      StateHasChanged();
+    }
+
+    return base.OnInitializedAsync();
+  }
+
+  public void ToggleVisible()
+  {
+    Visible = !Visible;
+  }
+
+  public async Task CopyText()
+  {
+    await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", Text);
+    await OnCopy.InvokeAsync();
+  }
+}

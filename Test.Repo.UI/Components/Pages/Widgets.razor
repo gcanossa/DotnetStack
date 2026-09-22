@@ -1,0 +1,20 @@
+@page "/widgets"
+@using Microsoft.EntityFrameworkCore
+
+@inherits DbContextProvider<DemoDbContext>
+
+<PageTitle>Widgets</PageTitle>
+
+<MudText Typo="Typo.h6" Class="my-4">Widgets (EntityGrid)</MudText>
+
+<WidgetGrid SharedContext="Context" OnDuplicate="OnDuplicate" />
+
+@code {
+  [Inject] private IUiNotifier Notifier { get; set; } = default!;
+
+  private Task OnDuplicate(Widget widget)
+  {
+    Notifier.Info($"Duplicate requested for {widget.Name}");
+    return Task.CompletedTask;
+  }
+}

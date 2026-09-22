@@ -1,0 +1,103 @@
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.Extensions.Logging
+@using System.Linq.Expressions
+
+@typeparam T where T : class
+@typeparam TItem
+
+@inherits ManagedItemAutocomplete<T, TItem>
+
+@* Razor emits @inject properties as private, so the base component's are re-injected here. *@
+@inject NavigationManager navigationManager
+@inject IUiDialogs Dialogs
+@inject IUiNotifier Notifier
+@inject IGKitUiStrings Strings
+@inject ILogger<EntityItemAutocomplete<T, TItem>> Logger
+
+@{
+  base.BuildRenderTree(__builder);
+}
+
+@code
+{
+  protected new RenderFragment? BeforeItemsTemplate { get; set; }
+
+  protected override void OnInitialized()
+  {
+    base.BeforeItemsTemplate = @<MudStack Row Justify="Justify.Center" Style="border-bottom: 1px solid lightgray;">
+                                 @if (EditDialog != null)
+                                 {
+                                   <MudButton Color="Color.Primary" OnClick="NewAsync">@Strings.Add</MudButton>
+                                 }
+                                 @if (EntitiesHref != null)
+                                 {
+                                   <MudButton OnClick="() => navigationManager.NavigateTo(EntitiesHref)">
+                                     @Strings.OpenRegistry
+                                   </MudButton>
+                                 }
+                               </MudStack>;
+
+    base.NoItemsTemplate = @<MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Style="border-bottom: 1px solid lightgray;">
+                             @if (EditDialog != null)
+                             {
+                               <MudButton Color="Color.Primary" OnClick="NewAsync">@Strings.Add</MudButton>
+                             }
+                             <MudText Class="mt-2 mb-2">@Strings.NoResults</MudText>
+                           </MudStack>;
+
+    base.OnInitialized();
+  }
+
+  [Parameter, EditorRequired] public DbContext Context { get; set; } = null!;
+
+  [Parameter] public string EntitiesHref { get; set; } = null!;
+
+  [Parameter] public Expression<Func<IEditEntityDialog<T>>> EditDialog { get; set; } = null!;
+
+  [Parameter, EditorRequired] public Func<DbContext, IQueryable<TItem>> QueryFactory { get; set; } = null!;
+
+  [Parameter, EditorRequired] public Func<string, Expression<Func<TItem, bool>>> SearchExp { get; set; } = null!;
+
+  protected override async Task<IReadOnlyList<TItem>> FetchAsync(string searchText, CancellationToken token)
+  {
+    var query = QueryFactory(Context);
+
+    if (string.IsNullOrEmpty(searchText))
+      return await query.ToListAsync(token);
+
+    return await query.Where(SearchExp(searchText)).ToListAsync(token);
+  }
+
+  /// <summary>
+  /// Creates a new entity inline, then selects it without discarding the current search.
+  /// </summary>
+  protected async Task NewAsync()
+  {
+    await Component.CloseMenuAsync();
+
+    var dialogType = (EditDialog.Body as NewExpression)!.Type;
+
+    var result = await Dialogs.ShowAsync(dialogType, Strings.CreateItemTitle, new Dictionary<string, object?>
+    {
+      [nameof(IEditEntityDialog<T>.Context)] = Context
+    });
+
+    if (result.Canceled || result.Data is null)
+      return;
+
+    try
+    {
+      var entry = Context.Attach(result.Data);
+
+      await Context.SaveChangesAsync();
+      Notifier.Success(Strings.ItemAdded);
+
+      await Component.SelectOptionAsync((T)entry.Entity);
+    }
+    catch (Exception e)
+    {
+      Logger.LogError(e, "Could not add entity of type {EntityType} from lookup", typeof(T).Name);
+      Notifier.Error(Strings.ItemAddFailed);
+    }
+  }
+}

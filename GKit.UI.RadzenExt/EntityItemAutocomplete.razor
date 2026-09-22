@@ -1,0 +1,99 @@
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.Extensions.Logging
+@using System.Linq.Expressions
+
+@typeparam T where T : class
+@typeparam TItem
+
+@inherits ManagedItemAutocomplete<T, TItem>
+
+@* Razor emits @inject properties as private, so the base component's are re-injected here. *@
+@inject NavigationManager navigationManager
+@inject IUiDialogs Dialogs
+@inject IUiNotifier Notifier
+@inject IGKitUiStrings Strings
+@inject ILogger<EntityItemAutocomplete<T, TItem>> Logger
+
+@{
+  base.BuildRenderTree(__builder);
+}
+
+@code
+{
+  protected new RenderFragment? HeaderTemplate { get; set; }
+
+  protected override void OnInitialized()
+  {
+    // Radzen's dropdown has a header slot, so the create/navigate affordances sit inside the
+    // popup as they do under MudBlazor rather than beside the input.
+    base.HeaderTemplate = @<div class="rz-display-flex rz-justify-content-center rz-gap-2 rz-p-2"
+                                style="border-bottom: 1px solid var(--rz-border-color, lightgray);">
+                             @if (EditDialog != null)
+                             {
+                               <RadzenButton ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small"
+                                             Text="@Strings.Add" Click="@(_ => NewAsync())" />
+                             }
+                             @if (EntitiesHref != null)
+                             {
+                               <RadzenButton ButtonStyle="ButtonStyle.Base" Size="ButtonSize.Small"
+                                             Text="@Strings.OpenRegistry"
+                                             Click="@(_ => navigationManager.NavigateTo(EntitiesHref))" />
+                             }
+                           </div>;
+
+    base.OnInitialized();
+  }
+
+  [Parameter, EditorRequired] public DbContext Context { get; set; } = null!;
+
+  [Parameter] public string EntitiesHref { get; set; } = null!;
+
+  [Parameter] public Expression<Func<IEditEntityDialog<T>>> EditDialog { get; set; } = null!;
+
+  [Parameter, EditorRequired] public Func<DbContext, IQueryable<TItem>> QueryFactory { get; set; } = null!;
+
+  [Parameter, EditorRequired] public Func<string, Expression<Func<TItem, bool>>> SearchExp { get; set; } = null!;
+
+  protected override async Task<IReadOnlyList<TItem>> FetchAsync(string searchText, CancellationToken token)
+  {
+    var query = QueryFactory(Context);
+
+    if (string.IsNullOrEmpty(searchText))
+      return await query.ToListAsync(token);
+
+    return await query.Where(SearchExp(searchText)).ToListAsync(token);
+  }
+
+  /// <summary>
+  /// Creates a new entity inline, then selects it.
+  /// </summary>
+  protected async Task NewAsync()
+  {
+    var dialogType = (EditDialog.Body as NewExpression)!.Type;
+
+    var result = await Dialogs.ShowAsync(dialogType, Strings.CreateItemTitle, new Dictionary<string, object?>
+    {
+      [nameof(IEditEntityDialog<T>.Context)] = Context
+    });
+
+    if (result.Canceled || result.Data is null)
+      return;
+
+    try
+    {
+      var entry = Context.Attach(result.Data);
+
+      await Context.SaveChangesAsync();
+      Notifier.Success(Strings.ItemAdded);
+
+      // Refresh the option list so the new entity is present, then select it.
+      await Engine.SearchItemsAsync("", CancellationToken.None);
+      await OnSelectedItemChanged((TItem)(object)entry.Entity);
+    }
+    catch (Exception e)
+    {
+      Logger.LogError(e, "Could not add entity of type {EntityType} from lookup", typeof(T).Name);
+      Notifier.Error(Strings.ItemAddFailed);
+    }
+  }
+}

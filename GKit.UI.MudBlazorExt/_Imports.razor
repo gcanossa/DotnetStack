@@ -1,0 +1,8 @@
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.JSInterop
+@* The "Ext" suffix is load-bearing. Razor emits using directives inside the generated namespace,
+   so from within a namespace named GKit.UI.MudBlazor an unqualified "MudBlazor" would resolve to
+   GKit.UI.MudBlazor itself rather than the library. GKit.UI.MudBlazorExt does not shadow it. *@
+@using MudBlazor
+@using GKit.UI
+@using GKit.UI.Data

@@ -1,0 +1,82 @@
+@using GKit.BlazorExt
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.EntityFrameworkCore
+
+@typeparam T where T : class
+@typeparam TForm where TForm : IComponent, IEditEntityForm<T>
+@typeparam TValidator where TValidator : AbstractValidatorBase<T>
+
+@inject HtmlAttrSetterService setter
+@inject IGKitUiStrings Strings
+@inject EditEntityDialogEngine<T> Engine
+@inject IUiDialogHost Host
+
+<div @ref="container">
+  <RadzenTemplateForm @ref="_form" TItem="T" Data="@Model">
+    <GKitFluentValidator T="T" />
+
+    <DynamicComponent @ref="_dynamicComponent" Type="typeof(TForm)" Parameters="_formParameters" />
+
+    <div class="rz-mt-4 rz-display-flex rz-gap-2">
+      <RadzenButton ButtonStyle="ButtonStyle.Primary" Text="@Strings.Save"
+                    Disabled="@(!(_form?.EditContext?.IsModified() ?? false))"
+                    Click="@(_ => SubmitAsync())" />
+      <RadzenButton ButtonStyle="ButtonStyle.Danger" Variant="Variant.Flat" Text="@Strings.Cancel"
+                    Click="@(_ => CancelAsync())" />
+    </div>
+  </RadzenTemplateForm>
+</div>
+
+@code {
+  protected RadzenTemplateForm<T>? _form;
+  protected DynamicComponent? _dynamicComponent;
+
+  ElementReference container;
+
+  [Parameter] public string Title { get; set; } = "";
+
+  [Parameter] public T Model { get; set; } = default!;
+
+  [Parameter] public DbContext Context { get; set; } = default!;
+
+  protected Dictionary<string, object> _formParameters = new();
+
+  protected IEditEntityForm<T>? FormInstance => _dynamicComponent?.Instance as IEditEntityForm<T>;
+
+  protected override void OnInitialized()
+  {
+    base.OnInitialized();
+
+    if (string.IsNullOrEmpty(Title))
+      Title = Strings.EditItemTitle;
+  }
+
+  protected override void OnParametersSet()
+  {
+    Model = Model ?? EmptyValueFactory();
+
+    _formParameters = new Dictionary<string, object>()
+    {
+      { nameof(IEditEntityForm<T>.Model), Model },
+      { nameof(IEditEntityForm<T>.Context), Context }
+    };
+  }
+
+  protected override async Task OnAfterRenderAsync(bool firstRender)
+  {
+    // Browsers ignore autocomplete="off" on many fields; a nonsense token reliably suppresses it.
+    await setter.SetAttributes(container, new Dictionary<string, object>() { { "autocomplete", "--off" } }, "input");
+
+    await base.OnAfterRenderAsync(firstRender);
+  }
+
+  protected async Task SubmitAsync()
+  {
+    await Engine.SubmitAsync(new RadzenUiFormHandle(_form!.EditContext!), FormInstance, Host, Model);
+  }
+
+  protected async Task CancelAsync()
+  {
+    await Engine.CancelAsync(new RadzenUiFormHandle(_form!.EditContext!), Host);
+  }
+}

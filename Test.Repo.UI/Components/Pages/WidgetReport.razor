@@ -1,0 +1,48 @@
+@page "/widget-report"
+@using Microsoft.EntityFrameworkCore
+
+@inject IDbContextFactory<DemoDbContext> Factory
+
+<PageTitle>Widget report</PageTitle>
+
+<MudText Typo="Typo.h6" Class="my-4">Widgets (ManagedGrid, hand-written loader)</MudText>
+
+<ManagedGrid @ref="_grid" T="Widget" LoadServerData="LoadAsync" ExportServerData="ExportAsync"
+             Title="Widget report" ToStringFunc="DemoQueries.DescribeWidget"
+             Exportable="true" Refreshable="true">
+  <Columns>
+    <PropertyColumn Property="x => x.Name" Title="Name" />
+    <PropertyColumn Property="x => x.Quantity" Title="Quantity" />
+    <PropertyColumn Property="x => x.Category!.Name" Title="Category" />
+  </Columns>
+</ManagedGrid>
+
+@code {
+  private ManagedGrid<Widget> _grid = default!;
+
+  @*
+    This is the shape application code takes under either adapter: GridQuery in, GridPage out,
+    with no component-library type in the signature.
+  *@
+  private async Task<GridPage<Widget>> LoadAsync(GridQuery<Widget> state, CancellationToken token)
+  {
+    await using var ctx = await Factory.CreateDbContextAsync(token);
+
+    var query = state.ApplyFilters(DemoQueries.Widgets(ctx).AsNoTracking());
+
+    var total = await query.CountAsync(token);
+
+    var items = await state.ApplySorts(query)
+      .Skip(state.StartIndex)
+      .Take(state.Count)
+      .ToListAsync(token);
+
+    return new GridPage<Widget> { Items = items, TotalItems = total };
+  }
+
+  private async Task<IQueryable<Widget>> ExportAsync(CancellationToken token)
+  {
+    var ctx = await Factory.CreateDbContextAsync(token);
+    return DemoQueries.Widgets(ctx).AsNoTracking();
+  }
+}

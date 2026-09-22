@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Test.Repo.UI.Radzen</RootNamespace>
+  </PropertyGroup>
+
+  <!--
+    The Radzen twin of Test.Repo.UI. Both hosts reference the same Test.Repo.UI.Shared, which is
+    what makes the "one domain layer, two UIs" claim checkable by the compiler rather than
+    asserted in a README.
+  -->
+  <ItemGroup>
+    <ProjectReference Include="..\GKit.BlazorExt\GKit.BlazorExt.csproj" />
+    <ProjectReference Include="..\GKit.UI.RadzenExt\GKit.UI.RadzenExt.csproj" />
+    <ProjectReference Include="..\GKit.UI.Localization\GKit.UI.Localization.csproj" />
+    <ProjectReference Include="..\Test.Repo.UI.Shared\Test.Repo.UI.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="Nerdbank.GitVersioning">
+      <Version>3.10.94</Version>
+    </PackageReference>
+  </ItemGroup>
+
+</Project>

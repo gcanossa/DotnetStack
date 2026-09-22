@@ -1,0 +1,96 @@
+@using GKit.BlazorExt
+
+@attribute [CascadingTypeParameter(nameof(T))]
+@typeparam T where T : class
+
+@* Paging and virtualisation are mutually exclusive on MudDataGrid: exactly one server-data
+   callback may be set, or the grid loads twice. *@
+<MudDataGrid @ref="Component" T="T"
+  VirtualizeServerData="@(Virtualize ? ManagedLoadVirtualizedData : null)"
+  ServerData="@(Virtualize ? null : ManagedLoadPagedData)"
+  Height="@(Virtualize ? "75vh" : null)" ItemSize="43" FixedHeader
+  RowsPerPage="@PageSize"
+  FixedFooter Filterable SortMode="SortMode.Multiple" Virtualize="@Virtualize" Dense Hover ShowColumnOptions
+  DragDropColumnReordering="@DragDropColumnReordering" DragIndicatorIcon="@IconSet.Resolve(UiIcon.DragIndicator)"
+  ApplyDropClassesOnDragStarted="true" RowClassFunc="RowClassFunc" Loading="Loading"
+  ColumnResizeMode="ColumnResizeMode" RowClick="RowClick"
+  MultiSelection="MultiSelection" SelectOnRowClick="SelectOnRowClick"
+  SelectedItems="SelectedItems" SelectedItemsChanged="SelectedItemsChanged"
+  SelectedItem="SelectedItem" SelectedItemChanged="SelectedItemChanged">
+  <ToolBarContent>
+    <MudText Typo="Typo.h6">@Title</MudText>
+    <MudSpacer />
+    @if (HeaderControls != null)
+    {
+      @HeaderControls
+    }
+    @if (Exportable)
+    {
+      <MudTooltip Text="@Strings.ExportXlsx">
+        <MudFab StartIcon="@IconSet.Resolve(UiIcon.Download)" Size="Size.Small" Color="Color.Default"
+                OnClick="() => ExportXlsAsync()" Class="mx-2" />
+      </MudTooltip>
+    }
+    @if (Refreshable)
+    {
+      <MudTooltip Text="@Strings.Refresh">
+        <MudFab StartIcon="@IconSet.Resolve(UiIcon.Refresh)" Size="Size.Small" Color="Color.Default"
+                OnClick="() => RefreshDataAsync()" Class="mx-2" />
+      </MudTooltip>
+    }
+    @if (DefaultHeaderControls != null)
+    {
+      @DefaultHeaderControls
+    }
+  </ToolBarContent>
+  <Columns>
+    @if (EffectiveRowControls.Any())
+    {
+      <TemplateColumn CellClass="d-flex justify-end" HeaderStyle="@($"width: {ControlHeaderWidth}rem;")" StickyLeft="true">
+        <CellTemplate>
+          @switch (RowControlsVariant)
+          {
+            case GridRowControlsVariant.Expanded:
+              <MudStack Row>
+                @foreach (var control in EffectiveRowControls)
+                {
+                  <MudTooltip Text="@control.Text">
+                    <MudIconButton Icon="@ResolveIcon(control)" Size="Size.Small" Color="@control.Color.ToMudColor()"
+                                   OnClick="(evt) => OnRowControlClick(evt, control, context)"
+                                   Disabled="@(control.Disabled?.Invoke(ToRowContext(context)) ?? false)" />
+                  </MudTooltip>
+                }
+              </MudStack>
+              break;
+            case GridRowControlsVariant.Menu:
+              <MudMenu Icon="@IconSet.Resolve(UiIcon.More)" AriaLabel="@Strings.RowActionsMenu" Dense Size="Size.Small">
+                @foreach (var control in EffectiveRowControls)
+                {
+                  <MudMenuItem Icon="@ResolveIcon(control)" IconColor="@control.Color.ToMudColor()" Label="@control.Text"
+                               OnClick="((evt) => OnRowControlClick(evt, control, context))"
+                               Disabled="@(control.Disabled?.Invoke(ToRowContext(context)) ?? false)" />
+                }
+              </MudMenu>
+              break;
+            default:
+              break;
+          }
+        </CellTemplate>
+      </TemplateColumn>
+    }
+    @Columns
+  </Columns>
+  @* Razor does not allow a conditional around a named child-content element, so the pager slot
+     is always present and its contents are what varies. *@
+  <PagerContent>
+    @if (!Virtualize)
+    {
+      <MudDataGridPager T="T" />
+    }
+  </PagerContent>
+  <NoRecordsContent>
+    <MudStack>
+      <MudText Typo="Typo.body1">@Strings.NoRecords</MudText>
+    </MudStack>
+  </NoRecordsContent>
+</MudDataGrid>

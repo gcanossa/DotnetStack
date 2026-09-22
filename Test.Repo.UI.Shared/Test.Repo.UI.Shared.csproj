@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <!--
+    Deliberately a plain class library, not a Razor one, and referencing neither UI adapter.
+    If anything component-library-specific creeps into the shared demo layer, this project stops
+    compiling - which is the point of splitting it out.
+  -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.12" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.12" />
+    <PackageReference Update="Nerdbank.GitVersioning">
+      <Version>3.10.94</Version>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GKit.UI.Abstractions\GKit.UI.Abstractions.csproj" />
+    <ProjectReference Include="..\GKit.UI.Data\GKit.UI.Data.csproj" />
+  </ItemGroup>
+
+</Project>

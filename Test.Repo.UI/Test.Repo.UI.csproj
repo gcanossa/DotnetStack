@@ -3,7 +3,9 @@
   <ItemGroup>
     <ProjectReference Include="..\GKit.BlazorExt\GKit.BlazorExt.csproj" />
     <ProjectReference Include="..\GKit.Authentication.Blazor\GKit.Authentication.Blazor.csproj" />
-    <ProjectReference Include="..\GKit.MudBlazorExt\GKit.MudBlazorExt.csproj" />
+    <ProjectReference Include="..\GKit.UI.MudBlazorExt\GKit.UI.MudBlazorExt.csproj" />
+    <ProjectReference Include="..\GKit.UI.Localization\GKit.UI.Localization.csproj" />
+    <ProjectReference Include="..\Test.Repo.UI.Shared\Test.Repo.UI.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>

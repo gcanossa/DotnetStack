@@ -1,0 +1,28 @@
+@using Microsoft.EntityFrameworkCore
+
+@implements IEditEntityForm<Widget>
+
+@*
+  The per-adapter layer: markup only. The model, the validator and the lookup query all come from
+  Test.Repo.UI.Shared and are identical under the Radzen adapter.
+*@
+<div style="min-width: 320px;">
+  <MudTextField For="@(() => Model.Name)" Label="Name" @bind-Value="Model.Name" />
+
+  <MudNumericField For="@(() => Model.Quantity)" Label="Quantity" @bind-Value="Model.Quantity" />
+
+  <EntityAutocomplete T="Category" For="@(() => Model.Category!)" Label="Category"
+                      @bind-Value="Model.Category"
+                      Context="Context"
+                      QueryFactory="DemoQueries.Categories"
+                      SearchExp="DemoQueries.CategorySearch"
+                      ToStringFunc="@(c => c?.Name ?? "")" />
+
+  <MudTextField For="@(() => Model.Notes)" Label="Notes" @bind-Value="Model.Notes" Lines="3" />
+</div>
+
+@code {
+  [Parameter, EditorRequired] public Widget Model { get; set; } = default!;
+
+  [Parameter, EditorRequired] public DbContext Context { get; set; } = default!;
+}

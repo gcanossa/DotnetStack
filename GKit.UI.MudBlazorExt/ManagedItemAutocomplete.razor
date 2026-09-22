@@ -1,0 +1,93 @@
+@using System.Linq.Expressions
+@using Microsoft.Extensions.Logging
+
+@typeparam T
+@typeparam TItem
+
+@inject IUiNotifier Notifier
+@inject IGKitUiStrings Strings
+@inject ILogger<ManagedItemAutocomplete<T, TItem>> Logger
+
+<MudAutocomplete @ref="Component" T="T" For="@For" Label="@Label" ToStringFunc="ByValueToStringFunc" SearchFunc="Search"
+                 Clearable Value="@Value" ValueChanged="ValueChangedHandler" ShowProgressIndicator Disabled="Disabled"
+                 ResetValueOnEmptyText data-attr-setter="force" BeforeItemsTemplate="BeforeItemsTemplate"
+                 NoItemsTemplate="@(NoItemsTemplate ?? DefaultNoItemsTemplate)">
+</MudAutocomplete>
+
+@code
+{
+  protected MudAutocomplete<T> Component = null!;
+
+  private EntityLookupEngine<T, TItem> _engine = null!;
+
+  /// <summary>The search and projection logic, shared with the Radzen adapter.</summary>
+  protected EntityLookupEngine<T, TItem> Engine => _engine;
+
+  [Parameter] public RenderFragment? BeforeItemsTemplate { get; set; }
+
+  [Parameter] public RenderFragment? NoItemsTemplate { get; set; }
+
+  protected RenderFragment DefaultNoItemsTemplate => @<MudText>@Strings.NoResults</MudText>;
+
+  @* Not EditorRequired: the entity-backed variants override FetchAsync and never use this, and
+     the attribute is inherited, so it would warn on every EntityAutocomplete usage. *@
+  [Parameter] public Func<string, Task<IQueryable<TItem>>> FetchData { get; set; } = default!;
+  [Parameter, EditorRequired] public Func<TItem, T> ToValue { get; set; } = default!;
+  [Parameter, EditorRequired] public Func<T, TItem> ToItem { get; set; } = default!;
+
+  [Parameter] public bool Disabled { get; set; }
+  [Parameter] public T Value { get; set; } = default!;
+
+  [Parameter] public EventCallback<T> ValueChanged { get; set; }
+
+  [Parameter] public string Label { get; set; } = "";
+  [Parameter] public Expression<Func<T>> For { get; set; } = null!;
+
+  [Parameter] public Func<TItem?, string> ToStringFunc { get; set; } = p => p?.ToString() ?? "";
+
+  protected override void OnInitialized()
+  {
+    base.OnInitialized();
+
+    _engine = new EntityLookupEngine<T, TItem>(Notifier, Strings, Logger)
+    {
+      Fetch = FetchAsync,
+      ToValue = ToValue,
+      ToItem = ToItem,
+      ToStringFunc = ToStringFunc
+    };
+  }
+
+  protected override void OnParametersSet()
+  {
+    base.OnParametersSet();
+
+    _engine.ToValue = ToValue;
+    _engine.ToItem = ToItem;
+    _engine.ToStringFunc = ToStringFunc;
+  }
+
+  /// <summary>
+  /// Overridden by the entity-backed variants to search a DbContext directly.
+  /// </summary>
+  protected virtual async Task<IReadOnlyList<TItem>> FetchAsync(string searchText, CancellationToken token)
+  {
+    if (FetchData is null)
+      throw new InvalidOperationException(
+        $"{nameof(FetchData)} must be set, or {nameof(FetchAsync)} overridden.");
+
+    return [.. await FetchData(searchText)];
+  }
+
+  protected void ValueChangedHandler(T? value)
+  {
+    ValueChanged.InvokeAsync(value);
+  }
+
+  private string ByValueToStringFunc(T value) => _engine.Display(value);
+
+  protected virtual async Task<IEnumerable<T>> Search(string value, CancellationToken token)
+  {
+    return await _engine.SearchAsync(value, token);
+  }
+}
