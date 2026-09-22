@@ -5,11 +5,11 @@ namespace GKit.EntityFramework;
 
 public static class SoftDeleteExtensions
 {
-  public static void DisableSoftDelete<T, E>(this T context, E entity, bool hard = false)
+  public static void DisableSoftDelete<T, E>(this T context, E entity)
     where T : DbContext, ISoftDeleteAwareContext
     where E : class, ISoftDeletableEntity
   {
-    context.SoftDeleteInterceptor.RegisterForHardDelete(entity);
+    context.SoftDeleteInterceptor.RegisterForHardDelete(context, entity);
   }
 
   public static void Remove<T, E>(this T context, E entity, bool hard = false)

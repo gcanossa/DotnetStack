@@ -19,7 +19,11 @@ public abstract class DocumentEventServiceBase<T> : IAsyncDisposable where T : D
     var module = await moduleTask.Value;
 
     var source = CreateEventSource(module);
-    var objRef = DotNetObjectReference.Create(source);
+
+    // Held on the source so DisposeAsync can hand the *same* reference to disconnect and then
+    // dispose it; it used to be created here and never released.
+    var objRef = DotNetObjectReference.Create<DocumentEventSourceBase>(source);
+    source.SelfReference = objRef;
 
     await module.InvokeVoidAsync("connect", objRef);
     return source;

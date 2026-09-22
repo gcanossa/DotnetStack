@@ -13,7 +13,17 @@ public static class ADExtensions
     Action<CookieAuthenticationOptions>? cookieConfig = null,
     Action<ADAccountManagerOptions>? adConfig = null)
   {
-    if (adConfig is not null) ext.PostConfigure(adConfig);
+    // PostConfigure ran *after* configuration binding, so a caller-supplied delegate silently
+    // overrode appsettings.json — backwards. Bind first, then apply the delegate, then validate.
+    var options = ext.AddOptions<ADAccountManagerOptions>()
+      .BindConfiguration("GKit:ActiveDirectory");
+
+    if (adConfig is not null) options.Configure(adConfig);
+
+    options
+      .Validate(o => !string.IsNullOrWhiteSpace(o.Host), "ActiveDirectory Host must be configured")
+      .Validate(o => !string.IsNullOrWhiteSpace(o.QueryBase), "ActiveDirectory QueryBase must be configured")
+      .ValidateOnStart();
 
     ext.AddHttpContextAccessor();
     ext.AddScoped<ADAccountManager>();

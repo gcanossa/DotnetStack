@@ -53,21 +53,59 @@ namespace GKit.TelegramHost
             return Task.CompletedTask;
         }
 
+        /// <summary>
+        /// Connects to Telegram and pumps updates through the registered request handlers.
+        /// <para>
+        /// Disabled by default. The body was commented out wholesale after a
+        /// <c>TL.RpcException: 400 PHONE_NUMBER_BANNED</c>, which meant <c>AddTelegramHost</c>
+        /// registered a broker, controllers and this hosted service, and then silently dropped
+        /// every message. Opt in with <c>TelegramHostOptions.Enabled = true</c> once the account
+        /// is usable; until then the service says so instead of pretending to work.
+        /// </para>
+        /// </summary>
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            //TODO: reenable TL.RpcException: 400 PHONE_NUMBER_BANNED
-            // var processingTask = ProcessMessagesAsync(stoppingToken);
-            // var serverTask = Task.CompletedTask;
+            var options = await _optionsManager.GetOptionsAsync();
 
-            // while(!stoppingToken.IsCancellationRequested)
-            // {
-            //     _connection = _connectionFactory.Create(await _optionsManager.GetOptionsAsync());
+            if (!options.Enabled)
+            {
+                _logger.LogWarning(
+                    "TelegramHost is disabled: no updates will be processed. " +
+                    "Set TelegramHost:Enabled to true to connect.");
+                return;
+            }
 
-            //     serverTask = _connection.StartAsync(stoppingToken);
-            //     await serverTask;
-            // }
+            var processingTask = ProcessMessagesAsync(stoppingToken);
 
-            // await Task.WhenAll(serverTask, processingTask);
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                try
+                {
+                    _connection = _connectionFactory.Create(await _optionsManager.GetOptionsAsync());
+
+                    await _connection.StartAsync(stoppingToken);
+                }
+                catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+                {
+                    break;
+                }
+                catch (Exception e)
+                {
+                    // Must not escape: an unhandled exception from ExecuteAsync stops the host.
+                    _logger.LogError(e, "Telegram connection failed; retrying");
+
+                    try
+                    {
+                        await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        break;
+                    }
+                }
+            }
+
+            await processingTask;
         }
 
         private async Task ProcessMessagesAsync(CancellationToken stoppingToken)

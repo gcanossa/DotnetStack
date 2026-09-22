@@ -1,7 +1,5 @@
 using System.Linq.Expressions;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Logging;
 
 namespace GKit.DbMigration;
@@ -26,7 +24,7 @@ public abstract class DbMigrationContext<FromDbContext, ToDbContext>
   private readonly FromDbContext fromContext;
   private readonly ToDbContext toContext;
   private readonly IMigrationMappingsStore mappingStore;
-  private readonly ILogger<DbMigrationContext<FromDbContext, ToDbContext>> logger;
+  internal readonly ILogger<DbMigrationContext<FromDbContext, ToDbContext>> logger;
 
   private readonly List<IMigration> migrations = [];
   private readonly Dictionary<string, Expression> defaultMappings = [];
@@ -40,22 +38,36 @@ public abstract class DbMigrationContext<FromDbContext, ToDbContext>
     return $"{typeof(S).FullName}_{typeof(D).FullName}";
   }
 
+  /// <summary>
+  /// Set when this context owns its dependencies. Default false: the contexts and the mapping
+  /// store are injected, and disposing them here double-disposes whatever DI created.
+  /// </summary>
+  public bool OwnsDependencies { get; init; }
+
   public void Dispose()
   {
-    fromContext.Dispose();
-    toContext.Dispose();
-    mappingStore.Dispose();
+    if (OwnsDependencies)
+    {
+      fromContext.Dispose();
+      toContext.Dispose();
+      mappingStore.Dispose();
+    }
 
     GC.SuppressFinalize(this);
   }
 
   public async Task<D> DefaultAsync<D>() where D : class
   {
-    var keys = defaultMappings.Keys.Where(p => p.EndsWith(typeof(D).FullName!));
-    if (keys.Count() > 1)
+    var keys = defaultMappings.Keys.Where(p => p.EndsWith(typeof(D).FullName!)).ToList();
+
+    // Emptiness before ambiguity: First() on an empty sequence threw InvalidOperationException
+    // before the intended "Default mapping not found" message could ever be produced.
+    if (keys.Count == 0)
+      throw new ArgumentException($"Default mapping not found for entity {typeof(D).Name}");
+    if (keys.Count > 1)
       throw new ArgumentException($"Multiple mapping found for type {typeof(D).FullName}");
 
-    var entityKey = keys.First();
+    var entityKey = keys[0];
 
     if (!defaultMappings.TryGetValue(entityKey, out var expression))
       throw new ArgumentException($"Default mapping not found for entity {typeof(D).Name}");
@@ -124,9 +136,30 @@ public abstract class DbMigrationContext<FromDbContext, ToDbContext>
 
   protected abstract void OnMappingEntities(IMappingsBuilder builder);
 
-  private async Task<int> CountSourceEntities<S>() where S : class
+  /// <summary>
+  /// Applies a total order over the entity's primary key so that Skip/Take paging is stable.
+  /// </summary>
+  private static IQueryable<TEntity> OrderByKey<TEntity>(IQueryable<TEntity> query, IEnumerable<string> keyNames)
+    where TEntity : class
   {
-    return await fromContext.Set<S>().CountAsync();
+    IOrderedQueryable<TEntity>? ordered = null;
+
+    foreach (var name in keyNames)
+    {
+      ordered = ordered is null
+        ? query.OrderBy(e => EF.Property<object>(e, name))
+        : ordered.ThenBy(e => EF.Property<object>(e, name));
+    }
+
+    return ordered ?? query;
+  }
+
+  private async Task<int> CountSourceEntities<S>(Expression<Func<S, bool>>? filter = null) where S : class
+  {
+    var query = fromContext.Set<S>().AsQueryable();
+    if (filter is not null) query = query.Where(filter);
+
+    return await query.CountAsync();
   }
 
   private async Task<int> CountDestinationEntities<D>() where D : class
@@ -141,6 +174,8 @@ public abstract class DbMigrationContext<FromDbContext, ToDbContext>
     int sourceCount = 0;
     foreach (var m in migrations)
     {
+      // CountSourceAsync honours the migration's filter; counting the whole table made every
+      // reported percentage wrong whenever a Filter() was configured.
       sourceCount += await m.CountSourceAsync();
     }
 
@@ -168,10 +203,21 @@ public abstract class DbMigrationContext<FromDbContext, ToDbContext>
 
     logger.LogInformation($"Migrating {lCount} rows from {typeof(Old).FullName} to {typeof(New).FullName}");
 
+    // Skip/Take without a total order is non-deterministic: across a large migration rows are
+    // silently skipped and others migrated twice. Order by the source primary key.
+    var primaryKey = fromContext.Model.FindEntityType(typeof(Old))?.FindPrimaryKey();
+    if (primaryKey is null)
+      throw new InvalidOperationException(
+        $"{typeof(Old).FullName} has no primary key; paged migration cannot be ordered deterministically.");
+
+    var keyNames = primaryKey.Properties.Select(p => p.Name).ToList();
+
     int read = 0;
     while (read < lCount)
     {
-      var olds = await fromContext.Set<Old>().Where(filter).AsNoTracking().Skip(read).Take(BatchSize).ToListAsync();
+      var page = OrderByKey(fromContext.Set<Old>().Where(filter).AsNoTracking(), keyNames);
+
+      var olds = await page.Skip(read).Take(BatchSize).ToListAsync();
 
       var batch = new List<Tuple<Old, New>>();
       foreach (var old in olds)
@@ -238,7 +284,10 @@ public abstract class DbMigrationContext<FromDbContext, ToDbContext>
 
     private readonly List<D> _entities = [];
     private readonly List<Func<DbContext, Task<D>>> _entityFactories = [];
-    private Expression<Func<D, bool>> _defaultSelector = p => false;
+    // Was initialised to `p => false`, so the `!= null` guard below never failed and every
+    // mapping registered a default. DefaultAsync<D>() then found two mappings for the same
+    // destination type, or resolved `p => false` and threw on an empty sequence.
+    private Expression<Func<D, bool>>? _defaultSelector;
     private Expression<Func<S, bool>> _filter = p => true;
 
     public IMappingMapBuilder<S, D> Add(D entity)
@@ -304,7 +353,7 @@ public abstract class DbMigrationContext<FromDbContext, ToDbContext>
 
     public async Task<int> CountSourceAsync()
     {
-      return await ctx.CountSourceEntities<S>();
+      return await ctx.CountSourceEntities<S>(Filter);
     }
 
     public async Task MigrateAsync()
@@ -318,8 +367,12 @@ public abstract class DbMigrationContext<FromDbContext, ToDbContext>
             await ctx.toContext.AddAsync(entity);
             await ctx.toContext.SaveChangesAsync();
           }
-          catch
+          catch (DbUpdateException e)
           {
+            // The intent is "already seeded". A bare catch also hid connection failures and
+            // mapping errors, letting the migration continue against a half-seeded target.
+            ctx.logger.LogDebug(e, "Seed entity {Entity} not inserted; assuming it already exists",
+              typeof(D).Name);
             ctx.toContext.ChangeTracker.Clear();
           }
         }
@@ -334,8 +387,10 @@ public abstract class DbMigrationContext<FromDbContext, ToDbContext>
             await ctx.toContext.AddAsync(await factory.Invoke(ctx.toContext));
             await ctx.toContext.SaveChangesAsync();
           }
-          catch
+          catch (DbUpdateException e)
           {
+            ctx.logger.LogDebug(e, "Seed factory for {Entity} not inserted; assuming it already exists",
+              typeof(D).Name);
             ctx.toContext.ChangeTracker.Clear();
           }
         }

@@ -1,6 +1,7 @@
 @using GKit.BlazorExt
 @using Microsoft.EntityFrameworkCore
 @using System.Linq.Expressions
+@using Microsoft.Extensions.Logging
 @typeparam T where T : class
 @typeparam TItem
 
@@ -9,6 +10,7 @@
 @inject NavigationManager navigationManager
 @inject IDialogService dialogService
 @inject ISnackbar snackbar
+@inject ILogger<EntityItemAutocomplete<T, TItem>> logger
 
 @{
   base.BuildRenderTree(__builder);
@@ -90,6 +92,7 @@
       }
       catch (Exception e)
       {
+        logger.LogError(e, "Unable to add {Entity}", typeof(T).Name);
         snackbar.Add("Impossibile aggiungere l'elemento", Severity.Error);
       }
     }

@@ -21,7 +21,12 @@
   </DialogContent>
   <DialogActions>
     <MudStack Row>
-      <MudButton Color="Color.Primary" OnClick="SubmitAsync" Disabled="!(_form?.IsTouched ?? false)">Salva</MudButton>
+      @*
+        Was Disabled="!IsTouched": EntityGrid.NewAsync can hand the dialog a pre-filled model via
+        NewValueFactory, and accepting those defaults without editing a field left Save disabled
+        forever. Validation decides correctness; the button only guards double submission.
+      *@
+      <MudButton Color="Color.Primary" OnClick="SubmitAsync" Disabled="_submitting">Salva</MudButton>
       <MudButton Color="Color.Error" OnClick="CancelAsync">Annulla</MudButton>
     </MudStack>
   </DialogActions>
@@ -56,16 +61,35 @@
 
   protected override async Task OnAfterRenderAsync(bool firstRender)
   {
-    await setter.SetAttributes(container, new Dictionary<string, object>() { { "autocomplete", "--off" } }, "input");
+    // Only once: this used to make a JS interop round trip on every re-render, i.e. on every
+    // keystroke that re-rendered the form.
+    if (firstRender)
+      await setter.SetAttributes(container, new Dictionary<string, object>() { { "autocomplete", "--off" } }, "input");
 
     await base.OnAfterRenderAsync(firstRender);
   }
 
+  protected bool _submitting;
+
   protected async Task SubmitAsync()
+  {
+    if (_submitting) return;
+    _submitting = true;
+    try
+    {
+      await SubmitCoreAsync();
+    }
+    finally
+    {
+      _submitting = false;
+    }
+  }
+
+  private async Task SubmitCoreAsync()
   {
     await ((_dynamicComponent?.Instance as IEditEntityForm<T>)?.OnBeforeValidationAsync() ?? Task.CompletedTask);
     
-    await _form!.Validate();
+    await _form!.ValidateAsync();
     
     await ((_dynamicComponent?.Instance as IEditEntityForm<T>)?.OnAfterValidationAsync(_form.IsValid) ?? Task.CompletedTask);
     

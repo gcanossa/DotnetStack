@@ -1,65 +1,53 @@
+using System.Collections.Concurrent;
+
 namespace GKit.RENTRI;
 
+/// <summary>
+/// Caches RENTRI lookup results.
+/// <para>
+/// Reached concurrently by construction — Blazor circuits share one instance — so the backing
+/// stores are concurrent. Plain <see cref="Dictionary{TKey,TValue}"/> instances were being read
+/// on the fast path while another thread wrote, which can corrupt the bucket chain and spin
+/// forever inside a lookup.
+/// </para>
+/// </summary>
 public class ApiResultsCache
 {
     protected record CacheEntry(DateTimeOffset ExpiresAt, object Value);
 
-    private SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
-    protected Dictionary<string, SemaphoreSlim> _cacheSemaphores = new();
-    protected Dictionary<string, CacheEntry> _cache = new();
+    private readonly ConcurrentDictionary<string, SemaphoreSlim> _cacheSemaphores = new();
+    private readonly ConcurrentDictionary<string, CacheEntry> _cache = new();
 
-    protected SemaphoreSlim GetCacheSemaphore(string cacheKey)
-    {
-        if (!_cacheSemaphores.ContainsKey(cacheKey))
-        {
-            _semaphore.Wait();
-            try
-            {
-                if (!_cacheSemaphores.ContainsKey(cacheKey))
-                {
-                    _cacheSemaphores.Add(cacheKey, new SemaphoreSlim(1, 1));
-                }
-            }
-            finally
-            {
-                _semaphore.Release();
-            }
-        }
+    protected SemaphoreSlim GetCacheSemaphore(string cacheKey) =>
+        _cacheSemaphores.GetOrAdd(cacheKey, _ => new SemaphoreSlim(1, 1));
 
-        return _cacheSemaphores[cacheKey];
-    }
+    private static bool IsFresh(CacheEntry entry) => entry.ExpiresAt > DateTimeOffset.UtcNow;
 
     public async ValueTask<T> GetValue<T>(string cacheKey, Func<Task<T>> valueProvider, DateTimeOffset? expiresAt = null)
     {
-        if (!_cache.TryGetValue(cacheKey, out var value) || value.ExpiresAt < DateTimeOffset.Now)
+        if (_cache.TryGetValue(cacheKey, out var cached) && IsFresh(cached))
+            return (T)cached.Value;
+
+        var semaphore = GetCacheSemaphore(cacheKey);
+        await semaphore.WaitAsync();
+        try
         {
-            var semaphore = GetCacheSemaphore(cacheKey);
-            await semaphore.WaitAsync();
-            try
-            {
-                if(!_cache.TryGetValue(cacheKey, out value) || value.ExpiresAt < DateTimeOffset.Now)
-                {
-                    value = new CacheEntry(expiresAt ?? DateTimeOffset.Now.AddHours(1), (await valueProvider())!);
+            // Re-check: another caller may have populated it while this one queued.
+            if (_cache.TryGetValue(cacheKey, out cached) && IsFresh(cached))
+                return (T)cached.Value;
 
-                    _cache[cacheKey] = value;
-                }
-            }
-            finally
-            {
-                semaphore.Release();
-            }
+            var entry = new CacheEntry(expiresAt ?? DateTimeOffset.UtcNow.AddHours(1), (await valueProvider())!);
+            _cache[cacheKey] = entry;
+
+            return (T)entry.Value;
         }
-
-        return (T)value.Value;
+        finally
+        {
+            semaphore.Release();
+        }
     }
 
-    public void InvalidateKey(string cacheKey)
-    {
-        _cache.Remove(cacheKey);
-    }
+    public void InvalidateKey(string cacheKey) => _cache.TryRemove(cacheKey, out _);
 
-    public void InvalidateAll()
-    {
-        _cache.Clear();
-    }
+    public void InvalidateAll() => _cache.Clear();
 }

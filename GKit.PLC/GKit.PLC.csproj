@@ -7,11 +7,13 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <!-- The CLR->VarType mapping is internal but is the highest-risk logic in this package. -->
+        <InternalsVisibleTo Include="GKit.Tests" />
+    </ItemGroup>
+
+    <ItemGroup>
         <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="10.0.9" />
         <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.9" />
-        <PackageReference Update="Nerdbank.GitVersioning">
-            <Version>3.10.85</Version>
-        </PackageReference>
         <PackageReference Include="S7netplus" Version="0.20.0"/>
     </ItemGroup>
 

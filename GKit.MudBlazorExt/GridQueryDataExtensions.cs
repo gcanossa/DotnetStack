@@ -1,6 +1,5 @@
 using System.Linq.Expressions;
 using MudBlazor;
-using NPOI.SS.Formula.Functions;
 
 namespace GKit.MudBlazorExt;
 

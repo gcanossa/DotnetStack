@@ -5,7 +5,8 @@
   public AuthenticationOptions Options { get; set; } = new();
   protected override void OnInitialized()
   {
-    NavigationManager.NavigateTo($"{Options.AccessDeniedPath}?returnUrl={Uri.EscapeDataString(NavigationManager.Uri)}",
-    forceLoad: true);
+    var returnUrl = Uri.EscapeDataString(LocalUrl.CurrentPath(NavigationManager));
+
+    NavigationManager.NavigateTo($"{Options.AccessDeniedPath}?returnUrl={returnUrl}", forceLoad: true);
   }
 }

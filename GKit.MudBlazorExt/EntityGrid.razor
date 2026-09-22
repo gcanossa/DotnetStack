@@ -33,6 +33,13 @@
 
   [Parameter] public DbContext? SharedContext { get; set; } = null;
 
+  /// <summary>
+  /// Strip EF query filters from the grid's query. Off by default: leaving it on defeated
+  /// <c>WithSoftDelete()</c>, so deleted rows and superseded revisions appeared in every grid.
+  /// Applies to the export as well, so both show the same rows.
+  /// </summary>
+  [Parameter] public bool IgnoreQueryFilters { get; set; }
+
   [Parameter] public Func<CellContext<T>, bool>? EditRowDisable { get; set; } = null;
   [Parameter] public Func<CellContext<T>, bool>? DeleteRowDisable { get; set; } = null;
   

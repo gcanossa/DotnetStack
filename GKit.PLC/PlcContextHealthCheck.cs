@@ -19,8 +19,18 @@ public class PlcContextHealthCheck<T>(IPlcContextFactory<T> factory) : IHealthCh
 {
     public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
     {
-        using var plcContext = await factory.CreateContextAsync(cancellationToken);
-        
-        return !(plcContext.Connection?.IsConnected ?? false) ? HealthCheckResult.Unhealthy() : HealthCheckResult.Healthy();
+        try
+        {
+            await using var plcContext = await factory.CreateContextAsync(cancellationToken);
+
+            return plcContext.Connection?.IsConnected == true
+                ? HealthCheckResult.Healthy()
+                : HealthCheckResult.Unhealthy("PLC connection is not open");
+        }
+        catch (Exception e)
+        {
+            // A probe must report, not throw.
+            return HealthCheckResult.Unhealthy("PLC connection failed", e);
+        }
     }
 }

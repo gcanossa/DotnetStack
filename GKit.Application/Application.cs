@@ -9,7 +9,22 @@ namespace GKit.Application;
 
 public static class Application
 {
+  /// <summary>
+  /// Runs the host, dispatching any matching <see cref="ICommandLineRunner"/> first.
+  /// Returns the process exit code: 0 on success, 1 if the application terminated unexpectedly.
+  /// </summary>
+  public static int WrapAsync(string[] args, Func<IHost> app) => RunAsync(args, app)
+    .ConfigureAwait(false).GetAwaiter().GetResult();
+
   public static void Wrap(string[] args, Func<IHost> app)
+  {
+    // A fatal error used to be logged and then reported as a clean exit. Docker
+    // `restart: on-failure`, systemd `Restart=on-failure`, Kubernetes and CI all read the exit
+    // code, so a container that could not reach its database sat "successfully exited" forever.
+    Environment.ExitCode = WrapAsync(args, app);
+  }
+
+  public static async Task<int> RunAsync(string[] args, Func<IHost> app)
   {
     Log.Logger = new LoggerConfiguration()
       .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
@@ -21,19 +36,22 @@ public static class Application
     {
       Log.Information("Starting web application");
 
-      var host = app();
+      // IHost owns the root service provider: every singleton IDisposable (DbContext
+      // factories, PLC/OPC UA sessions, SmtpServer) leaks without this.
+      using var host = app();
+
       var runners = host.Services.GetRequiredService<IEnumerable<ICommandLineRunner>>().ToList();
 
-      if (args.Length == 1 && args[0] == "--help")
+      if (args.Contains("--help"))
       {
         Console.WriteLine("Available commands:");
         foreach (var runner in runners)
         {
           Console.WriteLine(runner.Help);
         }
-        return;
+        return 0;
       }
-      
+
       var shouldRun = true;
       foreach (var runner in runners.Where(p => p.Matches(host, args)))
       {
@@ -41,24 +59,27 @@ public static class Application
         if (shouldRun && runner.ShouldDisableHostRun(host, args))
         {
           shouldRun = false;
-          Log.Information("Host Run Disabled by CommandLinRunner {Runner}", runnerName);
+          Log.Information("Host Run Disabled by CommandLineRunner {Runner}", runnerName);
         }
-        
+
         Log.Information("Running CommandLineRunner {Runner}", runnerName);
-        runner.Execute(host, args).ConfigureAwait(false).GetAwaiter().GetResult();
+        await runner.Execute(host, args).ConfigureAwait(false);
         Log.Information("Executed CommandLineRunner {Runner}", runnerName);
       }
-      
+
       if (shouldRun)
-        host.Run();
+        await host.RunAsync().ConfigureAwait(false);
+
+      return 0;
     }
     catch (Exception ex)
     {
       Log.Fatal(ex, "Application terminated unexpectedly");
+      return 1;
     }
     finally
     {
-      Log.CloseAndFlush();
+      await Log.CloseAndFlushAsync().ConfigureAwait(false);
     }
   }
 }

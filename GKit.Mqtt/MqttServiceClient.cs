@@ -14,7 +14,7 @@ public class MqttServiceClient<T> : IHostedService where T : MqttControllerBase
     private readonly IMqttClient _client;
     private readonly IServiceProvider _provider;
 
-    private readonly Dictionary<string, MethodInfo[]> _handlers;
+    private readonly MqttTopicRouter _router;
 
     private readonly ILogger<MqttServiceClient<T>> _logger;
 
@@ -29,28 +29,7 @@ public class MqttServiceClient<T> : IHostedService where T : MqttControllerBase
         _factory = new MqttClientFactory();
         _client = _factory.CreateMqttClient();
 
-        _handlers = typeof(T).GetMethods()
-            .Select(p => new
-            {
-                topics = p.GetCustomAttributes(typeof(MqttTopicAttribute), false)
-                    .Cast<MqttTopicAttribute>()
-                    .Select(t => t.Topic),
-                method = p
-            })
-            .SelectMany(p => p.topics.Select(t => new { topic = t, p.method }))
-            .GroupBy(kv => kv.topic, kv => kv.method)
-            .ToDictionary(group => group.Key, group => group.ToArray());
-
-        foreach (var m in _handlers.Values.SelectMany(p => p))
-        {
-            if (!m.ReturnType.IsAssignableTo(typeof(Task)))
-                throw new ArgumentException($"Mqtt topic handler must return a Task object");
-
-            if (!(m.GetParameters().FirstOrDefault()?.ParameterType ?? typeof(object))
-                .IsAssignableTo(typeof(MqttApplicationMessageReceivedEventArgs)))
-                throw new ArgumentException(
-                    $"Mqtt topic handler must have the first parameter of type MqttApplicationMessageReceivedEventArgs");
-        }
+        _router = new MqttTopicRouter(typeof(T));
     }
 
     protected async Task HandleApplicationMessage(MqttApplicationMessageReceivedEventArgs args)
@@ -62,7 +41,9 @@ public class MqttServiceClient<T> : IHostedService where T : MqttControllerBase
         using var loggerScope = _logger.BeginScope(
             "{ClientId} => {Topic}", args.ClientId, args.ApplicationMessage.Topic);
 
-        if (!_handlers.TryGetValue(args.ApplicationMessage.Topic, out var topicHandlers))
+        var topicHandlers = _router.Resolve(args.ApplicationMessage.Topic);
+
+        if (topicHandlers.Count == 0)
         {
             _logger.LogWarning("No handler registered for topic.");
         }
@@ -105,7 +86,7 @@ public class MqttServiceClient<T> : IHostedService where T : MqttControllerBase
         var subscribeOptions = _factory.CreateSubscribeOptionsBuilder()
             .WithTopicFilter(f =>
             {
-                foreach (var topic in _handlers.Keys)
+                foreach (var topic in _router.TopicFilters)
                     f.WithTopic(topic);
             }).Build();
 

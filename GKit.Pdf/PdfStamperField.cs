@@ -12,4 +12,7 @@ public class PdfStamperField<T>(Func<T, object?> valueSelector, double left, dou
 
     public string FontName { get; init; } = "Arial";
     public double FontSize { get; init; } = 10;
+
+    /// <summary>Composite format string for the value. Defaults to plain <c>"{0}"</c>.</summary>
+    public string Format { get; init; } = "{0}";
 }

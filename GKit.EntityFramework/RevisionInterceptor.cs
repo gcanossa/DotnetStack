@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+using System.Runtime.CompilerServices;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
@@ -6,66 +7,136 @@ namespace GKit.EntityFramework;
 
 public class RevisionInterceptor : SaveChangesInterceptor
 {
-  private readonly List<IRevisionableEntity> _updateRegistrations = [];
-  private readonly List<object> _referenceUpdateRegistrations = [];
-  
-  public void RegisterForUpdate(IRevisionableEntity entity)
+  private sealed class Registrations
   {
-    if (!_updateRegistrations.Contains(entity))
+    public HashSet<object> SuppressRevision { get; } = new(ReferenceEqualityComparer.Instance);
+    public HashSet<object> UpdateReferences { get; } = new(ReferenceEqualityComparer.Instance);
+  }
+
+  /// <summary>
+  /// Registrations scoped to the <see cref="DbContext"/> that made them. A single interceptor
+  /// instance is shared by every context built from the same <see cref="DbContextOptions"/>,
+  /// so flat lists would let one context's save clear another context's registrations.
+  /// </summary>
+  private readonly ConditionalWeakTable<DbContext, Registrations> _registrations = [];
+
+  private Registrations GetOrAdd(DbContext context)
+  {
+    lock (_registrations)
     {
-      _updateRegistrations.Add(entity);
+      return _registrations.GetValue(context, _ => new Registrations());
     }
   }
-  public void RegisterForRevisionReferenceUpdate(object entity)
+
+  private Registrations Take(DbContext context)
   {
-    if (!_referenceUpdateRegistrations.Contains(entity))
+    lock (_registrations)
     {
-      _referenceUpdateRegistrations.Add(entity);
+      if (!_registrations.TryGetValue(context, out var registrations))
+        return new Registrations();
+
+      _registrations.Remove(context);
+      return registrations;
     }
+  }
+
+  public void RegisterForUpdate(DbContext context, IRevisionableEntity entity)
+  {
+    ArgumentNullException.ThrowIfNull(context);
+    ArgumentNullException.ThrowIfNull(entity);
+
+    GetOrAdd(context).SuppressRevision.Add(entity);
+  }
+
+  public void RegisterForRevisionReferenceUpdate(DbContext context, object entity)
+  {
+    ArgumentNullException.ThrowIfNull(context);
+    ArgumentNullException.ThrowIfNull(entity);
+
+    GetOrAdd(context).UpdateReferences.Add(entity);
   }
 
   public override InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)
   {
     if (eventData.Context is null) return result;
 
-    var entries = eventData.Context.ChangeTracker.Entries().ToList();
-    foreach (var entry in entries)
-    {
-      if (entry is not { State: EntityState.Modified, Entity: IRevisionableEntity entity }
-        || _updateRegistrations.Contains(entity)) continue;
-
-      var newEntity = (IRevisionableEntity)entity.Clone();
-      newEntity.Revision = entity.Revision.NewRevision();
-      eventData.Context.Add(newEntity);
-
-      entry.Reload();
-      entity.Revision.IsCurrent = false;
-      
-      AdjustNewRevisionReferences(entries, entity, newEntity);
-    }
-
-    _updateRegistrations.Clear();
-    _referenceUpdateRegistrations.Clear();
+    ApplyRevisions(eventData.Context);
 
     return result;
   }
 
-  protected void AdjustNewRevisionReferences(List<EntityEntry> entries, IRevisionableEntity currentRevision, IRevisionableEntity newRevision)
+  public override ValueTask<InterceptionResult<int>> SavingChangesAsync(
+    DbContextEventData eventData, InterceptionResult<int> result, CancellationToken cancellationToken = default)
   {
-    foreach (var entry in entries.Where(p => _referenceUpdateRegistrations.Contains(p.Entity)))
+    if (eventData.Context is null) return ValueTask.FromResult(result);
+
+    ApplyRevisions(eventData.Context);
+
+    return ValueTask.FromResult(result);
+  }
+
+  private void ApplyRevisions(DbContext context)
+  {
+    var pending = CollectPendingRevisions(context);
+
+    foreach (var (entry, current, _) in pending)
     {
-      foreach (var property in entry.Entity.GetType().GetProperties())
-      {
-        if(property.GetValue(entry.Entity) == currentRevision)
-          property.SetValue(entry.Entity, newRevision);
-      }
+      // The superseded row must keep the values it had in the database — the edit belongs to
+      // the new revision only.
+      //
+      // This used to call entry.Reload(), a synchronous SELECT per modified entity issued on
+      // the same connection while the save was in flight: on SQL Server without MARS that
+      // throws, and inside an explicit transaction it can deadlock. The original values are
+      // already tracked, so no query is needed to recover them.
+      entry.CurrentValues.SetValues(entry.OriginalValues);
+
+      // Then deprecate. Done after the revert so it is the one surviving modification.
+      current.Revision.IsCurrent = false;
     }
   }
 
-  public override ValueTask<InterceptionResult<int>> SavingChangesAsync(DbContextEventData eventData, InterceptionResult<int> result, CancellationToken cancellationToken = default)
+  private List<(EntityEntry Entry, IRevisionableEntity Current, IRevisionableEntity Next)>
+    CollectPendingRevisions(DbContext context)
   {
-    var data = ValueTask.FromResult(SavingChanges(eventData, result));
+    var registrations = Take(context);
 
-    return data;
+    var entries = context.ChangeTracker.Entries().ToList();
+    var pending = new List<(EntityEntry, IRevisionableEntity, IRevisionableEntity)>();
+
+    foreach (var entry in entries)
+    {
+      if (entry is not { State: EntityState.Modified, Entity: IRevisionableEntity entity }
+          || registrations.SuppressRevision.Contains(entity)) continue;
+
+      var newEntity = (IRevisionableEntity)entity.Clone();
+      newEntity.Revision = entity.Revision.NewRevision();
+      context.Add(newEntity);
+
+      AdjustNewRevisionReferences(entries, registrations, entity, newEntity);
+
+      pending.Add((entry, entity, newEntity));
+    }
+
+    return pending;
+  }
+
+  private static void AdjustNewRevisionReferences(
+    List<EntityEntry> entries,
+    Registrations registrations,
+    IRevisionableEntity currentRevision,
+    IRevisionableEntity newRevision)
+  {
+    foreach (var entry in entries.Where(p => registrations.UpdateReferences.Contains(p.Entity)))
+    {
+      // Indexers would throw TargetParameterCountException on GetValue.
+      var properties = entry.Entity.GetType().GetProperties()
+        .Where(p => p.CanRead && p.CanWrite && p.GetIndexParameters().Length == 0);
+
+      foreach (var property in properties)
+      {
+        if (ReferenceEquals(property.GetValue(entry.Entity), currentRevision))
+          property.SetValue(entry.Entity, newRevision);
+      }
+    }
   }
 }

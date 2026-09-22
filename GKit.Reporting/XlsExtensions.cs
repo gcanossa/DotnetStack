@@ -1,6 +1,5 @@
 ﻿namespace GKit.Reporting;
 
-using NPOI.SS.Formula.Functions;
 using NPOI.SS.UserModel;
 using NPOI.SS.Util;
 

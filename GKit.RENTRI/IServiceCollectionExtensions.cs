@@ -1,21 +1,29 @@
-using System.Security.Cryptography.X509Certificates;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace GKit.RENTRI;
 
 public static class RentriExtensions
 {
-    public static IServiceCollection AddRentriServices(this IServiceCollection serviceCollection)
+    public static IServiceCollection AddRentriServices(
+        this IServiceCollection serviceCollection,
+        Action<RentriOptions>? configure = null)
     {
+        serviceCollection.AddOptions<RentriOptions>()
+            .BindConfiguration("GKit:Rentri")
+            .Configure(options => configure?.Invoke(options));
+
+        serviceCollection.AddRentriHttpClient();
+
         serviceCollection.AddSingleton<ApiStatusProvider>();
+        serviceCollection.AddSingleton<ApiResultsCache>();
         serviceCollection.AddHostedService<ApiStatusService>();
 
-        serviceCollection.AddSingleton(provider => new AnagraficheClientFactory(provider.GetRequiredService<ApiStatusProvider>()));
-        serviceCollection.AddSingleton(provider => new CaRentriClientFactory(provider.GetRequiredService<ApiStatusProvider>()));
-        serviceCollection.AddSingleton(provider => new CodificheClientFactory(provider.GetRequiredService<ApiStatusProvider>()));
-        serviceCollection.AddSingleton(provider => new DatiRegistriClientFactory(provider.GetRequiredService<ApiStatusProvider>()));
-        serviceCollection.AddSingleton(provider => new FormulariClientFactory(provider.GetRequiredService<ApiStatusProvider>()));
-        serviceCollection.AddSingleton(provider => new VidimazioneFormulariClientFactory(provider.GetRequiredService<ApiStatusProvider>()));
+        serviceCollection.AddSingleton<AnagraficheClientFactory>();
+        serviceCollection.AddSingleton<CaRentriClientFactory>();
+        serviceCollection.AddSingleton<CodificheClientFactory>();
+        serviceCollection.AddSingleton<DatiRegistriClientFactory>();
+        serviceCollection.AddSingleton<FormulariClientFactory>();
+        serviceCollection.AddSingleton<VidimazioneFormulariClientFactory>();
 
         return serviceCollection;
     }

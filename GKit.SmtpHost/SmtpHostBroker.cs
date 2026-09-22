@@ -30,7 +30,7 @@ namespace GKit.SmtpHost
 
         public async ValueTask<(MimeMessage, ISessionContext)> DequeueAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
-            return await Reader.ReadAsync();
+            return await Reader.ReadAsync(cancellationToken);
         }
 
         public async IAsyncEnumerable<(MimeMessage, ISessionContext)> ProcessAllAsync([EnumeratorCancellation]CancellationToken cancellationToken = default(CancellationToken))

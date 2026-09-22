@@ -1,11 +1,18 @@
-using GKit.RENTRI.Stubs.DatiRegistri;
+using Microsoft.Extensions.Options;
 
 namespace GKit.RENTRI;
 
-public class DatiRegistriClientFactory(ApiStatusProvider apiStatusProvider) : BaseClientFactory<DatiRegistriClient>(apiStatusProvider)
+public class DatiRegistriClientFactory(
+    ApiStatusProvider apiStatusProvider,
+    IOptions<RentriOptions> rentriOptions,
+    IHttpClientFactory httpClientFactory)
+    : BaseClientFactory<DatiRegistriClient>(apiStatusProvider, rentriOptions)
 {
-    protected override DatiRegistriClient BuildClient(ClientOptions options)
+    protected override RentriApi Api => RentriApi.DatiRegistri;
+
+    protected override DatiRegistriClient BuildClient(ClientOptions? options, string? anonymousBaseUrl)
     {
-        return new DatiRegistriClient(RentriHttpClientFactory.Create(), options);
+        return new DatiRegistriClient(
+            httpClientFactory.CreateClient(RentriHttpClientFactory.ClientName), options, anonymousBaseUrl);
     }
 }

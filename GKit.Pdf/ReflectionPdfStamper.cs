@@ -15,7 +15,8 @@ public class ReflectionPdfStamper<T> : AbstractPdfStamper<T> where T : class
                 Width = kv.Value.Width,
                 Height = kv.Value.Height,
                 FontName = kv.Value.FontName,
-                FontSize = kv.Value.FontSize
+                FontSize = kv.Value.FontSize,
+                Format = kv.Value.Format
             });
     }
 }

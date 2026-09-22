@@ -10,11 +10,17 @@ namespace GKit.MudBlazorExt;
 public record NewValueResult<N>(bool Canceled, N Value);
 
 [CascadingTypeParameter(nameof(T))]
-public partial class EntityGrid<T, TDialog> : ManagedGrid<T>
+public partial class EntityGrid<T, TDialog> : ManagedGrid<T>, IDisposable
   where T : class
   where TDialog : IEditEntityDialog<T>, IComponent
 {
   protected SemaphoreSlim _ctxLock = new SemaphoreSlim(1, 1);
+
+  public void Dispose()
+  {
+    _ctxLock.Dispose();
+    GC.SuppressFinalize(this);
+  }
   protected bool IsSharedContext()
   {
     return SharedContext is not null;
@@ -25,65 +31,67 @@ public partial class EntityGrid<T, TDialog> : ManagedGrid<T>
     return SharedContext ?? ContextFactory.Invoke();
   }
 
-  private async Task WithDbContextPreamble(DbContext ctx, bool shared, object[] entities)
+  private async Task<bool> WithDbContextPreamble(DbContext ctx, bool shared, object[] entities)
   {
+    // Take the lock first: releasing it in the epilogue after an attach failure used to throw
+    // SemaphoreFullException on a semaphore that was never acquired.
+    if (shared)
+      await _ctxLock.WaitAsync();
+
     if (!shared && entities.Length > 0)
     {
-      try
+      // The previous code caught InvalidOperationException and retried the identical call,
+      // which could only throw again. An already-tracked instance is the real cause.
+      foreach (var entity in entities)
       {
-        ctx.AttachRange(entities);
-      }
-      catch (InvalidOperationException)
-      {
-        ctx.AttachRange(entities);
+        if (ctx.Entry(entity).State == EntityState.Detached)
+          ctx.Attach(entity);
       }
     }
-    if(shared)
-      await _ctxLock.WaitAsync();
+
+    return shared;
   }
 
-  private async Task WithDbContextEpilogue(DbContext? ctx, bool shared)
+  private async Task WithDbContextEpilogue(DbContext? ctx, bool lockTaken)
   {
-    if (ctx != null)
-    {
-      if (shared)
-        _ctxLock.Release();
-      else
-        await ctx.DisposeAsync();
-    }
+    if (lockTaken)
+      _ctxLock.Release();
+
+    if (ctx != null && !IsSharedContext())
+      await ctx.DisposeAsync();
   }
   
   protected async Task WithDbContext(Func<DbContext, Task> action, params object[] entities)
   {
     DbContext? ctx = null;
-    var shared = IsSharedContext();
+    var lockTaken = false;
     try
     {
       ctx = GetDbContext();
-      await WithDbContextPreamble(ctx, shared, entities);
-      
+      lockTaken = await WithDbContextPreamble(ctx, IsSharedContext(), entities);
+
       await action(ctx);
     }
     finally
     {
-      await WithDbContextEpilogue(ctx, shared);
+      await WithDbContextEpilogue(ctx, lockTaken);
     }
   }
   
   protected async Task<R> WithDbContextReturning<R>(Func<DbContext, Task<R>> action, params object[] entities)
   {
     DbContext? ctx = null;
-    var shared = IsSharedContext();
+    var lockTaken = false;
     try
     {
       ctx = GetDbContext();
-      await WithDbContextPreamble(ctx, shared, entities);
-      
+      lockTaken = await WithDbContextPreamble(ctx, IsSharedContext(), entities);
+
       return await action(ctx);
     }
     finally
     {
-      await WithDbContextEpilogue(ctx, shared);
+      await WithDbContextEpilogue(ctx, lockTaken);
     }
   }
   
@@ -103,7 +111,7 @@ public partial class EntityGrid<T, TDialog> : ManagedGrid<T>
       }
       catch (Exception e)
       {
-        logger.LogError(e.Message);
+        logger.LogError(e, "Unable to delete {Entity}", typeof(T).Name);
         snackbar.Add("Impossibile eliminare l'elemento", Severity.Error);
         await OnAfterDelete(entity, true);
       }
@@ -138,7 +146,7 @@ public partial class EntityGrid<T, TDialog> : ManagedGrid<T>
         }
         catch (Exception e)
         {
-          logger.LogError(e.Message);
+          logger.LogError(e, "Unable to edit {Entity}", typeof(T).Name);
           snackbar.Add("Impossibile modificare l'elemento", Severity.Error);
           await OnAfterEdit(entity, true);
         }
@@ -184,7 +192,7 @@ public partial class EntityGrid<T, TDialog> : ManagedGrid<T>
         }
         catch (Exception e)
         {
-          logger.LogError("Error: {}", e.Message);
+          logger.LogError(e, "Unable to add {Entity}", typeof(T).Name);
           snackbar.Add("Impossibile aggiungere l'elemento", Severity.Error);
           await OnAfterNew(newEntity!, true);
         }
@@ -206,7 +214,7 @@ public partial class EntityGrid<T, TDialog> : ManagedGrid<T>
       {
         var title = Title ?? typeof(T).Name;
 
-        var query = QueryFactory?.Invoke(ctx) ?? throw new InvalidOperationException($"{nameof(QueryFactory)} is not set");
+        var query = BuildQuery(ctx);
 
         query = QueryFilterExtensions.Where(query, Component.FilterDefinitions);
         query = QuerySortExtensions.OrderBy(query, Component.SortDefinitions.Values);
@@ -214,60 +222,55 @@ public partial class EntityGrid<T, TDialog> : ManagedGrid<T>
         using var ms = new MemoryStream();
         await query.ToXlsAsync(title, Component, ms);
         ms.Position = 0;
-        await downloadFileService.DownloadFileFromStream(ms, $"{title}.xls");
+        await downloadFileService.DownloadFileFromStream(ms, $"{title}.xlsx");
       });
     });
   }
   
+  /// <summary>
+  /// Builds the grid's query.
+  /// <para>
+  /// <c>IgnoreQueryFilters()</c> used to be applied unconditionally, which defeated
+  /// <c>GKit.EntityFramework.WithSoftDelete()</c> — every grid showed deleted rows and
+  /// superseded revisions, and consumers had to re-filter by hand in every QueryFactory.
+  /// Export did *not* apply it, so the XLSX had a different row set than the grid on screen.
+  /// </para>
+  /// </summary>
+  protected IQueryable<T> BuildQuery(DbContext ctx)
+  {
+    var query = QueryFactory?.Invoke(ctx)
+                ?? throw new InvalidOperationException($"{nameof(QueryFactory)} is not set");
+
+    if (IgnoreQueryFilters)
+      query = query.IgnoreQueryFilters();
+
+    // AsNoTracking is a pure function; the result used to be discarded, so every virtualised
+    // scroll grew the change tracker without bound.
+    if (!IsSharedContext())
+      query = query.AsNoTracking();
+
+    return query;
+  }
+
   protected async Task<GridData<T>> LoadEntityData(GridStateVirtualize<T> gridState, CancellationToken token)
   {
     return await WithDbContextReturning<GridData<T>>(async ctx =>
     {
-      try
-      {
-        var result = new GridData<T>();
+      var result = new GridData<T>();
 
-        var query = QueryFactory?.Invoke(ctx)?.IgnoreQueryFilters() ??
-                    throw new InvalidOperationException($"{nameof(QueryFactory)} is not set");
-        if (!IsSharedContext())
-          query.AsNoTracking();
-        else
-          ctx.ChangeTracker.Clear();
+      var query = BuildQuery(ctx);
 
-        query = QueryFilterExtensions.Where(query, gridState.FilterDefinitions);
-        query = QuerySortExtensions.OrderBy(query, gridState.SortDefinitions);
+      if (IsSharedContext())
+        ctx.ChangeTracker.Clear();
 
-        result.TotalItems = await query.CountAsync(token);
+      query = QueryFilterExtensions.Where(query, gridState.FilterDefinitions);
+      query = QuerySortExtensions.OrderBy(query, gridState.SortDefinitions);
 
-        result.Items = await query.Skip(gridState.StartIndex).Take(gridState.Count).ToListAsync(token);
+      result.TotalItems = await query.CountAsync(token);
 
-        return result;
-      }
-      catch (TaskCanceledException)
-      {
-        return new GridData<T>
-        {
-          Items = [],
-          TotalItems = 0
-        };
-      }
-      catch (DbException e)
-      {
+      result.Items = await query.Skip(gridState.StartIndex).Take(gridState.Count).ToListAsync(token);
 
-        if (!e.Message.Contains("aborted", StringComparison.InvariantCultureIgnoreCase) &&
-            !e.Message.Contains("cancelled", StringComparison.InvariantCultureIgnoreCase))
-          throw;
-      
-        return new GridData<T>
-        {
-          Items = [],
-          TotalItems = 0
-        };
-      }
-      finally
-      {
-        await OnLoadedServerData.InvokeAsync(gridState);
-      }
+      return result;
     });
   }
 

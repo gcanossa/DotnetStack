@@ -54,6 +54,11 @@ public class OpcUaConnection : IDisposable
             _certificateValidatorRegistered = true;
         }
 
+        // These are required to establish a session at all; failing here with a clear message
+        // beats a null-reference deep inside the OPC UA stack.
+        var applicationConfiguration = ApplicationConfiguration
+            ?? throw new InvalidOperationException("ApplicationConfiguration was not configured.");
+
         try
         {
             if (Session is { Connected: true })
@@ -90,9 +95,10 @@ public class OpcUaConnection : IDisposable
 
                     Logger.LogInformation("Discover reverse connection endpoints....");
                     endpointDescription = await CoreClientUtils.SelectEndpointAsync(
-                        ApplicationConfiguration,
+                        applicationConfiguration,
                         connection,
                         Options.UserIdentity is not null,
+                        TelemetryContext,
                         linkedCts.Token
                     ).ConfigureAwait(false);
                     connection = null;
@@ -102,8 +108,8 @@ public class OpcUaConnection : IDisposable
             {
                 Logger.LogInformation("Connecting to... {ServerUrl}", Options.ServerUrl);
                 endpointDescription = await CoreClientUtils.SelectEndpointAsync(
-                    ApplicationConfiguration,
-                    Options.ServerUrl,
+                    applicationConfiguration,
+                    Options.ServerUrl ?? throw new InvalidOperationException("ServerUrl was not configured."),
                     Options.UserIdentity is not null,
                     TelemetryContext,
                     ct).ConfigureAwait(false);
@@ -111,7 +117,7 @@ public class OpcUaConnection : IDisposable
 
             // Get the endpoint by connecting to server's discovery endpoint.
             // Try to find the first endopint with security.
-            var endpointConfiguration = EndpointConfiguration.Create(ApplicationConfiguration);
+            var endpointConfiguration = EndpointConfiguration.Create(applicationConfiguration);
             var endpoint = new ConfiguredEndpoint(
                 null,
                 endpointDescription,
@@ -122,12 +128,12 @@ public class OpcUaConnection : IDisposable
             // Create the session
             var session = await sessionFactory
                 .CreateAsync(
-                    ApplicationConfiguration,
-                    connection,
+                    applicationConfiguration,
+                    connection!,
                     endpoint,
                     connection == null,
                     false,
-                    $"{ApplicationConfiguration!.ApplicationName}-{Guid.NewGuid():N}",
+                    $"{applicationConfiguration.ApplicationName}-{Guid.NewGuid():N}",
                     (uint)Options.SessionLifeTime.TotalMilliseconds,
                     UserIdentity,
                     null,
@@ -152,6 +158,7 @@ public class OpcUaConnection : IDisposable
 
                 // prepare a reconnect handler
                 SessionReconnectHandler = new SessionReconnectHandler(
+                    TelemetryContext,
                     true,
                     (int)Options.ReconnectPeriodExponentialBackoff.TotalMilliseconds);
             }
@@ -247,7 +254,9 @@ public class OpcUaConnection : IDisposable
             }
 
             // start reconnect sequence on communication error.
-            if (ServiceResult.IsBad(e.Status) && ReverseConnectManager is not null)
+            // The reverse-connect check used to gate this entire block, so a direct connection
+            // (the common case) never recovered from a dropped session.
+            if (ServiceResult.IsBad(e.Status))
             {
                 if ((int)Options.ReconnectPeriod.TotalMilliseconds <= 0)
                 {
@@ -257,13 +266,16 @@ public class OpcUaConnection : IDisposable
                     return;
                 }
 
-                var state = SessionReconnectHandler!
-                    .BeginReconnect(
+                var state = ReverseConnectManager is not null
+                    ? SessionReconnectHandler!.BeginReconnect(
                         Session,
-                        ReverseConnectManager!,
+                        ReverseConnectManager,
                         (int)Options.ReconnectPeriod.TotalMilliseconds,
-                        Client_ReconnectComplete!
-                    );
+                        Client_ReconnectComplete!)
+                    : SessionReconnectHandler!.BeginReconnect(
+                        Session,
+                        (int)Options.ReconnectPeriod.TotalMilliseconds,
+                        Client_ReconnectComplete!);
                 if (state == SessionReconnectHandler.ReconnectState.Triggered)
                 {
                     Logger.LogInformation(
