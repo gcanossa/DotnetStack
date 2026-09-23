@@ -18,7 +18,7 @@ public static class QuartzHealthCheckExtensions
       .WithIdentity("quartz.check", "healthchecks")
       .StartNow()
       .WithSimpleSchedule(x => x
-        .WithIntervalInSeconds((int)options.Value.HeartBeat.TotalSeconds)
+        .WithInterval(options.Value.HeartBeat)
         .RepeatForever())
       .Build();
 
@@ -63,10 +63,10 @@ public class QuartzProbe(IOptions<QuartzHealthCheckOptions> options)
 
 public class QuartzProbeJob(QuartzProbe probe) : IJob
 {
-  public Task Execute(IJobExecutionContext context)
+  public ValueTask Execute(IJobExecutionContext context, CancellationToken cancellationToken)
   {
     probe.Update();
 
-    return Task.CompletedTask;
+    return ValueTask.CompletedTask;
   }
 }

@@ -15,5 +15,8 @@
 
     <ItemGroup>
         <PackageReference Include="PCSC" Version="7.0.1" />
+        <PackageReference Update="Nerdbank.GitVersioning">
+          <Version>3.10.94</Version>
+        </PackageReference>
     </ItemGroup>
 </Project>

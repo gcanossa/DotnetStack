@@ -29,7 +29,15 @@ public static class GKitQuartzExtensions
         // health check hit an unresolvable-dependency error on every heartbeat, forever.
         services.AddSingleton<QuartzProbe>();
 
-        services.AddQuartz(q => { q.SchedulerName = schedulerName ?? Assembly.GetEntryAssembly()!.FullName!; });
+        // Quartz 4 registers a scheduler added with AddQuartz(name, …) entirely under that name as the
+        // service *key* — nothing unkeyed, so GetRequiredService<ISchedulerFactory>() (which every
+        // consumer, and UseGKitQuartz itself, does) finds no registration at all. The name belongs on
+        // the scheduler's InstanceName instead: that keeps this the container's default scheduler, so
+        // the unkeyed ISchedulerFactory and IScheduler stay resolvable as they were under Quartz 3,
+        // while the scheduler still carries the name it was asked for.
+        var name = schedulerName ?? Assembly.GetEntryAssembly()!.FullName!;
+
+        services.AddQuartz(q => q.ConfigureScheduler(options => options.InstanceName = name));
         services.AddQuartzHostedService(options =>
         {
             options.AwaitApplicationStarted = true;
@@ -48,13 +56,16 @@ public static class GKitQuartzExtensions
         {
             using var scope = host.Services.CreateScope();
             var schedulerFactory = scope.ServiceProvider.GetRequiredService<ISchedulerFactory>();
-            var scheduler = schedulerFactory.GetScheduler(schedulerName ?? Assembly.GetEntryAssembly()!.FullName!)
+            // Quartz 4 split ISchedulerFactory.GetScheduler: the parameterless overload returns the
+            // scheduler AddGKitQuartz registered, whatever its InstanceName. A caller that named one
+            // gets the name checked instead — GetRequiredScheduler throws SchedulerNotFoundException
+            // rather than letting a name that disagrees with AddGKitQuartz's pass unnoticed.
+            var scheduler = (schedulerName is null
+                    ? schedulerFactory.GetScheduler(CancellationToken.None)
+                    : schedulerFactory.GetRequiredScheduler(schedulerName, CancellationToken.None))
                 .ConfigureAwait(false).GetAwaiter().GetResult();
 
             var options = scope.ServiceProvider.GetRequiredService<IOptions<GKitQuartzOptions>>();
-
-            if (scheduler is null)
-                throw new Exception("Could not find a valid scheduler");
 
             var logger = scope.ServiceProvider.GetRequiredService<ILogger<IScheduler>>();
 
@@ -83,7 +94,7 @@ public static class GKitQuartzExtensions
 
             logger.LogInformation("Scheduling {JobCount} jobs with {TriggerCount} triggers", jobConfigs.Count,
                 jobConfigs.Values.Select(p => p.Count).Sum());
-            scheduler.ScheduleJobs(jobConfigs, true).ConfigureAwait(false).GetAwaiter().GetResult();
+            scheduler.ScheduleJobs(jobConfigs, ScheduleJobOptions.Replacing).ConfigureAwait(false).GetAwaiter().GetResult();
             logger.LogInformation("Jobs scheduled");
 
             if (config != null)
@@ -106,12 +117,28 @@ public static class GKitQuartzExtensions
         return host;
     }
 
+    // Quartz 4 replaced GetTriggerKeys(matcher) with a paged trigger query, so listing every
+    // trigger now means walking pages instead of a single key lookup.
     public static async Task<IEnumerable<ITrigger>> GetTriggers(this IScheduler scheduler)
     {
-        var keys = await scheduler.GetTriggerKeys(global::Quartz.Impl.Matchers.GroupMatcher<TriggerKey>.AnyGroup());
         var list = new List<ITrigger>();
-        foreach (var key in keys)
-            list.Add((await scheduler.GetTrigger(key))!);
+        var query = new TriggerQuery { Group = GroupMatcher<TriggerKey>.AnyGroup() };
+
+        while (true)
+        {
+            var page = await scheduler.QueryTriggers(query);
+            foreach (var header in page.Items)
+            {
+                var trigger = await scheduler.GetTrigger(header.Key);
+                if (trigger is not null)
+                    list.Add(trigger);
+            }
+
+            if (!page.HasMore)
+                break;
+
+            query = query with { Skip = query.Skip + page.Items.Count };
+        }
 
         return list;
     }

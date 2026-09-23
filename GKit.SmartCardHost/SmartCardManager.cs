@@ -6,7 +6,7 @@ using PCSC.Monitoring;
 
 namespace GKit.SmartCardHost;
 
-public class SmartCardManager(SmartCardStateBroker broker, ILogger<SmartCardManager> logger) : BackgroundService
+public class SmartCardManager(ISmartCardStateSink sink, ILogger<SmartCardManager> logger) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -15,7 +15,7 @@ public class SmartCardManager(SmartCardStateBroker broker, ILogger<SmartCardMana
         var availableReaders = context.GetReaders();
         Array.Sort(availableReaders);
 
-        await broker.OnReadersChanged(availableReaders);
+        await sink.OnReadersChanged(availableReaders);
 
         ISCardMonitor? monitor = null;
 
@@ -46,7 +46,7 @@ public class SmartCardManager(SmartCardStateBroker broker, ILogger<SmartCardMana
                     logger.LogInformation("Restarting reader monitor. Readers changed.");
                 }
 
-                await broker.OnReadersChanged(availableReaders);
+                await sink.OnReadersChanged(availableReaders);
             }
 
             await Task.Delay(5 * 1000, stoppingToken);
@@ -93,7 +93,7 @@ public class SmartCardManager(SmartCardStateBroker broker, ILogger<SmartCardMana
         {
             var uid = Convert.ToHexString(card.GetUid());
             logger.LogInformation("Read Card uid: {UID}", uid);
-            await broker.OnCardAvailable(uid);
+            await sink.OnCardAvailable(uid);
 
             var error = card.Disconnect(SCardReaderDisposition.Leave);
             error.ThrowIfNotSuccess();

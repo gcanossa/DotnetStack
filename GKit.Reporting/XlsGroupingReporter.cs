@@ -13,8 +13,9 @@ public abstract class XlsGroupingReporter<T> : XlsReporter<T>
   public XlsGroupingReporter(
     string title,
     IEnumerable<ColumnDescriptor<T>> descriptors,
-    IEnumerable<Func<IEnumerable<T>, object>> aggregations)
-    : base(title, descriptors.AsEnumerable())
+    IEnumerable<Func<IEnumerable<T>, object>> aggregations,
+    XlsStyleOptions<T>? styles = null)
+    : base(title, descriptors.AsEnumerable(), styles)
   {
     GroupDefs = descriptors.Where(p => p is GroupingColumnDescriptor<T>)
       .Cast<GroupingColumnDescriptor<T>>();
@@ -24,34 +25,33 @@ public abstract class XlsGroupingReporter<T> : XlsReporter<T>
     Aggregations = aggregations;
   }
 
-  protected override ICellStyle GetHeaderStyle(IWorkbook workbook)
+  /// <remarks>
+  /// The roles this reporter adds to the flat one. A resolver has already had its say by the time
+  /// this runs, so an override here only decides the cells it declined.
+  /// </remarks>
+  protected override ICellStyle DefaultStyleFor(IWorkbook workbook, XlsCellContext<T> context) => context.Role switch
   {
-    return MemoCellStyle(nameof(GetHeaderStyle), () => workbook.CreateCellStyle()
-      .WithFont(workbook.CreateFont().FontStyle("Tahoma", 8).Bold())
-      .VerticalAlign(VerticalAlignment.Center)
-      .BorderStyle(BorderStyle.Thin));
-  }
-  protected virtual ICellStyle GetDataStyle(IWorkbook workbook, T item, int index, ColumnDescriptor<T> column)
-  {
-    return MemoCellStyle(nameof(GetDataStyle), () => workbook.CreateCellStyle()
-      .WithFont(workbook.CreateFont().FontStyle("Tahoma", 8))
-      .VerticalAlign(VerticalAlignment.Center)
-      .BorderStyle(BorderStyle.Thin));
-  }
-  protected virtual ICellStyle GetAggregationStyle(IWorkbook workbook)
-  {
-    return MemoCellStyle(nameof(GetAggregationStyle), () => workbook.CreateCellStyle()
-      .WithFont(workbook.CreateFont().FontStyle("Tahoma", 8))
-      .VerticalAlign(VerticalAlignment.Center)
-      .BorderStyle(BorderStyle.Thin));
-  }
-  protected virtual ICellStyle GetRegionStyle(IWorkbook workbook)
-  {
-    return MemoCellStyle(nameof(GetRegionStyle), () => workbook.CreateCellStyle()
-      .WithFont(workbook.CreateFont().FontStyle("Tahoma", 8))
-      .VerticalAlign(VerticalAlignment.Center)
-      .BorderStyle(BorderStyle.Thin));
-  }
+    XlsCellRole.Data when context.Item is not null && context.Column is not null =>
+      GetDataStyle(workbook, context.Item, context.RowIndex, context.Column),
+    XlsCellRole.Aggregation => GetAggregationStyle(workbook),
+    XlsCellRole.Region => GetRegionStyle(workbook),
+    _ => base.DefaultStyleFor(workbook, context)
+  };
+
+  /// <summary>The style of a value cell inside a group.</summary>
+  /// <remarks>
+  /// <paramref name="index"/> is the row on the sheet. It was the row's position within its group
+  /// before styling moved through <see cref="XlsCellContext{T}"/>, which counts from the top.
+  /// </remarks>
+  protected virtual ICellStyle GetDataStyle(IWorkbook workbook, T item, int index, ColumnDescriptor<T> column) =>
+    ThemeStyle(workbook, XlsCellRole.Data);
+
+  protected virtual ICellStyle GetAggregationStyle(IWorkbook workbook) =>
+    ThemeStyle(workbook, XlsCellRole.Aggregation);
+
+  protected virtual ICellStyle GetRegionStyle(IWorkbook workbook) =>
+    ThemeStyle(workbook, XlsCellRole.Region);
+
   protected virtual void ApplyRegionStyle(ISheet sheet, CellRangeAddress range)
   {
     sheet.RegionWithBorderStyle(range, BorderStyle.Thin);
@@ -67,7 +67,9 @@ public abstract class XlsGroupingReporter<T> : XlsReporter<T>
 
     var horizontalRange = new CellRangeAddress(baseRowIndex, baseRowIndex, baseColIndex + 1, baseColIndex + 1 + node.Depth - 1 + PropDefs.Count() - 1);
 
-    sheet.GetRow(verticalRange.FirstRow).GetCell(verticalRange.FirstColumn).SetCellValue("-" ?? "").WithStyle(GetRegionStyle(workbook));
+    sheet.GetRow(verticalRange.FirstRow).GetCell(verticalRange.FirstColumn).SetCellValue("-" ?? "")
+      .WithStyle(StyleFor(workbook, new XlsCellContext<T>(
+        XlsCellRole.Region, null, verticalRange.FirstColumn, verticalRange.FirstRow, default, node.Value)));
     sheet.GetRow(horizontalRange.FirstRow).GetCell(horizontalRange.FirstColumn).SetCellValue($"{node.Label}: {node.Value} (tot = {node.Items.Count()})");
 
     ApplyRegionStyle(sheet, verticalRange);
@@ -89,8 +91,13 @@ public abstract class XlsGroupingReporter<T> : XlsReporter<T>
         col = 0;
         foreach (var prop in PropDefs)
         {
-          var cell = sheet.GetRow(baseRowIndex + 1 + row).GetCell(baseColIndex + 1 + col++).SetCellValue(prop.SelectValue(item)?.ToString() ?? "");
-          cell.CellStyle = GetDataStyle(workbook, item, row, prop);
+          var rowIndex = baseRowIndex + 1 + row;
+          var colIndex = baseColIndex + 1 + col++;
+          var value = prop.SelectValue(item);
+
+          var cell = sheet.GetRow(rowIndex).GetCell(colIndex).SetCellValue(value?.ToString() ?? "");
+          cell.CellStyle = StyleFor(workbook,
+            new XlsCellContext<T>(XlsCellRole.Data, prop, colIndex, rowIndex, item, value));
         }
         row++;
       }
@@ -100,8 +107,13 @@ public abstract class XlsGroupingReporter<T> : XlsReporter<T>
     var firstCol = node.Depth - 1;
     foreach (var agg in Aggregations)
     {
-      var cell = sheet.GetRow(baseRowIndex + 1 + lastRow).GetCell(baseColIndex + 1 + firstCol++).SetCellValue(agg.Invoke(node.Items)?.ToString() ?? "");
-      cell.CellStyle = GetAggregationStyle(workbook);
+      var rowIndex = baseRowIndex + 1 + lastRow;
+      var colIndex = baseColIndex + 1 + firstCol++;
+      var value = agg.Invoke(node.Items);
+
+      var cell = sheet.GetRow(rowIndex).GetCell(colIndex).SetCellValue(value?.ToString() ?? "");
+      cell.CellStyle = StyleFor(workbook,
+        new XlsCellContext<T>(XlsCellRole.Aggregation, null, colIndex, rowIndex, default, value));
     }
   }
 
@@ -136,16 +148,12 @@ public abstract class XlsGroupingReporter<T> : XlsReporter<T>
     headerRow.HeightInPoints = 40;
 
     var headerCell = 0;
-    foreach (var grp in GroupDefs)
+    foreach (var column in GroupDefs.Cast<ColumnDescriptor<T>>().Concat(PropDefs))
     {
-      var cell = headerRow.CreateCell(headerCell++).SetCellValue(grp.Label);
-      cell.CellStyle = GetHeaderStyle(workbook);
-    }
-
-    foreach (var prop in PropDefs)
-    {
-      var cell = headerRow.CreateCell(headerCell++).SetCellValue(prop.Label);
-      cell.CellStyle = GetHeaderStyle(workbook);
+      var colIndex = headerCell++;
+      var cell = headerRow.CreateCell(colIndex).SetCellValue(column.Label);
+      cell.CellStyle = StyleFor(workbook,
+        new XlsCellContext<T>(XlsCellRole.Header, column, colIndex, 0, default, column.Label));
     }
 
     int rowOffset = 1;
@@ -176,6 +184,9 @@ public abstract class XlsGroupingReporter<T> : XlsReporter<T>
     {
       sheet.AutoSizeColumn(i);
     }
+
+    // After auto-sizing: an explicit column width set here is meant to win over it.
+    Styles.PostProcess?.Invoke(workbook, sheet);
 
     workbook.Write(output, true);
 

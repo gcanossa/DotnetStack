@@ -52,7 +52,7 @@ public class DbContextProviderTests : TestContext, IDisposable
     // DbContextProvider inherits DbContextFactoryProvider but replaced its markup with a bare
     // @ChildContent, discarding the <CascadingValue Value="this"> the base emitted — so a child
     // declaring [CascadingParameter] DbContextProvider<T> never received one.
-    var component = RenderComponent<DbContextProvider<CatalogContext>>(p => p
+    var component = Render<DbContextProvider<CatalogContext>>(p => p
       .AddChildContent<Consumer>());
 
     Assert.Contains(nameof(CatalogContext), component.Markup);
@@ -61,7 +61,7 @@ public class DbContextProviderTests : TestContext, IDisposable
   [Fact]
   public void Children_are_not_rendered_before_the_context_exists()
   {
-    var component = RenderComponent<DbContextProvider<CatalogContext>>(p => p
+    var component = Render<DbContextProvider<CatalogContext>>(p => p
       .AddChildContent<Consumer>());
 
     Assert.NotNull(component.Instance.Context);
@@ -72,7 +72,7 @@ public class DbContextProviderTests : TestContext, IDisposable
   [Fact]
   public async Task Disposing_the_provider_disposes_the_context()
   {
-    var component = RenderComponent<DbContextProvider<CatalogContext>>(p => p
+    var component = Render<DbContextProvider<CatalogContext>>(p => p
       .AddChildContent<Consumer>());
 
     await component.Instance.DisposeAsync();

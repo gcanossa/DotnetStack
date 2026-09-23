@@ -62,8 +62,27 @@ navigation does not throw.
 ## XlsExportExtensions
 
 ```cs
-await query.ToXlsAsync(title, columns, stream);   // columns: IEnumerable<ExportColumn>
+await query.ToXlsAsync(title, columns, stream);           // columns: IEnumerable<ExportColumn>
+await query.ToXlsAsync(title, columns, stream, styles);   // styles: XlsStyleOptions<T>
 ```
 
-Adapters project their rendered columns onto `ExportColumn(Title, PropertyPath)`, skipping
-template columns with no underlying property.
+Adapters project their rendered columns onto `ExportColumn(Title, PropertyPath, Format?)`, skipping
+template columns with no underlying property. `Format` is an Excel number format (`"#,##0.00"`), left
+null by the adapters.
+
+`styles` is how an export is restyled without a subclass of `XlsReporter<T>` — see
+[GKit.Reporting](../GKit.Reporting/README.md). The grids take it as an `ExportStyles` parameter and
+fall back to the `XlsTheme` registered by `AddGKitUiCore`, so
+
+```cs
+services.AddSingleton(XlsTheme.Default with { FontFamily = "Calibri", FontSize = 10 });
+services.AddGKitMudBlazorUi();   // or AddGKitRadzenUi
+```
+
+restyles every grid export in the application, and
+
+```razor
+<ManagedGrid T="Movement" Exportable ExportStyles="_exportStyles" ... />
+```
+
+overrides it for one grid.

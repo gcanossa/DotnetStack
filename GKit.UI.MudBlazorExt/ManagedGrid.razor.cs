@@ -1,5 +1,6 @@
 using System.Data.Common;
 using GKit.BlazorExt;
+using GKit.Reporting;
 using GKit.UI.Data;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
@@ -23,6 +24,16 @@ public partial class ManagedGrid<T> : ComponentBase
   [Inject] protected DownloadFileService DownloadFileService { get; set; } = default!;
   [Inject] protected IUiIconSet IconSet { get; set; } = default!;
   [Inject] protected IGKitUiStrings Strings { get; set; } = default!;
+
+  /// <summary>The application's house style for exports, registered by <c>AddGKitUiCore</c>.</summary>
+  [Inject] protected XlsTheme ExportTheme { get; set; } = default!;
+
+  /// <summary>
+  /// What the export is actually styled with: the grid's own <see cref="ExportStyles"/> where it
+  /// has one, the registered theme otherwise.
+  /// </summary>
+  protected XlsStyleOptions<T> EffectiveExportStyles =>
+    ExportStyles ?? new XlsStyleOptions<T> { Theme = ExportTheme };
 
   protected MudDataGrid<T> Component = null!;
 
@@ -70,6 +81,12 @@ public partial class ManagedGrid<T> : ComponentBase
   [Parameter] public Func<T, string> ToStringFunc { get; set; } = null!;
 
   [Parameter] public bool Exportable { get; set; }
+
+  /// <summary>
+  /// How the XLSX export is styled: a <see cref="XlsTheme"/> for the sheet's look and an optional
+  /// per-cell resolver for the exceptions. Null uses the registered <see cref="XlsTheme"/>.
+  /// </summary>
+  [Parameter] public XlsStyleOptions<T>? ExportStyles { get; set; }
 
   [Parameter] public bool Refreshable { get; set; }
 
@@ -153,7 +170,7 @@ public partial class ManagedGrid<T> : ComponentBase
       query = CurrentQuery.Apply(query);
 
       using var ms = new MemoryStream();
-      await query.ToXlsAsync(title, Component.ToExportColumns(Strings), ms);
+      await query.ToXlsAsync(title, Component.ToExportColumns(Strings), ms, EffectiveExportStyles);
       ms.Position = 0;
       await DownloadFileService.DownloadFileFromStream(ms, $"{title}.xlsx");
     });

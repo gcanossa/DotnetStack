@@ -12,11 +12,11 @@ public static class SmartCardHostHealthCheckExtensions
     }
 }
 
-public class SmartCardHostHealthCheck(SmartCardStateBroker broker) : IHealthCheck
+public class SmartCardHostHealthCheck(ISmartCardStateSink sink) : IHealthCheck
 {
     public Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = new CancellationToken())
     {
-        var result = broker.Readers.Length == 0 ? HealthCheckResult.Unhealthy() : HealthCheckResult.Healthy();
+        var result = sink.Readers.Length == 0 ? HealthCheckResult.Unhealthy() : HealthCheckResult.Healthy();
 
         return Task.FromResult(result);
     }

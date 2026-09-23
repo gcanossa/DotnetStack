@@ -9,42 +9,42 @@ public class JobScheduleResolverTests
 {
   private sealed class NoScheduleJob : IJob
   {
-    public Task Execute(IJobExecutionContext context) => Task.CompletedTask;
+    public ValueTask Execute(IJobExecutionContext context, CancellationToken cancellationToken) => ValueTask.CompletedTask;
   }
 
   [CronSchedule("0/20 * * ? * MON-SUN *")]
   private sealed class CronJob : IJob
   {
-    public Task Execute(IJobExecutionContext context) => Task.CompletedTask;
+    public ValueTask Execute(IJobExecutionContext context, CancellationToken cancellationToken) => ValueTask.CompletedTask;
   }
 
   [IntervalSchedule("00:15:00")]
   private sealed class IntervalJob : IJob
   {
-    public Task Execute(IJobExecutionContext context) => Task.CompletedTask;
+    public ValueTask Execute(IJobExecutionContext context, CancellationToken cancellationToken) => ValueTask.CompletedTask;
   }
 
   [DailyAtSchedule("00:15:00")]
   private sealed class DailyJob : IJob
   {
-    public Task Execute(IJobExecutionContext context) => Task.CompletedTask;
+    public ValueTask Execute(IJobExecutionContext context, CancellationToken cancellationToken) => ValueTask.CompletedTask;
   }
 
   [CronSchedule("0 0 1 * * ?")]
   [CronSchedule("0 0 13 * * ?")]
   private sealed class TwiceDailyJob : IJob
   {
-    public Task Execute(IJobExecutionContext context) => Task.CompletedTask;
+    public ValueTask Execute(IJobExecutionContext context, CancellationToken cancellationToken) => ValueTask.CompletedTask;
   }
 
   private abstract class AbstractJob : IJob
   {
-    public abstract Task Execute(IJobExecutionContext context);
+    public abstract ValueTask Execute(IJobExecutionContext context, CancellationToken cancellationToken);
   }
 
   private sealed class GenericJob<T> : IJob
   {
-    public Task Execute(IJobExecutionContext context) => Task.CompletedTask;
+    public ValueTask Execute(IJobExecutionContext context, CancellationToken cancellationToken) => ValueTask.CompletedTask;
   }
 
   private static GKitQuartzOptions Options(

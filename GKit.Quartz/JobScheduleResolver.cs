@@ -153,15 +153,17 @@ public static class JobScheduleResolver
     return schedule switch
     {
       CronScheduleAttribute cron =>
-        builder.WithSchedule(CronScheduleBuilder.CronSchedule(cron.Value)).Build(),
+        builder.WithSchedule(CronScheduleBuilder.Create(cron.Value)).Build(),
 
       IntervalScheduleAttribute interval =>
         builder.WithSchedule(SimpleScheduleBuilder.Create()
           .WithInterval(interval.Value).RepeatForever()).Build(),
 
+      // CronScheduleBuilder.DailyAtHourAndMinute was removed in Quartz 4; this is the same
+      // expression it used to build (seconds=0, day-of-month unspecified, every month/weekday).
       DailyAtScheduleAttribute dailyAt =>
         builder.WithSchedule(CronScheduleBuilder
-          .DailyAtHourAndMinute(dailyAt.Value.Hours, dailyAt.Value.Minutes)).Build(),
+          .Create($"0 {dailyAt.Value.Minutes} {dailyAt.Value.Hours} ? * *")).Build(),
 
       _ => throw new ArgumentException($"Invalid schedule type {schedule.GetType().Name}")
     };

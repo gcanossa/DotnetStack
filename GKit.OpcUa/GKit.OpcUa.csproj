@@ -15,11 +15,14 @@
       <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="10.0.12" />
       <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.12" />
       <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="10.0.12" />
-      <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua" Version="1.5.378.156" />
-      <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua.Client" Version="1.5.378.156" />
-      <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua.Client.ComplexTypes" Version="1.5.378.156" />
-      <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua.Configuration" Version="1.5.378.156" />
-      <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua.Core" Version="1.5.378.156" />
+      <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua" Version="1.5.378.176" />
+      <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua.Client" Version="1.5.378.176" />
+      <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua.Client.ComplexTypes" Version="1.5.378.176" />
+      <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua.Configuration" Version="1.5.378.176" />
+      <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua.Core" Version="1.5.378.176" />
+      <PackageReference Update="Nerdbank.GitVersioning">
+        <Version>3.10.94</Version>
+      </PackageReference>
     </ItemGroup>
 
 </Project>

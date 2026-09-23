@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using Bunit;
 using GKit.Tests.Blazor.Infrastructure;
+using GKit.Reporting;
 using GKit.UI;
 using GKit.UI.Data;
 using GKit.UI.MudBlazorExt;
@@ -23,7 +24,7 @@ namespace GKit.Tests.Blazor;
 /// neutral <see cref="ExportColumn"/> records, and <c>GKit.UI.Data</c> resolves and writes them.
 /// This covers both halves end to end.
 /// </remarks>
-public class ExportColumnTests : TestContext, IDisposable
+public class ExportColumnTests : TestContext, IDisposable, IAsyncLifetime
 {
   private readonly GridFixture _fixture = new();
   private readonly IGKitUiStrings _strings = new DefaultUiStrings();
@@ -34,11 +35,25 @@ public class ExportColumnTests : TestContext, IDisposable
     JSInterop.Mode = JSRuntimeMode.Loose;
   }
 
-  public new void Dispose()
+  public Task InitializeAsync() => Task.CompletedTask;
+
+  /// <summary>
+  /// AddMudServices registers PointerEventsNoneService, which only implements IAsyncDisposable -
+  /// the inherited synchronous Dispose() throws on it, so real cleanup has to go through
+  /// DisposeAsync (xUnit's IAsyncLifetime) instead. Explicit interface implementation keeps this
+  /// off the class's public surface, where xUnit would otherwise flag it as a stray test-shaped
+  /// method (xUnit1013); it still runs, harmlessly, because xUnit calls it unconditionally
+  /// whenever the class implements IDisposable, even alongside IAsyncLifetime.
+  /// </summary>
+  void IDisposable.Dispose()
+  {
+    GC.SuppressFinalize(this);
+  }
+
+  public new async Task DisposeAsync()
   {
     _fixture.Dispose();
-    base.Dispose();
-    GC.SuppressFinalize(this);
+    await base.DisposeAsync();
   }
 
   /// <summary>
@@ -61,10 +76,16 @@ public class ExportColumnTests : TestContext, IDisposable
     return host.FindComponent<MudDataGrid<Product>>().Instance;
   }
 
-  private async Task<ISheet> ExportAsync(IQueryable<Product> query, MudDataGrid<Product> grid)
+  private async Task<ISheet> ExportAsync(
+    IQueryable<Product> query,
+    MudDataGrid<Product> grid,
+    XlsStyleOptions<Product>? styles = null,
+    Func<ExportColumn, ExportColumn>? column = null)
   {
+    var columns = grid.ToExportColumns(_strings).Select(c => column?.Invoke(c) ?? c);
+
     using var ms = new MemoryStream();
-    await query.ToXlsAsync("Report", grid.ToExportColumns(_strings), ms);
+    await query.ToXlsAsync("Report", columns, ms, styles);
     ms.Position = 0;
     return new XSSFWorkbook(ms).GetSheetAt(0);
   }
@@ -122,6 +143,39 @@ public class ExportColumnTests : TestContext, IDisposable
 
     Assert.Equal(CellType.Numeric, cell.CellType);
     Assert.Equal(12.5, cell.NumericCellValue, 5);
+  }
+
+  [Fact]
+  public async Task Export_styles_reach_the_sheet()
+  {
+    // What a grid's ExportStyles parameter does: the style options travel the whole neutral path
+    // rather than being a thing only a subclass of XlsReporter could set.
+    List<Product> items = [new() { Name = "a", Price = 1.5m }];
+
+    var grid = RenderGrid(builder => Column<string>(builder, 0, x => x.Name), items);
+
+    var sheet = await ExportAsync(items.AsQueryable(), grid, new XlsStyleOptions<Product>
+    {
+      Theme = XlsTheme.Default with { FontFamily = "Calibri" }
+    });
+
+    var font = ((XSSFCellStyle)sheet.GetRow(0).GetCell(0).CellStyle).GetFont();
+    Assert.Equal("Calibri", font.FontName);
+  }
+
+  [Fact]
+  public async Task A_column_format_reaches_the_sheet()
+  {
+    List<Product> items = [new() { Name = "a", Price = 1234.5m }];
+
+    var grid = RenderGrid(builder => Column<decimal>(builder, 0, x => x.Price), items);
+
+    var sheet = await ExportAsync(items.AsQueryable(), grid,
+      column: c => c with { Format = "#,##0.00" });
+
+    var cell = sheet.GetRow(1).GetCell(0);
+    Assert.Equal("#,##0.00", cell.CellStyle.GetDataFormatString());
+    Assert.Equal(1234.5, cell.NumericCellValue, 5);
   }
 
   [Fact]

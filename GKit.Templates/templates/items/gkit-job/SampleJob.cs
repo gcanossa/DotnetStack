@@ -17,7 +17,7 @@ namespace GKIT-NAMESPACE;
 //#endif
 public class SampleJob(ILogger<SampleJob> logger) : IJob
 {
-  public async Task Execute(IJobExecutionContext context)
+  public async ValueTask Execute(IJobExecutionContext context, CancellationToken cancellationToken)
   {
     logger.LogInformation("SampleJob running at {Now}", context.FireTimeUtc);
 

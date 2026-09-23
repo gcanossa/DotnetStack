@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace GKit.SmartCardHost;
 
-public class SmartCardStateBroker(IHubContext<CardHub, ICardHub> hubContext)
+public class SmartCardStateBroker(IHubContext<CardHub, ICardHub> hubContext) : ISmartCardStateSink
 {
     public string[] Readers { get; protected set; } = [];
 

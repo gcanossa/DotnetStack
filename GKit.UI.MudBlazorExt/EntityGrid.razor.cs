@@ -1,3 +1,4 @@
+using GKit.Reporting;
 using GKit.UI.Data;
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
@@ -141,7 +142,7 @@ public partial class EntityGrid<T, TDialog> : ManagedGrid<T>
         var query = Engine.BuildExportQuery(ctx, CurrentQuery);
 
         using var ms = new MemoryStream();
-        await query.ToXlsAsync(title, Component.ToExportColumns(Strings), ms);
+        await query.ToXlsAsync(title, Component.ToExportColumns(Strings), ms, EffectiveExportStyles);
         ms.Position = 0;
         await DownloadFileService.DownloadFileFromStream(ms, $"{title}.xlsx");
       });

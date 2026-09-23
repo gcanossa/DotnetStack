@@ -1,0 +1,49 @@
+schema: spec-driven
+
+context: |
+  DotnetStack (a.k.a. GKit): a multi-package .NET library stack published as NuGet packages
+  from a single solution (DotnetStack.sln), plus a CLI scaffolder.
+
+  Tech stack:
+  - .NET 10 (net10.0), C#, Blazor
+  - Tests: xUnit + bUnit (GKit.Tests, GKit.Tests.Blazor)
+  - Versioning: Nerdbank.GitVersioning (version.json); shared metadata in Directory.Build.props
+  - Package validation (EnablePackageValidation) is on for every GKit.* package, so any change
+    to a public API surface is a breaking-change decision, not an implementation detail.
+
+  Layout:
+  - GKit.* projects are the shipped packages (Application, EntityFramework, Settings, Quartz,
+    Mqtt, OpcUa, PLC, Pdf, Reporting, RENTRI, SmtpHost, Telegram*, SmartCardHost*,
+    Authentication.*, DbMigration, BlazorExt, MudBlazorExt).
+  - GKit.UI.* is a UI abstraction layer: GKit.UI.Abstractions plus interchangeable renderers
+    GKit.UI.MudBlazorExt and GKit.UI.RadzenExt, which must stay mixable in the same app.
+  - GKit.Cli + GKit.Templates are the solution scaffolder (`gkit new` / `gkit add`).
+  - Test.Repo* projects are sample/reference apps, not packages (IsPackable=false).
+  - docs/ holds long-form design proposals and reviews.
+
+  Conventions:
+  - Branch work off `dev`; `main` is the release branch.
+  - New capabilities usually mean: a GKit.* package change, matching tests under GKit.Tests*,
+    and — when it affects scaffolding — a GKit.Templates template update.
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always include a "Non-goals" section
+#     tasks:
+#       - Break tasks into chunks of max 2 hours
+
+# Per-operation guidance (optional)
+# Add advisory guidance for how apply and archive work should be conducted.
+# This is separate from artifact rules above.
+# Example:
+#   operations:
+#     apply:
+#       guidance:
+#         - Keep test summaries concise
+#     archive:
+#       guidance:
+#         - Summarize the archive outcome before finishing
